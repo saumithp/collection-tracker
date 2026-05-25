@@ -221,19 +221,25 @@
     margin-top:6px;
   }
 
-  /* ---- SERIES RATING ---- */
-  .series-rating {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 12px; font-weight: 600; margin-top: 5px;
+  /* ---- SERIES RATING BADGE ---- */
+  .rating-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+    margin-top: 6px; color: white;
+    background: var(--accent); /* default blue-green */
   }
-  .series-rating .rating-stars { letter-spacing: 0; font-size: 13px; }
-  .series-rating .rating-num { color: var(--text2); font-weight: 500; }
-  .series-rating.perfect .rating-stars { color: #E8A000; filter: drop-shadow(0 0 3px rgba(232,160,0,0.4)); }
-  .series-rating.perfect .rating-num { color: #B87A00; font-weight: 700; }
-  .series-rating:not(.perfect) .rating-stars { color: #C0B080; }
-  .series-rating-input-wrap {
-    display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
-  }
+  .rating-badge .rb-star { font-size: 12px; }
+  .rating-badge .rb-num { letter-spacing: 0.01em; }
+  /* 1-4: muted grey-blue */
+  .rating-badge.rb-low   { background: #6B7F9E; }
+  /* 5-7: brand blue */
+  .rating-badge.rb-mid   { background: #3D3BAA; }
+  /* 8-9: brand green */
+  .rating-badge.rb-high  { background: var(--accent); }
+  /* 10: gold */
+  .rating-badge.rb-perfect { background: #C07000; }
+
   .star-btn {
     background: none; border: none; cursor: pointer; font-size: 20px;
     padding: 2px; transition: transform 0.1s; line-height: 1;
@@ -241,6 +247,25 @@
   }
   .star-btn:hover, .star-btn.active { color: #E8A000; transform: scale(1.15); }
   .star-btn.perfect { color: #E8A000; filter: drop-shadow(0 0 4px rgba(232,160,0,0.5)); }
+
+  /* Rating stats table */
+  .rating-stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;
+  }
+  .rating-stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .rating-stat-badge-wrap { flex-shrink: 0; }
+  .rating-stat-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .rating-stat-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rating-stat-sub  { font-size: 11px; color: var(--text3); }
+
+  .rating-dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .rating-dist-label { width: 42px; flex-shrink: 0; }
+  .rating-dist-bar-wrap { flex: 1; height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .rating-dist-bar { height: 100%; border-radius: 99px; transition: width 0.4s; }
+  .rating-dist-count { width: 24px; text-align: right; font-size: 12px; color: var(--text2); font-weight: 500; flex-shrink: 0; }
 
 
   /* ---- IMPORT/EXPORT MENU ---- */
@@ -1092,12 +1117,8 @@ function renderSeries() {
         <div class="series-card-stat"><span>Collection status</span><span>${esc(series.collectionStatus)}</span></div>
         ${series.rating ? (() => {
           const r = parseInt(series.rating);
-          const isPerfect = r === 10;
-          const stars = "★".repeat(r) + "☆".repeat(10 - r);
-          return `<div class="series-rating${isPerfect ? " perfect" : ""}">
-            <span class="rating-stars">${stars}</span>
-            <span class="rating-num">${r}/10</span>
-          </div>`;
+          const cls = r === 10 ? "rb-perfect" : r >= 8 ? "rb-high" : r >= 5 ? "rb-mid" : "rb-low";
+          return `<div class="rating-badge ${cls}"><span class="rb-star">★</span><span class="rb-num">${r}/10</span></div>`;
         })() : ""}
       </div>
       <div class="card-footer" onclick="event.stopPropagation()">
@@ -2138,6 +2159,98 @@ function renderStats() {
       })()}
     </div>
 
+    <!-- Ratings -->
+    ${(()=>{
+      const rated = Object.entries(_seriesMeta).filter(([,sm]) => sm.rating && parseInt(sm.rating) > 0);
+      if (!rated.length) return `<div>
+        <div class="stats-section-title">Ratings</div>
+        <p style="color:var(--text3);font-size:13px">Rate your series in the Series tab to see rating stats here.</p>
+      </div>`;
+
+      const ratedWithData = rated.map(([name, sm]) => {
+        const r = parseInt(sm.rating);
+        const owned = items.filter(i => (i.series||"Standalone")===name).length;
+        return { name, rating: r, owned };
+      }).sort((a,b) => b.rating - a.rating);
+
+      const avg = (ratedWithData.reduce((s,x)=>s+x.rating,0) / ratedWithData.length).toFixed(1);
+      const top = ratedWithData[0];
+      const bottom = [...ratedWithData].sort((a,b)=>a.rating-b.rating)[0];
+      const tens = ratedWithData.filter(x=>x.rating===10);
+
+      // Distribution
+      const dist = {};
+      for (let i=1;i<=10;i++) dist[i]=0;
+      ratedWithData.forEach(x=>dist[x.rating]++);
+      const maxDist = Math.max(...Object.values(dist), 1);
+
+      function badgeHtml(r) {
+        const cls = r===10?"rb-perfect":r>=8?"rb-high":r>=5?"rb-mid":"rb-low";
+        return `<div class="rating-badge ${cls}" style="margin-top:0"><span class="rb-star">★</span><span class="rb-num">${r}/10</span></div>`;
+      }
+
+      return `<div>
+        <div class="stats-section-title">Ratings</div>
+        <div class="kpi-grid" style="margin-bottom:14px">
+          <div class="kpi-card">
+            <div class="kpi-label">Rated Series</div>
+            <div class="kpi-value">${ratedWithData.length}</div>
+            <div class="kpi-sub">of ${Object.keys(seriesMap).length} total</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Average Rating</div>
+            <div class="kpi-value">${avg}</div>
+            <div class="kpi-sub">out of 10</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Perfect 10s</div>
+            <div class="kpi-value" style="color:#C07000">${tens.length}</div>
+            ${tens.length ? `<div class="kpi-sub">${tens.map(x=>esc(x.name)).join(", ").slice(0,40)}${tens.map(x=>x.name).join("").length>40?"…":""}</div>` : ""}
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Rating Distribution</div>
+            <div style="margin-top:4px">
+              ${[10,9,8,7,6,5,4,3,2,1].map(r => {
+                const count = dist[r] || 0;
+                const cls = r===10?"rb-perfect":r>=8?"rb-high":r>=5?"rb-mid":"rb-low";
+                const colors = {rb_perfect:"#C07000",rb_high:"#2D4A3E",rb_mid:"#3D3BAA",rb_low:"#6B7F9E"};
+                const barColor = cls==="rb-perfect"?"#C07000":cls==="rb-high"?"#2D4A3E":cls==="rb-mid"?"#3D3BAA":"#6B7F9E";
+                return `<div class="rating-dist-row">
+                  <div class="rating-dist-label">${badgeHtml(r)}</div>
+                  <div class="rating-dist-bar-wrap"><div class="rating-dist-bar" style="width:${count?Math.max(4,Math.round(count/maxDist*100)):0}%;background:${barColor}"></div></div>
+                  <div class="rating-dist-count">${count||""}</div>
+                </div>`;
+              }).join("")}
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">All Rated Series</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;max-height:320px;overflow-y:auto">
+              ${ratedWithData.map(x => `
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                  <div style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(x.name)}</div>
+                  ${badgeHtml(x.rating)}
+                </div>`).join("")}
+            </div>
+          </div>
+        </div>
+        ${(top && bottom && top.name !== bottom.name) ? `<div class="charts-row" style="margin-top:14px">
+          <div class="chart-card" style="background:var(--accent-light);border-color:rgba(45,74,62,0.2)">
+            <div class="chart-title" style="color:var(--accent)">⭐ Highest Rated</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin:6px 0 4px">${esc(top.name)}</div>
+            <div style="display:flex;align-items:center;gap:8px">${badgeHtml(top.rating)}<span style="font-size:12px;color:var(--text2)">${top.owned} vol${top.owned!==1?"s":""} owned</span></div>
+          </div>
+          <div class="chart-card" style="background:#F5F0FF;border-color:rgba(61,59,170,0.2)">
+            <div class="chart-title" style="color:#3D3BAA">📋 Lowest Rated</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin:6px 0 4px">${esc(bottom.name)}</div>
+            <div style="display:flex;align-items:center;gap:8px">${badgeHtml(bottom.rating)}<span style="font-size:12px;color:var(--text2)">${bottom.owned} vol${bottom.owned!==1?"s":""} owned</span></div>
+          </div>
+        </div>` : ""}
+      </div>`;
+    })()}
+
     <!-- Missing Volumes -->
     <div>
       <div class="stats-section-title">Missing Volumes</div>
@@ -2279,8 +2392,8 @@ function openSeriesDetail(name) {
     <div class="series-kpi"><div class="series-kpi-label">Collection</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.collectionStatus||"—")}</div></div>
     ${sm.rating ? (() => {
       const r = parseInt(sm.rating);
-      const isPerfect = r === 10;
-      return `<div class="series-kpi"><div class="series-kpi-label">Rating</div><div class="series-kpi-value" style="font-size:15px;margin-top:2px;${isPerfect ? "color:#B87A00" : ""}">${r}/10${isPerfect ? " ★" : ""}</div></div>`;
+      const cls = r === 10 ? "rb-perfect" : r >= 8 ? "rb-high" : r >= 5 ? "rb-mid" : "rb-low";
+      return `<div class="series-kpi"><div class="series-kpi-label">Rating</div><div style="margin-top:4px"><div class="rating-badge ${cls}"><span class="rb-star">★</span><span class="rb-num">${r}/10</span></div></div></div>`;
     })() : ""}`;
 
   document.getElementById("series-detail-body").innerHTML = bubbleHTML + volListHTML;
