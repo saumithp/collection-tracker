@@ -515,6 +515,9 @@
     </div>
     <div class="recent-grid" id="recent-grid"></div>
   </div>
+  <div id="recent-unhide-bar" style="display:none;margin-bottom:1rem">
+    <button class="btn-hide-recent" style="color:var(--text2)" onclick="toggleRecentSection()">▸ Show recently added</button>
+  </div>
 
   <!-- Grid -->
   <div class="grid" id="grid"></div>
@@ -1043,6 +1046,8 @@ function renderRecent() {
 function toggleRecentSection() {
   recentHidden = !recentHidden;
   renderRecent();
+  const bar = document.getElementById("recent-unhide-bar");
+  if (bar) bar.style.display = recentHidden ? "block" : "none";
 }
 
 /* ---- BULK EDIT ---- */
