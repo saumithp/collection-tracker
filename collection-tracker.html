@@ -794,6 +794,26 @@
             <label>Page Count</label>
             <input type="number" id="f-book-pages" placeholder="e.g. 352" min="1">
           </div>
+          <div class="form-group">
+            <label>MSRP (£)</label>
+            <input type="number" id="f-book-msrp" placeholder="e.g. 9.99" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Original Language</label>
+            <input type="text" id="f-book-orig-lang" placeholder="e.g. Japanese">
+          </div>
+          <div class="form-group">
+            <label>Author Country of Origin</label>
+            <input type="text" id="f-book-author-country" placeholder="e.g. Japan">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Original Publication Date</label>
+            <input type="text" id="f-book-orig-pubdate" placeholder="e.g. 1994 or 1994-03-15">
+          </div>
           <div class="form-group"></div>
         </div>
       </div>
@@ -1603,6 +1623,10 @@ function openAdd() {
   document.getElementById("f-book-series").value = "";
   document.getElementById("f-book-publisher").value = "";
   document.getElementById("f-book-pages").value = "";
+  document.getElementById("f-book-msrp").value = "";
+  document.getElementById("f-book-orig-lang").value = "";
+  document.getElementById("f-book-author-country").value = "";
+  document.getElementById("f-book-orig-pubdate").value = "";
   switchModalType("Manga");
   coverWasRemoved = false;
   removeCover();
@@ -1625,6 +1649,10 @@ function openEdit(id) {
     document.getElementById("f-book-series").value = item.series || "";
     document.getElementById("f-book-publisher").value = item.publisher || "";
     document.getElementById("f-book-pages").value = item.pageCount || "";
+    document.getElementById("f-book-msrp").value = item.msrp != null ? item.msrp : "";
+    document.getElementById("f-book-orig-lang").value = item.originalLanguage || "";
+    document.getElementById("f-book-author-country").value = item.authorCountry || "";
+    document.getElementById("f-book-orig-pubdate").value = item.originalPubDate || "";
     switchModalType("Book");
   } else {
     document.getElementById("f-status").value = item.status || "Plan to Read";
@@ -1669,9 +1697,13 @@ function saveItem() {
       series: document.getElementById("f-book-series").value.trim(),
       publisher: document.getElementById("f-book-publisher").value.trim(),
       pageCount: document.getElementById("f-book-pages").value !== "" ? parseInt(document.getElementById("f-book-pages").value) : null,
+      msrp: document.getElementById("f-book-msrp").value !== "" ? parseFloat(document.getElementById("f-book-msrp").value) : null,
+      originalLanguage: document.getElementById("f-book-orig-lang").value.trim() || null,
+      authorCountry: document.getElementById("f-book-author-country").value.trim() || null,
+      originalPubDate: document.getElementById("f-book-orig-pubdate").value.trim() || null,
       notes: document.getElementById("f-notes").value.trim(),
       // clear manga-only fields
-      volumes: null, volRange: null, dateBought: null, pricePaid: null, msrp: null,
+      volumes: null, volRange: null, dateBought: null, pricePaid: null,
       demographic: "", genre: "",
     };
   } else {
@@ -2100,6 +2132,26 @@ function renderStats() {
     // By publisher
     const bookPubMap = {};
     bookItems.forEach(i => { if (i.publisher) { bookPubMap[i.publisher] = (bookPubMap[i.publisher] || 0) + 1; } });
+    // By original language
+    const bookLangMap = {};
+    bookItems.forEach(i => { if (i.originalLanguage) { bookLangMap[i.originalLanguage] = (bookLangMap[i.originalLanguage] || 0) + 1; } });
+    // By author country
+    const bookCountryMap = {};
+    bookItems.forEach(i => { if (i.authorCountry) { bookCountryMap[i.authorCountry] = (bookCountryMap[i.authorCountry] || 0) + 1; } });
+    // MSRP
+    const bookMsrpItems = bookItems.filter(i => i.msrp != null);
+    const bookTotalMsrp = bookMsrpItems.reduce((s, i) => s + i.msrp, 0);
+    const bookAvgMsrp = bookMsrpItems.length ? bookTotalMsrp / bookMsrpItems.length : null;
+    // Orig pub decade distribution
+    const pubDecadeMap = {};
+    bookItems.forEach(i => {
+      if (!i.originalPubDate) return;
+      const yr = parseInt(i.originalPubDate.slice(0, 4));
+      if (isNaN(yr)) return;
+      const decade = Math.floor(yr / 10) * 10;
+      const label = `${decade}s`;
+      pubDecadeMap[label] = (pubDecadeMap[label] || 0) + 1;
+    });
     // Read/Unread donut
     const readDist = { "Read": bRead, "Unread": bUnread };
     const readColors = ["#185FA5", "#5F5E5A"];
@@ -2144,6 +2196,8 @@ function renderStats() {
         <div class="kpi-card"><div class="kpi-label">Unread</div><div class="kpi-value">${bUnread}</div><div class="kpi-sub">on the TBR pile</div></div>
         ${bPages > 0 ? `<div class="kpi-card"><div class="kpi-label">Total Pages</div><div class="kpi-value" style="font-size:22px">${bPages.toLocaleString()}</div><div class="kpi-sub">${bReadPages.toLocaleString()} pages read</div></div>` : ""}
         ${bPages > 0 && bRead > 0 ? `<div class="kpi-card"><div class="kpi-label">Avg Pages / Book</div><div class="kpi-value" style="font-size:22px">${Math.round(bPages/bTotal)}</div><div class="kpi-sub">across ${bTotal} books</div></div>` : ""}
+        ${bookMsrpItems.length ? `<div class="kpi-card"><div class="kpi-label">Total MSRP</div><div class="kpi-value" style="font-size:22px">£${bookTotalMsrp.toFixed(2)}</div><div class="kpi-sub">${bookMsrpItems.length} book${bookMsrpItems.length!==1?"s":""} with price</div></div>` : ""}
+        ${bookAvgMsrp != null ? `<div class="kpi-card"><div class="kpi-label">Avg MSRP / Book</div><div class="kpi-value" style="font-size:22px">£${bookAvgMsrp.toFixed(2)}</div><div class="kpi-sub">across ${bookMsrpItems.length} book${bookMsrpItems.length!==1?"s":""}</div></div>` : ""}
       </div>
     </div>
 
@@ -2174,6 +2228,48 @@ function renderStats() {
       <div class="chart-card">
         <div class="chart-title">Books by Publisher</div>
         ${bookPubBarHTML}
+      </div>
+    </div>` : ""}
+
+    ${(Object.keys(bookLangMap).length || Object.keys(bookCountryMap).length || Object.keys(pubDecadeMap).length) ? `<div>
+      <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Origins &amp; Publication</div>
+      <div class="charts-row${Object.keys(pubDecadeMap).length ? "-3" : ""}">
+        ${Object.keys(bookLangMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Original Language</div>
+          ${(()=>{
+            const entries = Object.entries(bookLangMap).sort((a,b)=>b[1]-a[1]);
+            const max = entries[0]?.[1] || 1;
+            return `<div class="bar-list">${entries.map(([k,v],i)=>`
+              <div class="bar-row">
+                <div class="bar-row-label"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(k)}</span><span>${v}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+              </div>`).join("")}</div>`;
+          })()}
+        </div>` : ""}
+        ${Object.keys(bookCountryMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Author Country of Origin</div>
+          ${(()=>{
+            const entries = Object.entries(bookCountryMap).sort((a,b)=>b[1]-a[1]);
+            const max = entries[0]?.[1] || 1;
+            return `<div class="bar-list">${entries.map(([k,v],i)=>`
+              <div class="bar-row">
+                <div class="bar-row-label"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(k)}</span><span>${v}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+              </div>`).join("")}</div>`;
+          })()}
+        </div>` : ""}
+        ${Object.keys(pubDecadeMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Publication Decade</div>
+          ${(()=>{
+            const entries = Object.entries(pubDecadeMap).sort((a,b)=>a[0].localeCompare(b[0]));
+            const max = Math.max(...entries.map(([,v])=>v), 1);
+            return `<div class="bar-list">${entries.map(([k,v],i)=>`
+              <div class="bar-row">
+                <div class="bar-row-label"><span>${esc(k)}</span><span>${v}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+              </div>`).join("")}</div>`;
+          })()}
+        </div>` : ""}
       </div>
     </div>` : ""}
     `;
@@ -2919,6 +3015,10 @@ function importCSV(e) {
           translator: obj.translator || null,
           narrator: obj.narrator || null,
           pageCount: obj.pageCount !== "" ? parseInt(obj.pageCount) : null,
+          msrp: obj.msrp !== "" ? parseFloat(obj.msrp) : null,
+          originalLanguage: obj.originalLanguage || null,
+          authorCountry: obj.authorCountry || null,
+          originalPubDate: obj.originalPubDate || null,
           addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), importedAt: Date.now(), cover: null
         });
         added++;
