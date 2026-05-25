@@ -1143,14 +1143,23 @@ function renderStats() {
     if (i.series) authorMap[a].series.add(i.series);
   });
 
-  // Missing volumes — per item that has a volumes range string AND either a series total or a parseable range
+  // Missing volumes — extract volume number from title, group by series, compare against series total
+  // Matches: "Vol. 12", "Vol 12", "Volume 12", "#12", "No. 12", or a bare trailing number
+  function extractVolNum(title) {
+    const t = title || "";
+    const m = t.match(/(?:vol(?:ume)?\.?\s*|#|no\.?\s*)(\d+)/i) || t.match(/\b(\d+)\s*$/);
+    return m ? parseInt(m[1]) : null;
+  }
+
   const missingData = [];
-  // Group items by series (or standalone title) to compute per-series missing
   const missingSeriesMap = {};
   items.forEach(item => {
-    const key = item.series || item.title;
-    if (!missingSeriesMap[key]) missingSeriesMap[key] = { name: key, author: item.author || "", items: [], seriesTotal: null };
-    missingSeriesMap[key].items.push(item);
+    // Only include items that belong to a named series
+    if (!item.series) return;
+    const key = item.series;
+    if (!missingSeriesMap[key]) missingSeriesMap[key] = { name: key, author: item.author || "", ownedNums: new Set(), seriesTotal: null };
+    const volNum = extractVolNum(item.title);
+    if (volNum !== null) missingSeriesMap[key].ownedNums.add(volNum);
   });
   // Pull series totals from meta
   Object.values(missingSeriesMap).forEach(sg => {
@@ -1158,34 +1167,21 @@ function renderStats() {
     if (sm.total) sg.seriesTotal = parseInt(sm.total) || null;
   });
   Object.values(missingSeriesMap).forEach(sg => {
-    // Gather all owned volume numbers across items in this series
-    const allOwned = new Set();
-    let hasRangeData = false;
-    sg.items.forEach(item => {
-      const { owned, isSequential } = parseVolumeString(item.volumes);
-      if (owned.size > 0) {
-        owned.forEach(v => allOwned.add(v));
-        if (!isSequential || sg.items.length > 1) hasRangeData = true;
-        // Even sequential (bare count) is useful if there's a series total to compare against
-        if (sg.seriesTotal) hasRangeData = true;
-      }
-    });
-    if (!hasRangeData && allOwned.size === 0) return; // no volume data at all
-    const total = sg.seriesTotal;
-    if (!total && allOwned.size === 0) return;
-    // Build the full expected set
-    const maxOwned = allOwned.size ? Math.max(...allOwned) : 0;
-    const expectedMax = total || maxOwned;
+    const { ownedNums, seriesTotal } = sg;
+    // Need either a series total set, or at least 2 items with vol numbers to infer a range
+    if (!seriesTotal && ownedNums.size < 2) return;
+    const maxOwned = ownedNums.size ? Math.max(...ownedNums) : 0;
+    const expectedMax = seriesTotal || maxOwned;
     if (expectedMax < 1) return;
     const missing = [];
     for (let v = 1; v <= expectedMax; v++) {
-      if (!allOwned.has(v)) missing.push(v);
+      if (!ownedNums.has(v)) missing.push(v);
     }
     missingData.push({
       name: sg.name,
       author: sg.author,
-      owned: allOwned,
-      total,
+      owned: ownedNums,
+      total: seriesTotal,
       missing,
     });
   });
