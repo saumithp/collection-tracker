@@ -481,24 +481,42 @@ function editSeries(name) {
   const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
   const current = meta[name] || {};
 
-  const total = prompt(`Total volumes for ${name}`, current.total || "");
-  if (total === null) return;
+  const owned = items.filter(i => (i.series || "Standalone") === name).length;
 
-  const mangaStatus = prompt(`Manga status for ${name}`, current.mangaStatus || "Publishing");
-  if (mangaStatus === null) return;
+  document.getElementById("series-name-hidden").value = name;
+  document.getElementById("series-name").value = name;
+  document.getElementById("series-total").value = current.total || "";
+  document.getElementById("series-owned").value = owned;
+  document.getElementById("series-manga-status").value = current.mangaStatus || "Publishing";
+  document.getElementById("series-collection-status").value = current.collectionStatus || "Collecting";
 
-  const collectionStatus = prompt(`Collection status for ${name}`, current.collectionStatus || "Collecting");
-  if (collectionStatus === null) return;
+  document.getElementById("series-modal").style.display = "flex";
+}
+
+function closeSeriesModal() {
+  document.getElementById("series-modal").style.display = "none";
+}
+
+function seriesOverlayClick(e) {
+  if (e.target === document.getElementById("series-modal")) closeSeriesModal();
+}
+
+function saveSeriesMeta() {
+  const name = document.getElementById("series-name-hidden").value;
+
+  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
 
   meta[name] = {
     ...(meta[name] || {}),
-    total,
-    mangaStatus,
-    collectionStatus
+    total: document.getElementById("series-total").value.trim(),
+    mangaStatus: document.getElementById("series-manga-status").value,
+    collectionStatus: document.getElementById("series-collection-status").value
   };
 
   localStorage.setItem("series-meta", JSON.stringify(meta));
+
   renderSeries();
+  closeSeriesModal();
 }
 
 function render() {
@@ -689,5 +707,62 @@ function deleteItem(id) {
 
 render();
 </script>
+
+<!-- Series Modal -->
+<div class="overlay" id="series-modal" style="display:none" onclick="seriesOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Series</div>
+      <button class="btn-close" onclick="closeSeriesModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="series-name-hidden">
+
+      <div class="form-group">
+        <label>Series</label>
+        <input type="text" id="series-name" disabled>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Volumes</label>
+          <input type="text" id="series-total" placeholder="e.g. 111">
+        </div>
+        <div class="form-group">
+          <label>Volumes Owned</label>
+          <input type="text" id="series-owned" disabled>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Manga Status</label>
+          <select id="series-manga-status">
+            <option>Publishing</option>
+            <option>Completed</option>
+            <option>Hiatus</option>
+            <option>Cancelled</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Collection Status</label>
+          <select id="series-collection-status">
+            <option>Collecting</option>
+            <option>Completed</option>
+            <option>Paused</option>
+            <option>Dropped</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeSeriesModal()">Cancel</button>
+        <button class="btn-save" onclick="saveSeriesMeta()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
