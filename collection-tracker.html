@@ -605,9 +605,15 @@
           <option>Dropped</option>
         </select>
       </div>
-      <div class="form-group">
+      <div class="form-row">
+        <div class="form-group">
           <label id="vol-label">Volumes</label>
-          <input type="text" id="f-volumes" placeholder="e.g. 12">
+          <input type="text" id="f-volumes" placeholder="e.g. 1">
+        </div>
+        <div class="form-group">
+          <label>Volumes Covered <span style="font-size:10px;color:var(--text3);font-weight:400">(for omnibus)</span></label>
+          <input type="text" id="f-volrange" placeholder="e.g. 1-2 or 4-6">
+        </div>
       </div>
       <div class="form-group">
         <label>Series</label>
@@ -1218,6 +1224,7 @@ function openAdd() {
   document.getElementById("f-title").value = "";
   document.getElementById("f-status").value = "Plan to Read";
   document.getElementById("f-volumes").value = "";
+  document.getElementById("f-volrange").value = "";
   document.getElementById("f-notes").value = "";
   document.getElementById("f-series").value = "";
   document.getElementById("f-dateBought").value = "";
@@ -1236,6 +1243,7 @@ function openEdit(id) {
   document.getElementById("f-title").value = item.title;
   document.getElementById("f-status").value = item.status;
   document.getElementById("f-volumes").value = item.volumes || "";
+  document.getElementById("f-volrange").value = item.volRange || "";
   document.getElementById("f-notes").value = item.notes || "";
   document.getElementById("f-series").value = item.series || "";
   document.getElementById("f-dateBought").value = item.dateBought || "";
@@ -1267,6 +1275,7 @@ function saveItem() {
     type: "Manga",
     status: document.getElementById("f-status").value,
     volumes: document.getElementById("f-volumes").value.trim(),
+    volRange: document.getElementById("f-volrange").value.trim() || null,
     series: seriesName,
     demographic: sm.demographic || "",
     genre: sm.genre || "",
@@ -1436,23 +1445,45 @@ function renderStats() {
     if (i.series) authorMap[a].series.add(i.series);
   });
 
-  // Missing volumes — extract volume number from title, group by series, compare against series total
-  // Matches: "Vol. 12", "Vol 12", "Volume 12", "#12", "No. 12", or a bare trailing number
-  function extractVolNum(title) {
-    const t = title || "";
-    const m = t.match(/(?:vol(?:ume)?\.?\s*|#|no\.?\s*)(\d+)/i) || t.match(/\b(\d+)\s*$/);
-    return m ? parseInt(m[1]) : null;
+  // Extract owned volume numbers for an item.
+  // Priority: explicit volRange field > range in title (e.g. "Vol. 1-2") > single vol from title
+  function extractOwnedNums(item) {
+    const result = new Set();
+    const src = item.volRange || "";
+    if (src) {
+      // Parse range string: "1-3", "4-6", "1", "1-2, 4-5" etc.
+      src.split(/[\s,]+/).forEach(part => {
+        const range = part.match(/^(\d+)[-–](\d+)$/);
+        if (range) {
+          const lo = parseInt(range[1]), hi = parseInt(range[2]);
+          for (let v = lo; v <= Math.min(hi, lo + 200); v++) result.add(v);
+        } else if (/^\d+$/.test(part)) {
+          result.add(parseInt(part));
+        }
+      });
+      if (result.size > 0) return result;
+    }
+    // Fall back: check title for a range first e.g. "Maid-sama! Vol. 1-2"
+    const t = item.title || "";
+    const rangeMatch = t.match(/(?:vol(?:ume)?\.?\s*|#)(\d+)[-–](\d+)/i);
+    if (rangeMatch) {
+      const lo = parseInt(rangeMatch[1]), hi = parseInt(rangeMatch[2]);
+      for (let v = lo; v <= Math.min(hi, lo + 200); v++) result.add(v);
+      return result;
+    }
+    // Fall back: single volume number from title
+    const single = t.match(/(?:vol(?:ume)?\.?\s*|#|no\.?\s*)(\d+)/i) || t.match(/\b(\d+)\s*$/);
+    if (single) result.add(parseInt(single[1]));
+    return result;
   }
 
   const missingData = [];
   const missingSeriesMap = {};
   items.forEach(item => {
-    // Only include items that belong to a named series
     if (!item.series) return;
     const key = item.series;
     if (!missingSeriesMap[key]) missingSeriesMap[key] = { name: key, author: item.author || "", ownedNums: new Set(), seriesTotal: null };
-    const volNum = extractVolNum(item.title);
-    if (volNum !== null) missingSeriesMap[key].ownedNums.add(volNum);
+    extractOwnedNums(item).forEach(n => missingSeriesMap[key].ownedNums.add(n));
   });
   // Pull series totals and collection status from meta
   Object.values(missingSeriesMap).forEach(sg => {
@@ -1800,12 +1831,24 @@ function openSeriesDetail(name) {
   const cover = coverItem ? getCover(coverItem.id) : null;
   const initials = name.slice(0,2).toUpperCase();
 
-  // Build set of owned volume numbers (from title parsing + volumes field)
+  // Build set of owned volume numbers using volRange > title range > title single
   const ownedNums = new Set();
   seriesItems.forEach(i => {
-    const m = (i.title||"").match(/(?:vol(?:ume)?\.?\s*|#|no\.?\s*)(\d+)/i) || (i.title||"").match(/\b(\d+)\s*$/);
-    if (m) ownedNums.add(parseInt(m[1]));
-    if (i.volumes) { const { owned } = parseVolumeString(i.volumes); owned.forEach(n => ownedNums.add(n)); }
+    const src = i.volRange || "";
+    if (src) {
+      let found = false;
+      src.split(/[\s,]+/).forEach(part => {
+        const range = part.match(/^(\d+)[-–](\d+)$/);
+        if (range) { const lo=parseInt(range[1]),hi=parseInt(range[2]); for(let v=lo;v<=Math.min(hi,lo+200);v++) ownedNums.add(v); found=true; }
+        else if (/^\d+$/.test(part)) { ownedNums.add(parseInt(part)); found=true; }
+      });
+      if (found) return;
+    }
+    const t = i.title || "";
+    const rangeMatch = t.match(/(?:vol(?:ume)?\.?\s*|#)(\d+)[-–](\d+)/i);
+    if (rangeMatch) { const lo=parseInt(rangeMatch[1]),hi=parseInt(rangeMatch[2]); for(let v=lo;v<=Math.min(hi,lo+200);v++) ownedNums.add(v); return; }
+    const single = t.match(/(?:vol(?:ume)?\.?\s*|#|no\.?\s*)(\d+)/i) || t.match(/\b(\d+)\s*$/);
+    if (single) ownedNums.add(parseInt(single[1]));
   });
 
   // Volume bubble grid
