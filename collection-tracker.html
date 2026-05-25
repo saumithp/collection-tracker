@@ -374,7 +374,7 @@ function render() {
     .filter(i => status === "All" || i.status === status)
     .filter(i => !search || i.title.toLowerCase().includes(search) || (i.author||"").toLowerCase().includes(search));
 
-  if (sort === "title") list.sort((a,b) => a.title.localeCompare(b.title));
+  if (sort === "title") list.sort((a,b) => a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'}));
   else if (sort === "rating") list.sort((a,b) => b.rating - a.rating);
   else list.sort((a,b) => b.addedAt - a.addedAt);
 
