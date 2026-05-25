@@ -1020,17 +1020,10 @@ function renderRecent() {
     const cover = getCover(item.id);
     const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
     const color = PALETTE[item.title.length % PALETTE.length];
-    const stamp = item.importedAt || item.addedAt;
-    const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
-    const addedMidnight = stamp ? new Date(stamp) : null;
-    if (addedMidnight) addedMidnight.setHours(0,0,0,0);
-    const daysAgo = addedMidnight ? Math.round((todayMidnight - addedMidnight) / 86400000) : null;
-    const dateStr = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : daysAgo !== null ? `${daysAgo}d ago` : "";
     return `<div class="recent-card" onclick="openEdit(${item.id})">
       ${cover ? `<img class="recent-cover" src="${cover}" alt="${esc(item.title)}">` : `<div class="recent-cover-placeholder" style="background:${color}">${initials}</div>`}
       <div class="recent-info">
         <div class="recent-name">${esc(item.title)}</div>
-        ${dateStr ? `<div class="recent-date">${dateStr}</div>` : ""}
       </div>
     </div>`;
   }).join("");
