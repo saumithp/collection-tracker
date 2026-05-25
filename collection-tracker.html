@@ -240,13 +240,22 @@
   /* 10: gold */
   .rating-badge.rb-perfect { background: #C07000; }
 
-  .star-btn {
-    background: none; border: none; cursor: pointer; font-size: 20px;
-    padding: 2px; transition: transform 0.1s; line-height: 1;
-    color: #D0C8A0;
+  .num-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    transition: background 0.12s, color 0.12s, transform 0.1s;
+    background: var(--surface2); color: var(--text2);
+    display: inline-flex; align-items: center; justify-content: center;
   }
-  .star-btn:hover, .star-btn.active { color: #E8A000; transform: scale(1.15); }
-  .star-btn.perfect { color: #E8A000; filter: drop-shadow(0 0 4px rgba(232,160,0,0.5)); }
+  .num-btn:hover  { background: #3D3BAA; color: white; transform: scale(1.08); }
+  .num-btn.active { background: #1E3D30; color: white; }
+  .num-btn.active-10 { background: #C07000; color: white; }
+  .num-btn-clear {
+    background: none; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text3);
+    padding: 4px 6px; border-radius: 6px; margin-left: 2px;
+  }
+  .num-btn-clear:hover { color: var(--text); background: var(--surface2); }
 
   .rating-dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
   .rating-dist-label { width: 68px; flex-shrink: 0; }
@@ -1127,28 +1136,46 @@ function renderStarButtons(active) {
   const wrap = document.getElementById("series-rating-stars");
   if (!wrap) return;
   wrap.innerHTML = "";
+  wrap.style.cssText = "display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:4px";
+
   for (let i = 1; i <= 10; i++) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "star-btn" + (i <= active ? (active === 10 ? " perfect" : " active") : "");
-    btn.textContent = "★";
+    btn.textContent = i;
     btn.title = `${i}/10`;
+    if (i <= active) {
+      btn.className = "num-btn " + (active === 10 ? "active-10" : "active");
+    } else {
+      btn.className = "num-btn";
+    }
     btn.addEventListener("click", () => {
-      // Toggle off if clicking the same star
-      const current = parseInt(document.getElementById("series-rating").value) || 0;
-      const newVal = current === i ? 0 : i;
+      const cur = parseInt(document.getElementById("series-rating").value) || 0;
+      const newVal = cur === i ? 0 : i;
       document.getElementById("series-rating").value = newVal;
       renderStarButtons(newVal);
     });
-    btn.addEventListener("mouseover", () => renderStarButtons(i));
-    btn.addEventListener("mouseout", () => renderStarButtons(parseInt(document.getElementById("series-rating").value) || 0));
+    btn.addEventListener("mouseover", () => {
+      // preview hover state without committing
+      wrap.querySelectorAll(".num-btn").forEach((b, idx) => {
+        b.className = "num-btn" + (idx < i ? (i === 10 ? " active-10" : " active") : "");
+      });
+    });
+    btn.addEventListener("mouseout", () => {
+      renderStarButtons(parseInt(document.getElementById("series-rating").value) || 0);
+    });
     wrap.appendChild(btn);
   }
-  // Label
-  const label = document.createElement("span");
-  label.style.cssText = "font-size:12px;color:var(--text3);margin-left:6px";
-  label.textContent = active ? `${active}/10` : "Not rated";
-  wrap.appendChild(label);
+
+  // Clear button
+  const clear = document.createElement("button");
+  clear.type = "button";
+  clear.className = "num-btn-clear";
+  clear.textContent = "Clear";
+  clear.addEventListener("click", () => {
+    document.getElementById("series-rating").value = 0;
+    renderStarButtons(0);
+  });
+  wrap.appendChild(clear);
 }
 
 function editSeries(name) {
