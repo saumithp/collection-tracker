@@ -317,6 +317,23 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 
+  /* ---- STATS NAV ---- */
+  .stats-nav {
+    position: sticky; top: 60px; z-index: 50;
+    display: flex; gap: 8px; padding: 10px 0;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .stats-nav-btn {
+    padding: 7px 18px; border-radius: 20px; border: 1.5px solid var(--border2);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; background: var(--surface); color: var(--text2);
+    transition: all 0.15s;
+  }
+  .stats-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stats-nav-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .stats-nav-btn.book-active { background: var(--book-fg); color: white; border-color: var(--book-fg); }
+
   /* ---- STATS PAGE ---- */
   .stats-page { display: flex; flex-direction: column; gap: 2rem; }
   .stats-section-title {
@@ -569,7 +586,7 @@
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="s-total">0</div></div>
     <div class="stat-card"><div class="stat-label">Manga Volumes</div><div class="stat-value" id="s-manga">0</div></div>
     <div class="stat-card"><div class="stat-label">Books</div><div class="stat-value" id="s-books">0</div></div>
-    <div class="stat-card"><div class="stat-label">Reading / Active</div><div class="stat-value" id="s-done">0</div></div>
+    <div class="stat-card"><div class="stat-label">Unread Books</div><div class="stat-value" id="s-done">0</div></div>
   </div>
 
   <!-- Toolbar -->
@@ -768,6 +785,19 @@
               <option>Audiobook</option>
             </select>
           </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Author Gender</label>
+            <select id="f-book-author-gender">
+              <option value="">Not specified</option>
+              <option value="Woman">Woman</option>
+              <option value="Man">Man</option>
+              <option value="Non-binary">Non-binary</option>
+              <option value="Multiple">Multiple authors</option>
+            </select>
+          </div>
+          <div class="form-group"></div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -1042,6 +1072,19 @@ function switchView(view) {
   if (view === "series" && seriesDirty) { renderSeries(); seriesDirty = false; }
   if (view === "stats"  && statsDirty)  { renderStats();  statsDirty  = false; }
   if (view === "year"   && yearDirty)   { renderYear();   yearDirty   = false; }
+}
+
+function statsScrollTo(id, btn) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  // offset for sticky header (60px) + stats nav (~52px)
+  const top = target.getBoundingClientRect().top + window.scrollY - 120;
+  window.scrollTo({ top, behavior: "smooth" });
+  // Update active state
+  document.querySelectorAll(".stats-nav-btn").forEach(b => b.classList.remove("active", "book-active"));
+  if (btn) {
+    btn.classList.add(id.startsWith("books") ? "book-active" : "active");
+  }
 }
 
 function toggleYear(year) {
@@ -1355,7 +1398,7 @@ function render() {
   document.getElementById("s-total").textContent = items.length;
   document.getElementById("s-manga").textContent = items.filter(i => i.type !== "Book").length;
   document.getElementById("s-books").textContent = items.filter(i => i.type === "Book").length;
-  document.getElementById("s-done").textContent = items.filter(i => i.status === "Reading" || i.status === "Read").length;
+  document.getElementById("s-done").textContent = items.filter(i => i.type === "Book" && i.status === "Unread").length;
 
   // Recently Added — only re-render when items change (called from markDirty)
   // renderRecent() is NOT called here to avoid cover cost on every filter/search change
@@ -1625,6 +1668,7 @@ function openAdd() {
   document.getElementById("f-book-pages").value = "";
   document.getElementById("f-book-msrp").value = "";
   document.getElementById("f-book-orig-lang").value = "";
+  document.getElementById("f-book-author-gender").value = "";
   document.getElementById("f-book-author-country").value = "";
   document.getElementById("f-book-orig-pubdate").value = "";
   switchModalType("Manga");
@@ -1652,6 +1696,7 @@ function openEdit(id) {
     document.getElementById("f-book-msrp").value = item.msrp != null ? item.msrp : "";
     document.getElementById("f-book-orig-lang").value = item.originalLanguage || "";
     document.getElementById("f-book-author-country").value = item.authorCountry || "";
+    document.getElementById("f-book-author-gender").value = item.authorGender || "";
     document.getElementById("f-book-orig-pubdate").value = item.originalPubDate || "";
     switchModalType("Book");
   } else {
@@ -1700,6 +1745,7 @@ function saveItem() {
       msrp: document.getElementById("f-book-msrp").value !== "" ? parseFloat(document.getElementById("f-book-msrp").value) : null,
       originalLanguage: document.getElementById("f-book-orig-lang").value.trim() || null,
       authorCountry: document.getElementById("f-book-author-country").value.trim() || null,
+      authorGender: document.getElementById("f-book-author-gender").value || null,
       originalPubDate: document.getElementById("f-book-orig-pubdate").value.trim() || null,
       notes: document.getElementById("f-notes").value.trim(),
       // clear manga-only fields
@@ -2138,6 +2184,9 @@ function renderStats() {
     // By author country
     const bookCountryMap = {};
     bookItems.forEach(i => { if (i.authorCountry) { bookCountryMap[i.authorCountry] = (bookCountryMap[i.authorCountry] || 0) + 1; } });
+    // By author gender
+    const bookGenderMap = {};
+    bookItems.forEach(i => { if (i.authorGender) { bookGenderMap[i.authorGender] = (bookGenderMap[i.authorGender] || 0) + 1; } });
     // MSRP
     const bookMsrpItems = bookItems.filter(i => i.msrp != null);
     const bookTotalMsrp = bookMsrpItems.reduce((s, i) => s + i.msrp, 0);
@@ -2188,7 +2237,7 @@ function renderStats() {
       </div>`).join("")}</div>` : `<p style="color:var(--text3);font-size:13px">No publisher data yet.</p>`;
 
     return `
-    <div style="padding-top:1rem;border-top:2px solid var(--book-bg);margin-top:1rem">
+    <div id="books-overview" style="padding-top:1rem;border-top:2px solid var(--book-bg);margin-top:1rem">
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Overview</div>
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">Total Books</div><div class="kpi-value">${bTotal}</div><div class="kpi-sub">${bWithSeries} in series · ${bStandalone} standalone</div></div>
@@ -2217,9 +2266,15 @@ function renderStats() {
 
     ${topBookAuthors.length ? `<div>
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Authors</div>
-      <div class="chart-card">
-        <div class="chart-title">Books by Author (top 10)</div>
-        ${bookAuthorBarHTML}
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Books by Author (top 10)</div>
+          ${bookAuthorBarHTML}
+        </div>
+        ${Object.keys(bookGenderMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Author Gender</div>
+          ${bookDonutHTML(bookGenderMap, ["#7B3553","#3D3BAA","#3B6D11","#BA7517"], "donut-book-gender", 110)}
+        </div>` : ""}
       </div>
     </div>` : ""}
 
@@ -2277,8 +2332,14 @@ function renderStats() {
 
   el.innerHTML = `<div class="stats-page">
 
+    <!-- Sticky section nav -->
+    <div class="stats-nav" id="stats-nav">
+      <button class="stats-nav-btn active" onclick="statsScrollTo('manga-overview', this)">📚 Manga</button>
+      ${bookItems.length ? `<button class="stats-nav-btn" onclick="statsScrollTo('books-overview', this)">📖 Books</button>` : ""}
+    </div>
+
     <!-- KPI row -->
-    <div>
+    <div id="manga-overview">
       <div class="stats-section-title">📚 Manga — Overview</div>
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">Total Volumes</div><div class="kpi-value">${total}</div><div class="kpi-sub">${numSeries} series tracked</div></div>
@@ -2689,6 +2750,9 @@ function renderStats() {
       bookItems2.forEach(i => { const f = i.format || "Unknown"; formatMap2[f] = (formatMap2[f] || 0) + 1; });
       drawDonut("donut-book-read", readDist2, ["#185FA5","#5F5E5A"]);
       drawDonut("donut-book-format", formatMap2, ["#8B4A00","#3D3BAA","#2D4A3E","#BA7517","#185FA5"]);
+      const bookGenderMap2 = {};
+      bookItems2.forEach(i => { if (i.authorGender) { bookGenderMap2[i.authorGender] = (bookGenderMap2[i.authorGender] || 0) + 1; } });
+      if (Object.keys(bookGenderMap2).length) drawDonut("donut-book-gender", bookGenderMap2, ["#7B3553","#3D3BAA","#3B6D11","#BA7517"]);
     }
   });
 }
@@ -3018,6 +3082,7 @@ function importCSV(e) {
           msrp: obj.msrp !== "" ? parseFloat(obj.msrp) : null,
           originalLanguage: obj.originalLanguage || null,
           authorCountry: obj.authorCountry || null,
+          authorGender: obj.authorGender || null,
           originalPubDate: obj.originalPubDate || null,
           addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), importedAt: Date.now(), cover: null
         });
