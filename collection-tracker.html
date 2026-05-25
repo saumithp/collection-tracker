@@ -415,6 +415,37 @@
   .spend-month-label { color: var(--text2); text-align: right; }
   .spend-month-val { color: var(--text); font-weight: 500; text-align: right; }
 
+  /* ---- BY YEAR VIEW ---- */
+  .year-section { margin-bottom: 2rem; }
+  .year-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 1rem; cursor: pointer; user-select: none;
+  }
+  .year-label {
+    font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; color: var(--accent);
+  }
+  .year-pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .year-pill {
+    font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--text2);
+  }
+  .year-pill.accent { background: var(--accent-light); color: var(--accent); border-color: rgba(45,74,62,0.2); }
+  .year-toggle {
+    margin-left: auto; font-size: 12px; color: var(--text3);
+    background: none; border: none; cursor: pointer; padding: 4px 8px;
+    border-radius: 6px; font-family: 'DM Sans', sans-serif;
+    transition: background 0.12s;
+  }
+  .year-toggle:hover { background: var(--surface2); color: var(--text); }
+  .year-divider { flex: 1; height: 1px; background: var(--border); }
+  .year-grid-wrap { overflow: hidden; transition: max-height 0.3s ease; }
+  .year-empty { color: var(--text3); font-size: 13px; padding: 20px 0; }
+  .year-no-date {
+    margin-top: 2rem; padding: 16px 20px;
+    background: var(--surface); border: 1px dashed var(--border2); border-radius: var(--radius-lg);
+  }
+  .year-no-date-title { font-size: 12px; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.07em; }
+
   @media (max-width: 600px) {
     .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
   }
@@ -472,6 +503,7 @@
 <main>
   <div class="view-tabs" style="display:flex;gap:10px;margin-bottom:1.5rem;">
     <button class="filter-btn active" id="library-tab" onclick="switchView('library')">Library</button>
+    <button class="filter-btn" id="year-tab" onclick="switchView('year')">By Year</button>
     <button class="filter-btn" id="series-tab" onclick="switchView('series')">Series</button>
     <button class="filter-btn" id="stats-tab" onclick="switchView('stats')">Stats</button>
   </div>
@@ -552,6 +584,10 @@
 
   <div id="stats-view" style="display:none">
     <div id="stats-content"></div>
+  </div>
+
+  <div id="year-view" style="display:none">
+    <div id="year-content"></div>
   </div>
 
   <div id="series-view" style="display:none">
@@ -812,11 +848,110 @@ function switchView(view) {
   document.getElementById("library-view").style.display = view === "library" ? "block" : "none";
   document.getElementById("series-view").style.display = view === "series" ? "block" : "none";
   document.getElementById("stats-view").style.display = view === "stats" ? "block" : "none";
+  document.getElementById("year-view").style.display = view === "year" ? "block" : "none";
   document.getElementById("library-tab").classList.toggle("active", view === "library");
   document.getElementById("series-tab").classList.toggle("active", view === "series");
   document.getElementById("stats-tab").classList.toggle("active", view === "stats");
+  document.getElementById("year-tab").classList.toggle("active", view === "year");
   if (view === "series") renderSeries();
   if (view === "stats") renderStats();
+  if (view === "year") renderYear();
+}
+
+function toggleYear(year) {
+  const wrap = document.getElementById(`year-wrap-${year}`);
+  const btn = document.getElementById(`year-btn-${year}`);
+  if (!wrap) return;
+  const isOpen = wrap.style.maxHeight !== "0px" && wrap.style.maxHeight !== "";
+  wrap.style.maxHeight = isOpen ? "0px" : wrap.scrollHeight + "px";
+  if (btn) btn.textContent = isOpen ? "Show" : "Hide";
+}
+
+function renderYear() {
+  const el = document.getElementById("year-content");
+
+  // Group items by year of dateBought; fallback bucket for undated
+  const yearMap = {};
+  const undated = [];
+
+  items.forEach(item => {
+    if (item.dateBought) {
+      const y = item.dateBought.slice(0, 4);
+      if (!yearMap[y]) yearMap[y] = [];
+      yearMap[y].push(item);
+    } else {
+      undated.push(item);
+    }
+  });
+
+  const years = Object.keys(yearMap).sort((a, b) => b - a); // newest first
+
+  if (years.length === 0 && undated.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📅</div><p>Add purchase dates to your items to see them organised by year.</p></div>`;
+    return;
+  }
+
+  function cardHtml(item) {
+    const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
+    const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
+    const color = PALETTE[item.title.length % PALETTE.length];
+    const cover = getCover(item.id);
+    return `<div class="card">
+      <div class="card-cover-wrap">
+        ${cover ? `<img class="card-cover" src="${cover}" alt="${esc(item.title)}">` : `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${esc(item.title)}</div>
+        <div class="card-author">${esc(item.author || "Unknown author")}</div>
+        ${item.series ? `<div class="meta-tags"><span class="meta-tag">${esc(item.series)}</span></div>` : ""}
+        ${item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">£${item.pricePaid.toFixed(2)}</div>` : ""}
+      </div>
+      <div class="card-footer">
+        <span class="status-pill" style="background:${sc.bg};color:${sc.fg}">${item.status}</span>
+        <div class="card-actions">
+          <button class="btn-icon" onclick="openEdit(${item.id})">Edit</button>
+          <button class="btn-icon del" onclick="deleteItem(${item.id})">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function yearSectionHtml(year, yearItems) {
+    const spent = yearItems.reduce((s, i) => s + (i.pricePaid || 0), 0);
+    const vols = yearItems.reduce((s, i) => s + (parseInt(i.volumes) || 1), 0);
+    // Sort by dateBought within year, then title
+    const sorted = [...yearItems].sort((a, b) => {
+      if (a.dateBought && b.dateBought) return a.dateBought.localeCompare(b.dateBought);
+      return a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'});
+    });
+    return `<div class="year-section">
+      <div class="year-header" onclick="toggleYear('${year}')">
+        <div class="year-label">${year}</div>
+        <div class="year-pills">
+          <span class="year-pill accent">${yearItems.length} item${yearItems.length !== 1 ? "s" : ""}</span>
+          <span class="year-pill">${vols} vol${vols !== 1 ? "s" : ""}</span>
+          ${spent > 0 ? `<span class="year-pill">£${spent.toFixed(2)}</span>` : ""}
+        </div>
+        <div class="year-divider"></div>
+        <button class="year-toggle" id="year-btn-${year}" onclick="event.stopPropagation();toggleYear('${year}')">Hide</button>
+      </div>
+      <div class="year-grid-wrap" id="year-wrap-${year}" style="max-height:9999px">
+        <div class="grid">${sorted.map(cardHtml).join("")}</div>
+      </div>
+    </div>`;
+  }
+
+  let html = years.map(y => yearSectionHtml(y, yearMap[y])).join("");
+
+  if (undated.length > 0) {
+    const sorted = [...undated].sort((a, b) => a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'}));
+    html += `<div class="year-no-date">
+      <div class="year-no-date-title">No purchase date — ${undated.length} item${undated.length !== 1 ? "s" : ""}</div>
+      <div class="grid">${sorted.map(cardHtml).join("")}</div>
+    </div>`;
+  }
+
+  el.innerHTML = html;
 }
 
 function renderSeries() {
