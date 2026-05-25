@@ -653,7 +653,7 @@
       <option>Plan to Read</option>
       <option>Dropped</option>
     </select>
-    <input type="text" id="bulk-series-input" placeholder="Set series…" style="padding:6px 10px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;background:rgba(255,255,255,0.18);color:white;outline:none;width:130px;" onfocus="this.style.background='rgba(255,255,255,0.28)'" onblur="this.style.background='rgba(255,255,255,0.18)'" placeholder="Set series…">
+    <input type="text" id="bulk-series-input" placeholder="Set series…" style="padding:6px 10px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;background:rgba(255,255,255,0.18);color:white;outline:none;width:130px;" onfocus="this.style.background='rgba(255,255,255,0.28)'" onblur="this.style.background='rgba(255,255,255,0.18)'">
     <button class="bulk-bar-btn apply" onclick="bulkApply()">Apply</button>
     <button class="bulk-bar-btn" onclick="bulkSelectAll()">Select all</button>
     <button class="bulk-bar-btn danger" onclick="bulkDelete()">Delete</button>
@@ -1348,7 +1348,8 @@ function renderSeries() {
     }
   });
 
-  const sortVal = document.getElementById("series-sort") ? document.getElementById("series-sort").value : "name";
+  const _seriesSortEl = document.getElementById("series-sort");
+  const sortVal = _seriesSortEl ? _seriesSortEl.value : "name";
   let seriesList = Object.values(seriesMap);
 
   seriesList.forEach(s => {
@@ -1544,15 +1545,17 @@ function render() {
     });
   }
 
+  const _books = items.filter(i => i.type === "Book");
   document.getElementById("s-total").textContent = items.length;
-  document.getElementById("s-manga").textContent = items.filter(i => i.type !== "Book").length;
-  document.getElementById("s-books").textContent = items.filter(i => i.type === "Book").length;
-  document.getElementById("s-done").textContent = items.filter(i => i.type === "Book" && i.status === "Unread").length;
+  document.getElementById("s-manga").textContent = items.length - _books.length;
+  document.getElementById("s-books").textContent = _books.length;
+  document.getElementById("s-done").textContent = _books.filter(i => i.status === "Unread").length;
 
   // Recently Added — only re-render when items change (called from markDirty)
   // renderRecent() is NOT called here to avoid cover cost on every filter/search change
 
   const grid = document.getElementById("grid");
+  grid.className = "grid" + (bulkMode ? " bulk-mode" : "");
   if (list.length === 0) {
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
       <div class="empty-icon">📚</div>
@@ -1560,9 +1563,6 @@ function render() {
     </div>`;
     return;
   }
-
-  const gridEl = document.getElementById("grid");
-  gridEl.className = "grid" + (bulkMode ? " bulk-mode" : "");
 
   grid.innerHTML = list.map(item => {
     const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
@@ -1646,7 +1646,7 @@ function renderRecent() {
   rs.style.display = "";
   const recent = [...items]
     .filter(i => i.dateBought)
-    .sort((a,b) => new Date(b.dateBought) - new Date(a.dateBought))
+    .sort((a,b) => (b._dateBoughtMs || 0) - (a._dateBoughtMs || 0))
     .slice(0, 8);
   const grid = document.getElementById("recent-grid");
   grid.innerHTML = recent.map(item => {
@@ -1721,7 +1721,7 @@ function bulkSelectAll() {
   const filtered = items
     .filter(i => typeFilter === "All" || i.type === typeFilter)
     .filter(i => status === "All" || i.status === status)
-    .filter(i => !search || i.title.toLowerCase().includes(search) || (i.author||"").toLowerCase().includes(search));
+    .filter(i => !search || i._titleLower.includes(search) || i._authorLower.includes(search));
   const allShownSelected = filtered.every(i => selectedIds.has(i.id));
   if (allShownSelected) {
     filtered.forEach(i => selectedIds.delete(i.id));
@@ -1762,10 +1762,6 @@ function bulkDelete() {
   selectedIds.clear(); updateBulkCount();
   save(); render(); renderSeries();
   showToast(`🗑 Deleted ${toDelete.length} item${toDelete.length !== 1 ? "s" : ""}`);
-}
-
-function updateVolLabel() {
-  document.getElementById("vol-label").textContent = "Volumes";
 }
 
 function handleCover(e) {
@@ -3259,7 +3255,6 @@ function importCSV(e) {
           translator: obj.translator || null,
           narrator: obj.narrator || null,
           pageCount: obj.pageCount !== "" ? parseInt(obj.pageCount) : null,
-          msrp: obj.msrp !== "" ? parseFloat(obj.msrp) : null,
           originalLanguage: obj.originalLanguage || null,
           authorCountry: obj.authorCountry || null,
           authorGender: obj.authorGender || null,
