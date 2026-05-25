@@ -266,6 +266,59 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+
+  /* ---- STATS PAGE ---- */
+  .stats-page { display: flex; flex-direction: column; gap: 2rem; }
+  .stats-section-title {
+    font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500;
+    color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
+  }
+  .stats-section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .kpi-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .kpi-value { font-family: 'Fraunces', serif; font-size: 32px; color: var(--text); line-height: 1; }
+  .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .charts-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .chart-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 18px 20px;
+  }
+  .chart-title { font-size: 12px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+  .chart-canvas-wrap { position: relative; }
+  canvas.stat-canvas { display: block; width: 100%; }
+
+  .bar-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .bar-row { display: flex; flex-direction: column; gap: 3px; }
+  .bar-row-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
+  .bar-row-label span:last-child { font-weight: 500; color: var(--text); }
+  .bar-track { height: 7px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+
+  .donut-wrap { display: flex; align-items: center; gap: 18px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .legend-item span:last-child { margin-left: auto; font-weight: 500; color: var(--text); }
+
+  .rating-dist { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-top: 8px; }
+  .rating-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .rating-bar-outer { width: 100%; background: var(--surface2); border-radius: 4px 4px 0 0; display: flex; align-items: flex-end; }
+  .rating-bar-inner { width: 100%; border-radius: 4px 4px 0 0; background: #EF9F27; transition: height 0.5s; }
+  .rating-bar-label { font-size: 11px; color: var(--text3); }
+  .rating-bar-count { font-size: 11px; color: var(--text2); font-weight: 500; }
+
+  @media (max-width: 600px) {
+    .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
+  }
   @media (max-width: 600px) {
     .stats { grid-template-columns: 1fr 1fr; }
     .form-row { grid-template-columns: 1fr; }
@@ -321,6 +374,7 @@
   <div class="view-tabs" style="display:flex;gap:10px;margin-bottom:1.5rem;">
     <button class="filter-btn active" id="library-tab" onclick="switchView('library')">Library</button>
     <button class="filter-btn" id="series-tab" onclick="switchView('series')">Series</button>
+    <button class="filter-btn" id="stats-tab" onclick="switchView('stats')">Stats</button>
   </div>
 
   <div id="library-view">
@@ -360,6 +414,10 @@
 
   <!-- Grid -->
   <div class="grid" id="grid"></div>
+  </div>
+
+  <div id="stats-view" style="display:none">
+    <div id="stats-content"></div>
   </div>
 
   <div id="series-view" style="display:none">
@@ -558,9 +616,12 @@ function switchView(view) {
   currentView = view;
   document.getElementById("library-view").style.display = view === "library" ? "block" : "none";
   document.getElementById("series-view").style.display = view === "series" ? "block" : "none";
+  document.getElementById("stats-view").style.display = view === "stats" ? "block" : "none";
   document.getElementById("library-tab").classList.toggle("active", view === "library");
   document.getElementById("series-tab").classList.toggle("active", view === "series");
+  document.getElementById("stats-tab").classList.toggle("active", view === "stats");
   if (view === "series") renderSeries();
+  if (view === "stats") renderStats();
 }
 
 function renderSeries() {
@@ -882,6 +943,234 @@ function deleteItem(id) {
 }
 
 render();
+
+/* ---- STATS PAGE ---- */
+function renderStats() {
+  const el = document.getElementById("stats-content");
+
+  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+
+  // ---- Aggregates ----
+  const total = items.length;
+  const manga = items.filter(i => i.type === "Manga").length;
+  const books = items.filter(i => i.type === "Books").length;
+  const completed = items.filter(i => i.status === "Completed").length;
+  const reading = items.filter(i => i.status === "Reading").length;
+  const onHold = items.filter(i => i.status === "On Hold").length;
+  const planTo = items.filter(i => i.status === "Plan to Read").length;
+  const dropped = items.filter(i => i.status === "Dropped").length;
+  const rated = items.filter(i => i.rating > 0);
+  const avgRating = rated.length ? (rated.reduce((s, i) => s + i.rating, 0) / rated.length).toFixed(1) : "—";
+
+  // Volumes owned total
+  const totalVols = items.reduce((s, i) => s + (parseInt(i.volumes) || 1), 0);
+
+  // Series map
+  const seriesMap = {};
+  items.forEach(item => {
+    const name = item.series || "Standalone";
+    if (!seriesMap[name]) seriesMap[name] = { name, owned: 0, total: null, author: "", publisher: "", demographic: "", genre: "" };
+    seriesMap[name].owned++;
+    const sm = meta[name] || {};
+    if (sm.total) seriesMap[name].total = parseInt(sm.total) || null;
+    if (sm.publisher) seriesMap[name].publisher = sm.publisher;
+    if (sm.demographic) seriesMap[name].demographic = sm.demographic;
+    if (sm.genre) seriesMap[name].genre = sm.genre;
+    if (sm.author) seriesMap[name].author = sm.author;
+  });
+  const seriesList = Object.values(seriesMap).sort((a, b) => b.owned - a.owned);
+  const numSeries = seriesList.length;
+
+  // Publisher breakdown
+  const publisherMap = {};
+  items.forEach(i => {
+    const p = i.publisher || "Unknown";
+    publisherMap[p] = (publisherMap[p] || 0) + 1;
+  });
+
+  // Genre breakdown
+  const genreMap = {};
+  items.forEach(i => {
+    if (i.genre) genreMap[i.genre] = (genreMap[i.genre] || 0) + 1;
+  });
+
+  // Demographic breakdown
+  const demoMap = {};
+  items.forEach(i => {
+    if (i.demographic) demoMap[i.demographic] = (demoMap[i.demographic] || 0) + 1;
+  });
+
+  // Rating distribution
+  const ratingDist = [0,0,0,0,0];
+  items.forEach(i => { if (i.rating >= 1 && i.rating <= 5) ratingDist[i.rating-1]++; });
+
+  // Status distribution
+  const statusDist = {
+    "Completed": completed, "Reading": reading,
+    "On Hold": onHold, "Plan to Read": planTo, "Dropped": dropped
+  };
+
+  const COLORS = ["#2D4A3E","#3D3BAA","#8B4A00","#7B3553","#185FA5","#3B6D11","#BA7517","#A32D2D","#5B7B6F","#6B4CAA"];
+  const STATUS_C = { "Completed":"#185FA5","Reading":"#0F6E56","On Hold":"#BA7517","Plan to Read":"#5F5E5A","Dropped":"#A32D2D" };
+
+  function barListHTML(map, colorArr, maxCount) {
+    const entries = Object.entries(map).sort((a,b) => b[1]-a[1]);
+    const max = maxCount || Math.max(...entries.map(e=>e[1]), 1);
+    return `<div class="bar-list">${entries.map(([k,v], idx) => `
+      <div class="bar-row">
+        <div class="bar-row-label"><span>${esc(k)}</span><span>${v}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${colorArr[idx % colorArr.length]}"></div></div>
+      </div>`).join("")}</div>`;
+  }
+
+  function donutHTML(map, colorArr, canvasId, size=120) {
+    const entries = Object.entries(map).sort((a,b)=>b[1]-a[1]);
+    const tot = entries.reduce((s,[,v])=>s+v,0)||1;
+    const legend = entries.map(([k,v], i) => `
+      <div class="legend-item">
+        <div class="legend-dot" style="background:${colorArr[i%colorArr.length]}"></div>
+        <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(k)}</span>
+        <span>${Math.round(v/tot*100)}%</span>
+      </div>`).join("");
+    return `<div class="donut-wrap">
+      <canvas id="${canvasId}" width="${size}" height="${size}" class="stat-canvas" style="width:${size}px;height:${size}px;flex-shrink:0"></canvas>
+      <div class="donut-legend">${legend}</div>
+    </div>`;
+  }
+
+  function drawDonut(id, map, colorArr) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const entries = Object.entries(map).sort((a,b)=>b[1]-a[1]);
+    const tot = entries.reduce((s,[,v])=>s+v,0)||1;
+    const cx = canvas.width/2, cy = canvas.height/2, r = cx*0.82, inner = r*0.58;
+    let angle = -Math.PI/2;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    entries.forEach(([,v],i) => {
+      const sweep = (v/tot)*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,angle,angle+sweep);
+      ctx.closePath(); ctx.fillStyle = colorArr[i%colorArr.length]; ctx.fill();
+      angle += sweep;
+    });
+    ctx.beginPath(); ctx.arc(cx,cy,inner,0,Math.PI*2);
+    ctx.fillStyle = "var(--surface, #fff)"; ctx.fill();
+  }
+
+  // Series volumes bar (top 10)
+  const top10Series = seriesList.slice(0,10);
+  const seriesBarHTML = `<div class="bar-list">${top10Series.map((s,i) => {
+    const max = top10Series[0].owned || 1;
+    const pct = s.total ? Math.min(100, Math.round(s.owned/s.total*100)) : null;
+    return `<div class="bar-row">
+      <div class="bar-row-label">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${esc(s.name)}</span>
+        <span>${s.owned}${s.total ? " / "+s.total+(pct!==null?" ("+pct+"%)":"") : ""}</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(s.owned/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+    </div>`;
+  }).join("")}</div>`;
+
+  // Completion progress bars per series (only those with total set)
+  const withTotal = seriesList.filter(s => s.total && s.total > 0);
+  const completionBarsHTML = withTotal.length ? `<div class="bar-list">${withTotal.sort((a,b) => (b.owned/b.total)-(a.owned/a.total)).map((s,i) => {
+    const pct = Math.min(100, Math.round(s.owned/s.total*100));
+    const col = pct>=100?"#2D4A3E":pct>=50?"#3D3BAA":"#BA7517";
+    return `<div class="bar-row">
+      <div class="bar-row-label">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(s.name)}</span>
+        <span style="color:${col}">${pct}%</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
+    </div>`;
+  }).join("")}</div>` : `<p style="color:var(--text3);font-size:13px">Set "Total Volumes" on a series to see completion.</p>`;
+
+  // Rating distribution HTML
+  const maxR = Math.max(...ratingDist, 1);
+  const ratingHTML = `<div class="rating-dist">${ratingDist.map((count, i) => {
+    const h = count ? Math.max(8, Math.round((count/maxR)*70)) : 0;
+    return `<div class="rating-bar-wrap">
+      <div class="rating-bar-count">${count||""}</div>
+      <div class="rating-bar-outer" style="height:70px">
+        <div class="rating-bar-inner" style="height:${h}px"></div>
+      </div>
+      <div class="rating-bar-label">${"★".repeat(i+1)}</div>
+    </div>`;
+  }).join("")}</div>`;
+
+  el.innerHTML = `<div class="stats-page">
+
+    <!-- KPI row -->
+    <div>
+      <div class="stats-section-title">Overview</div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Total Titles</div><div class="kpi-value">${total}</div><div class="kpi-sub">${manga} manga · ${books} books</div></div>
+        <div class="kpi-card"><div class="kpi-label">Series</div><div class="kpi-value">${numSeries}</div><div class="kpi-sub">tracked collections</div></div>
+        <div class="kpi-card"><div class="kpi-label">Volumes</div><div class="kpi-value">${totalVols}</div><div class="kpi-sub">total owned</div></div>
+        <div class="kpi-card"><div class="kpi-label">Completed</div><div class="kpi-value">${completed}</div><div class="kpi-sub">${total ? Math.round(completed/total*100) : 0}% of collection</div></div>
+        <div class="kpi-card"><div class="kpi-label">Reading</div><div class="kpi-value">${reading}</div><div class="kpi-sub">in progress</div></div>
+        <div class="kpi-card"><div class="kpi-label">Avg Rating</div><div class="kpi-value">${avgRating}</div><div class="kpi-sub">${rated.length} rated titles</div></div>
+      </div>
+    </div>
+
+    <!-- Status & Rating -->
+    <div>
+      <div class="stats-section-title">Reading Status &amp; Ratings</div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Status Breakdown</div>
+          ${donutHTML(statusDist, Object.values(STATUS_C), "donut-status", 110)}
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Rating Distribution</div>
+          ${ratingHTML}
+        </div>
+      </div>
+    </div>
+
+    <!-- Publisher / Genre / Demographic -->
+    <div>
+      <div class="stats-section-title">Publishers · Genres · Demographics</div>
+      <div class="charts-row-3">
+        <div class="chart-card">
+          <div class="chart-title">By Publisher</div>
+          ${Object.keys(publisherMap).length ? donutHTML(publisherMap, COLORS, "donut-pub", 110) : '<p style="color:var(--text3);font-size:13px">No publisher data yet.</p>'}
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">By Genre</div>
+          ${Object.keys(genreMap).length ? barListHTML(genreMap, COLORS) : '<p style="color:var(--text3);font-size:13px">No genre data yet.</p>'}
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">By Demographic</div>
+          ${Object.keys(demoMap).length ? barListHTML(demoMap, COLORS.slice(3)) : '<p style="color:var(--text3);font-size:13px">No demographic data yet.</p>'}
+        </div>
+      </div>
+    </div>
+
+    <!-- Series volumes -->
+    <div>
+      <div class="stats-section-title">Series Collection</div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Volumes Owned by Series (top 10)</div>
+          ${seriesBarHTML}
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Collection Completion %</div>
+          ${completionBarsHTML}
+        </div>
+      </div>
+    </div>
+
+  </div>`;
+
+  // Draw donuts after DOM is painted
+  requestAnimationFrame(() => {
+    drawDonut("donut-status", statusDist, Object.values(STATUS_C));
+    if (Object.keys(publisherMap).length) drawDonut("donut-pub", publisherMap, COLORS);
+  });
+}
 
 /* ---- IMPORT / EXPORT ---- */
 
