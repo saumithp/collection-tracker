@@ -330,6 +330,9 @@
     font-family: 'DM Sans', sans-serif; font-size: 13px; background: var(--surface); color: var(--text);
   }
 
+  /* ---- AUTHOR MODAL ---- */
+  .author-modal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 4px; }
+
   /* ---- RECENTLY ADDED ---- */
   .recent-section { margin-bottom: 1.75rem; }
   .recent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
@@ -1677,7 +1680,7 @@ function renderStats() {
           <div class="chart-title">Author Summary</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:4px">
             ${entries.map(([k,v])=>`
-              <div style="background:var(--surface2);border-radius:var(--radius);padding:10px 12px;display:flex;flex-direction:column;gap:3px">
+              <div onclick="openAuthorModal('${k.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" style="background:var(--surface2);border-radius:var(--radius);padding:10px 12px;display:flex;flex-direction:column;gap:3px;cursor:pointer;transition:box-shadow 0.15s,border-color 0.15s;border:1px solid var(--border)" onmouseover="this.style.boxShadow='var(--shadow)';this.style.borderColor='var(--border2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='var(--border)'">
                 <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</div>
                 <div style="font-size:11px;color:var(--text3)">${v.count} volume${v.count!==1?"s":""}${v.series.size?" · "+v.series.size+" series":""}${v.spent>0?" · £"+v.spent.toFixed(2):""}</div>
               </div>`).join("")}
@@ -1725,6 +1728,71 @@ function renderStats() {
     drawDonut("donut-status", statusDist, Object.values(STATUS_C));
     if (Object.keys(publisherMap).length) drawDonut("donut-pub", publisherMap, COLORS);
   });
+}
+
+/* ---- AUTHOR MODAL ---- */
+function openAuthorModal(authorName) {
+  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+
+  // Build series data for this author
+  const seriesMap = {};
+  items.filter(i => (i.author || "Unknown") === authorName).forEach(item => {
+    const name = item.series || "Standalone";
+    if (!seriesMap[name]) {
+      seriesMap[name] = { name, owned: 0, coverItemId: getCover(item.id) ? item.id : null,
+        total: "", demographic: "", genre: "", publisher: "", mangaStatus: "Publishing", collectionStatus: "Collecting" };
+    } else if (!seriesMap[name].coverItemId && getCover(item.id)) {
+      seriesMap[name].coverItemId = item.id;
+    }
+    seriesMap[name].owned++;
+  });
+  Object.values(seriesMap).forEach(s => {
+    const sm = meta[s.name] || {};
+    Object.assign(s, { total: sm.total || "", demographic: sm.demographic || "", genre: sm.genre || "",
+      publisher: sm.publisher || "", mangaStatus: sm.mangaStatus || "Publishing", collectionStatus: sm.collectionStatus || "Collecting" });
+    const total = parseInt(s.total);
+    s.pct = (!isNaN(total) && total > 0) ? Math.min(100, Math.round((s.owned / total) * 100)) : null;
+  });
+  const seriesList = Object.values(seriesMap).sort((a,b) => b.owned - a.owned);
+
+  document.getElementById("author-modal-name").textContent = authorName;
+  document.getElementById("author-modal-grid").innerHTML = seriesList.map(series => {
+    const pct = series.pct ?? 0;
+    const pctColor = pct >= 100 ? "#2D4A3E" : pct >= 50 ? "#3D3BAA" : "#BA7517";
+    const cover = series.coverItemId ? getCover(series.coverItemId) : null;
+    return `<div class="card">
+      ${cover ? `<img class="card-cover" src="${cover}" alt="${esc(series.name)}">` : `<div class="card-cover-placeholder" style="background:#2D4A3E">${esc(series.name.slice(0,2).toUpperCase())}</div>`}
+      <div class="card-body">
+        <div class="card-title">${esc(series.name)}</div>
+        <div class="meta-tags" style="margin-top:5px">
+          ${series.demographic ? `<span class="meta-tag">${esc(series.demographic)}</span>` : ""}
+          ${series.genre ? `<span class="meta-tag">${esc(series.genre)}</span>` : ""}
+          ${series.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(series.publisher)}</span>` : ""}
+        </div>
+        <div class="series-card-stat"><span>Volumes owned</span><span>${series.owned}${series.total ? " / " + series.total : ""}</span></div>
+        ${series.pct !== null ? `<div style="margin-top:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:11px;color:var(--text3)">Collection</span>
+            <span style="font-size:12px;font-weight:500;color:${pctColor}">${pct}%</span>
+          </div>
+          <div style="height:5px;background:var(--surface2);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${pctColor};border-radius:99px"></div>
+          </div>
+        </div>` : ""}
+        <div class="series-card-stat"><span>Manga status</span><span>${esc(series.mangaStatus)}</span></div>
+        <div class="series-card-stat"><span>Collection status</span><span>${esc(series.collectionStatus)}</span></div>
+      </div>
+      <div class="card-footer">
+        <button class="btn-icon" onclick="closeAuthorModal();editSeries('${series.name.replace(/'/g,"\\'")}')">Edit Series</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("author-modal").style.display = "flex";
+}
+
+function closeAuthorModal() {
+  document.getElementById("author-modal").style.display = "none";
 }
 
 /* ---- MISSING VOLUMES FILTER ---- */
@@ -1954,6 +2022,19 @@ function importCSV(e) {
         <button class="btn-cancel" onclick="closeSeriesModal()">Cancel</button>
         <button class="btn-save" onclick="saveSeriesMeta()">Save changes</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Author Modal -->
+<div class="overlay" id="author-modal" style="display:none" onclick="if(event.target===this)closeAuthorModal()">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <div class="modal-title" id="author-modal-name"></div>
+      <button class="btn-close" onclick="closeAuthorModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="author-modal-grid" id="author-modal-grid"></div>
     </div>
   </div>
 </div>
