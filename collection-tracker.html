@@ -488,35 +488,50 @@
   .spend-month-val { color: var(--text); font-weight: 500; text-align: right; }
 
   /* ---- BY YEAR VIEW ---- */
-  .year-section { margin-bottom: 2rem; }
-  .year-header {
-    display: flex; align-items: center; gap: 14px;
-    margin-bottom: 1rem; cursor: pointer; user-select: none;
+  .year-selector-bar {
+    position: sticky; top: 60px; z-index: 50;
+    display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 0;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
   }
-  .year-label {
-    font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; color: var(--accent);
+  .year-selector-btn {
+    padding: 6px 16px; border-radius: 20px; border: 1.5px solid var(--border2);
+    font-family: 'Fraunces', serif; font-size: 15px; font-weight: 500;
+    cursor: pointer; background: var(--surface); color: var(--text2);
+    transition: all 0.15s;
   }
-  .year-pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .year-selector-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .year-selector-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .year-summary-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem;
+  }
+  .year-summary-title {
+    font-family: 'Fraunces', serif; font-size: 26px; font-weight: 500; color: var(--accent); margin-right: 4px;
+  }
   .year-pill {
     font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px;
     background: var(--surface); border: 1px solid var(--border); color: var(--text2);
   }
   .year-pill.accent { background: var(--accent-light); color: var(--accent); border-color: rgba(45,74,62,0.2); }
-  .year-toggle {
-    margin-left: auto; font-size: 12px; color: var(--text3);
-    background: none; border: none; cursor: pointer; padding: 4px 8px;
-    border-radius: 6px; font-family: 'DM Sans', sans-serif;
-    transition: background 0.12s;
+
+  .month-section { margin-bottom: 2rem; }
+  .month-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 1rem; cursor: pointer; user-select: none;
   }
-  .year-toggle:hover { background: var(--surface2); color: var(--text); }
-  .year-divider { flex: 1; height: 1px; background: var(--border); }
-  .year-grid-wrap { overflow: hidden; transition: max-height 0.3s ease; }
-  .year-empty { color: var(--text3); font-size: 13px; padding: 20px 0; }
-  .year-no-date {
-    margin-top: 2rem; padding: 16px 20px;
-    background: var(--surface); border: 1px dashed var(--border2); border-radius: var(--radius-lg);
+  .month-label {
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
   }
-  .year-no-date-title { font-size: 12px; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.07em; }
+  .month-pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .month-divider { flex: 1; height: 1px; background: var(--border); }
+  .month-toggle {
+    font-size: 11px; color: var(--text3); background: none; border: none; cursor: pointer;
+    padding: 3px 7px; border-radius: 6px; font-family: 'DM Sans', sans-serif; transition: background 0.12s;
+  }
+  .month-toggle:hover { background: var(--surface2); color: var(--text); }
+  .month-grid-wrap { overflow: hidden; transition: max-height 0.3s ease; }
 
   /* ---- SORT DIRECTION BUTTON ---- */
   .sort-wrap { display: flex; align-items: center; gap: 4px; }
@@ -538,6 +553,135 @@
     header { padding: 0 1rem; }
     main { padding: 1.25rem 1rem 3rem; }
   }
+
+  /* ---- OVERVIEW PAGE ---- */
+  .overview-page { display: flex; flex-direction: column; gap: 2rem; }
+
+  .overview-hero {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    background: linear-gradient(135deg, var(--accent) 0%, #1a3028 100%);
+    border-radius: var(--radius-lg); padding: 24px; color: white;
+    position: relative; overflow: hidden;
+  }
+  .overview-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(61,59,170,0.35) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .overview-hero-left { display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 1; }
+  .overview-hero-title { font-family: 'Fraunces', serif; font-size: 13px; font-weight: 400; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.1em; }
+  .overview-hero-count { font-family: 'Fraunces', serif; font-size: 56px; font-weight: 600; line-height: 1; letter-spacing: -2px; }
+  .overview-hero-sub { font-size: 13px; opacity: 0.75; }
+  .overview-hero-right { display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
+  .overview-hero-stat { background: rgba(255,255,255,0.1); border-radius: var(--radius); padding: 12px 14px; backdrop-filter: blur(8px); }
+  .overview-hero-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.65; margin-bottom: 3px; }
+  .overview-hero-stat-value { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 500; line-height: 1; }
+  .overview-hero-stat-sub { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+
+  .overview-split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .overview-type-card {
+    border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .overview-type-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .overview-type-icon { font-size: 20px; }
+  .overview-type-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; }
+  .overview-type-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .overview-mini-kpi { background: var(--surface2); border-radius: var(--radius); padding: 10px 12px; }
+  .overview-mini-kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
+  .overview-mini-kpi-value { font-family: 'Fraunces', serif; font-size: 20px; color: var(--text); line-height: 1; }
+  .overview-mini-kpi-sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
+
+  /* Activity timeline / mini bar chart */
+  .activity-chart { display: flex; flex-direction: column; gap: 4px; }
+  .activity-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  .activity-label { width: 56px; text-align: right; color: var(--text3); flex-shrink: 0; }
+  .activity-bar-wrap { flex: 1; height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .activity-bar { height: 100%; border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+  .activity-val { width: 28px; text-align: right; font-weight: 500; color: var(--text2); flex-shrink: 0; }
+
+  /* Recent Purchases enhanced */
+  .overview-recent-section { }
+  .overview-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .overview-section-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; color: var(--text); }
+  .overview-section-meta { font-size: 12px; color: var(--text3); }
+
+  .recent-enhanced-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;
+  }
+  .recent-enhanced-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; display: flex; flex-direction: column; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .recent-enhanced-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--border2); }
+  .recent-enhanced-cover { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: var(--surface2); display: block; }
+  .recent-enhanced-cover-placeholder {
+    width: 100%; aspect-ratio: 2/3; display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.85);
+  }
+  .recent-enhanced-body { padding: 9px 10px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .recent-enhanced-title { font-family: 'Fraunces', serif; font-size: 12px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text); }
+  .recent-enhanced-author { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recent-enhanced-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; border-top: 1px solid var(--border);
+  }
+  .recent-enhanced-date { font-size: 10px; color: var(--text3); }
+  .recent-enhanced-price { font-size: 11px; font-weight: 500; color: var(--accent); }
+
+  /* Monthly acquisition mini-bar */
+  .monthly-mini { display: flex; align-items: flex-end; gap: 3px; height: 48px; }
+  .monthly-mini-bar { flex: 1; background: var(--accent); border-radius: 3px 3px 0 0; min-width: 6px; opacity: 0.7; transition: opacity 0.15s; cursor: default; position: relative; }
+  .monthly-mini-bar:last-child { opacity: 1; }
+  .monthly-mini-bar:hover { opacity: 1; }
+  .monthly-mini-bar-tip {
+    position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+    background: var(--text); color: white; padding: 3px 7px; border-radius: 5px; font-size: 10px; white-space: nowrap;
+    pointer-events: none; opacity: 0; transition: opacity 0.12s; z-index: 10;
+  }
+  .monthly-mini-bar:hover .monthly-mini-bar-tip { opacity: 1; }
+
+  /* Status ring chart (pure CSS) */
+  .status-ring-wrap { display: flex; align-items: center; gap: 16px; }
+  .ring-legend { display: flex; flex-direction: column; gap: 5px; }
+  .ring-legend-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+  .ring-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ring-legend-val { margin-left: auto; font-weight: 600; color: var(--text); padding-left: 8px; }
+
+  /* Spending banner */
+  .spend-banner {
+    background: linear-gradient(135deg, #1e3a2e 0%, #2a4d63 100%);
+    border-radius: var(--radius-lg); padding: 18px 22px; color: white;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px;
+  }
+  .spend-banner-item { }
+  .spend-banner-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6; margin-bottom: 4px; }
+  .spend-banner-value { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; line-height: 1; }
+  .spend-banner-sub { font-size: 11px; opacity: 0.65; margin-top: 3px; }
+
+  /* Overview wishlist / next up section */
+  .next-up-list { display: flex; flex-direction: column; gap: 8px; }
+  .next-up-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px 12px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .next-up-row:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+  .next-up-num { font-family: 'Fraunces', serif; font-size: 18px; color: var(--text3); font-weight: 500; width: 28px; text-align: center; flex-shrink: 0; }
+  .next-up-info { flex: 1; min-width: 0; }
+  .next-up-title { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .next-up-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .next-up-badge { flex-shrink: 0; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+
+  @media (max-width: 640px) {
+    .overview-hero { grid-template-columns: 1fr; }
+    .overview-split { grid-template-columns: 1fr; }
+    .overview-type-kpis { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -552,7 +696,7 @@
         <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="ie-dropdown" id="ie-dropdown" style="display:none">
-        <div class="ie-dropdown-label">Export</div>
+        <div class="ie-dropdown-label">Export — All</div>
         <button class="ie-dropdown-item" onclick="exportJSON()">
           <span class="ie-icon">📦</span>
           <div><div style="font-weight:500">Export as JSON</div><div style="font-size:11px;color:var(--text3)">Full backup with covers</div></div>
@@ -560,6 +704,26 @@
         <button class="ie-dropdown-item" onclick="exportCSV()">
           <span class="ie-icon">📊</span>
           <div><div style="font-weight:500">Export as CSV</div><div style="font-size:11px;color:var(--text3)">Spreadsheet-friendly, no covers</div></div>
+        </button>
+        <div class="ie-dropdown-divider"></div>
+        <div class="ie-dropdown-label">Export — Manga only</div>
+        <button class="ie-dropdown-item" onclick="exportJSON('Manga')">
+          <span class="ie-icon">📦</span>
+          <div><div style="font-weight:500">Manga as JSON</div><div style="font-size:11px;color:var(--text3)">Manga only, with covers</div></div>
+        </button>
+        <button class="ie-dropdown-item" onclick="exportCSV('Manga')">
+          <span class="ie-icon">📊</span>
+          <div><div style="font-weight:500">Manga as CSV</div><div style="font-size:11px;color:var(--text3)">Manga only, no covers</div></div>
+        </button>
+        <div class="ie-dropdown-divider"></div>
+        <div class="ie-dropdown-label">Export — Books only</div>
+        <button class="ie-dropdown-item" onclick="exportJSON('Book')">
+          <span class="ie-icon">📦</span>
+          <div><div style="font-weight:500">Books as JSON</div><div style="font-size:11px;color:var(--text3)">Books only, with covers</div></div>
+        </button>
+        <button class="ie-dropdown-item" onclick="exportCSV('Book')">
+          <span class="ie-icon">📊</span>
+          <div><div style="font-weight:500">Books as CSV</div><div style="font-size:11px;color:var(--text3)">Books only, no covers</div></div>
         </button>
         <div class="ie-dropdown-divider"></div>
         <div class="ie-dropdown-label">Import</div>
@@ -579,7 +743,7 @@
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       Add title
     </button>
-    <button class="btn-ie" onclick="openFXModal()" title="Set USD→GBP exchange rate" style="padding:9px 10px">
+    <button class="btn-ie" onclick="openFXModal()" title="Set exchange rates (USD/INR → GBP)" style="padding:9px 10px">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 0 1 5.12-1.5M15 15a3 3 0 0 1-5.12 1.5M12 6v2m0 8v2"/></svg>
     </button>
   </div>
@@ -587,8 +751,9 @@
 <div class="toast" id="toast"></div>
 
 <main>
-  <div class="view-tabs" style="display:flex;gap:10px;margin-bottom:1.5rem;">
-    <button class="filter-btn active" id="library-tab" onclick="switchView('library')">Library</button>
+  <div class="view-tabs" style="display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;">
+    <button class="filter-btn" id="overview-tab" onclick="switchView('overview')">Overview</button>
+    <button class="filter-btn" id="library-tab" onclick="switchView('library')">Library</button>
     <button class="filter-btn" id="year-tab" onclick="switchView('year')">By Year</button>
     <button class="filter-btn" id="series-tab" onclick="switchView('series')">Series</button>
     <button class="filter-btn" id="stats-tab" onclick="switchView('stats')">Stats</button>
@@ -676,11 +841,16 @@
   <div id="grid-loading" style="display:none;text-align:center;padding:24px 0;color:var(--text3);font-size:13px">Loading more…</div>
   </div>
 
+  <div id="overview-view" style="display:none">
+    <div id="overview-content"></div>
+  </div>
+
   <div id="stats-view" style="display:none">
     <div id="stats-content"></div>
   </div>
 
   <div id="year-view" style="display:none">
+    <div class="year-selector-bar" id="year-selector-bar"></div>
     <div id="year-content"></div>
   </div>
 
@@ -775,6 +945,7 @@
               <select id="f-priceCurrency" style="width:58px;flex-shrink:0">
                 <option value="GBP">£</option>
                 <option value="USD">$</option>
+                <option value="INR">₹</option>
               </select>
               <input type="number" id="f-pricePaid" placeholder="e.g. 7.99" step="0.01" min="0" style="flex:1">
             </div>
@@ -787,6 +958,7 @@
               <select id="f-msrpCurrency" style="width:58px;flex-shrink:0">
                 <option value="GBP">£</option>
                 <option value="USD">$</option>
+                <option value="INR">₹</option>
               </select>
               <input type="number" id="f-msrp" placeholder="e.g. 8.99" step="0.01" min="0" style="flex:1">
             </div>
@@ -863,6 +1035,7 @@
               <select id="f-book-msrpCurrency" style="width:58px;flex-shrink:0">
                 <option value="GBP">£</option>
                 <option value="USD">$</option>
+                <option value="INR">₹</option>
               </select>
               <input type="number" id="f-book-msrp" placeholder="e.g. 9.99" step="0.01" min="0" style="flex:1">
             </div>
@@ -1075,17 +1248,25 @@ let items = JSON.parse(localStorage.getItem("collection-v1") || "[]");
 /* ---- CURRENCY CONVERSION ---- */
 const FX = {
   rate: parseFloat(localStorage.getItem("usd-gbp-rate") || "0.79"),
-  save(r) { this.rate = r; localStorage.setItem("usd-gbp-rate", String(r)); }
+  inrRate: parseFloat(localStorage.getItem("inr-gbp-rate") || "0.0095"),
+  save(r) { this.rate = r; localStorage.setItem("usd-gbp-rate", String(r)); },
+  saveINR(r) { this.inrRate = r; localStorage.setItem("inr-gbp-rate", String(r)); }
 };
 function toGBP(amount, currency) {
   if (amount == null) return null;
-  return currency === "USD" ? amount * FX.rate : amount;
+  if (currency === "USD") return amount * FX.rate;
+  if (currency === "INR") return amount * FX.inrRate;
+  return amount;
 }
 function fmtPrice(amount, currency) {
   if (amount == null) return null;
   if (currency === "USD") {
     const gbp = toGBP(amount, "USD");
     return `$${amount.toFixed(2)} <span style="color:var(--text3);font-size:10px">(≈ £${gbp.toFixed(2)})</span>`;
+  }
+  if (currency === "INR") {
+    const gbp = toGBP(amount, "INR");
+    return `₹${amount.toFixed(2)} <span style="color:var(--text3);font-size:10px">(≈ £${gbp.toFixed(2)})</span>`;
   }
   return `£${amount.toFixed(2)}`;
 }
@@ -1099,12 +1280,13 @@ function fmtPriceGBP(amount, currency) {
 let typeFilter = "All";
 let currentCover = null;      // base64 string or null
 let coverWasRemoved = false;  // true when user clicked Remove on an existing cover
-let currentView = 'library';
+let currentView = 'overview';
 
 // Dirty flags — set true when data changes so tabs re-render only when needed
 let seriesDirty = true;
 let statsDirty  = true;
 let yearDirty   = true;
+let overviewDirty = true;
 
 // Cached series meta — updated on every save, avoids repeated localStorage reads
 let _seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}");
@@ -1162,8 +1344,9 @@ function save() {
 
 // Call after any data mutation — marks background tabs dirty, re-renders active ones
 function markDirty() {
-  seriesDirty = true; statsDirty = true; yearDirty = true;
+  seriesDirty = true; statsDirty = true; yearDirty = true; overviewDirty = true;
   renderRecent();
+  if (currentView === "overview") { renderOverview(); overviewDirty = false; }
   if (currentView === "series") { renderSeries(); seriesDirty = false; }
   if (currentView === "stats")  { renderStats();  statsDirty  = false; }
   if (currentView === "year")   { renderYear();   yearDirty   = false; }
@@ -1198,16 +1381,19 @@ backfillItemsFromSeries();
 
 function switchView(view) {
   if (view !== "library") _stopVirtualization();
-  if (view !== "year") _teardownYearSections();
   currentView = view;
   document.getElementById("library-view").style.display = view === "library" ? "block" : "none";
   document.getElementById("series-view").style.display = view === "series" ? "block" : "none";
   document.getElementById("stats-view").style.display = view === "stats" ? "block" : "none";
   document.getElementById("year-view").style.display = view === "year" ? "block" : "none";
+  document.getElementById("overview-view").style.display = view === "overview" ? "block" : "none";
   document.getElementById("library-tab").classList.toggle("active", view === "library");
   document.getElementById("series-tab").classList.toggle("active", view === "series");
   document.getElementById("stats-tab").classList.toggle("active", view === "stats");
   document.getElementById("year-tab").classList.toggle("active", view === "year");
+  document.getElementById("overview-tab").classList.toggle("active", view === "overview");
+  if (view === "library") { render(); }
+  if (view === "overview" && overviewDirty) { renderOverview(); overviewDirty = false; }
   if (view === "series" && seriesDirty) { renderSeries(); seriesDirty = false; }
   else if (view === "series") { observeCovers(document.getElementById("series-view")); }
   if (view === "stats"  && statsDirty)  { renderStats();  statsDirty  = false; }
@@ -1228,18 +1414,99 @@ function statsScrollTo(id, btn) {
   }
 }
 
-function toggleYear(year) {
-  const wrap = document.getElementById(`year-wrap-${year}`);
-  const btn = document.getElementById(`year-btn-${year}`);
+/* ---- YEAR VIEW ---- */
+let _selectedYear = null;
+
+function selectYear(year) {
+  _selectedYear = year;
+  // Update selector button active states
+  document.querySelectorAll(".year-selector-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.year === String(year));
+  });
+  renderYearContent(year);
+}
+
+function toggleMonth(key) {
+  const wrap = document.getElementById(`month-wrap-${key}`);
+  const btn = document.getElementById(`month-btn-${key}`);
   if (!wrap) return;
   const isOpen = wrap.style.maxHeight !== "0px" && wrap.style.maxHeight !== "";
   wrap.style.maxHeight = isOpen ? "0px" : wrap.scrollHeight + "px";
   if (btn) btn.textContent = isOpen ? "Show" : "Hide";
 }
 
-/* ---- YEAR VIEW INFINITE SCROLL + VIRTUALIZATION ---- */
-// Per-year scroll state: yearKey -> { list, rendered, appending, observer, virtHandler }
-const _yearSections = {};
+function renderYearContent(year) {
+  const el = document.getElementById("year-content");
+  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  // Build month map for this year
+  const monthMap = {};
+  items.forEach(item => {
+    if (!item.dateBought) return;
+    if (item.dateBought.slice(0, 4) !== String(year)) return;
+    const m = item.dateBought.slice(5, 7); // "01".."12"
+    if (!monthMap[m]) monthMap[m] = [];
+    monthMap[m].push(item);
+  });
+
+  const yearItems = items.filter(i => i.dateBought && i.dateBought.slice(0,4) === String(year));
+  const totalSpent = yearItems.reduce((s, i) => s + (toGBP(i.pricePaid, i.priceCurrency || "GBP") || 0), 0);
+  const totalVols = yearItems.reduce((s, i) => s + (parseInt(i.volumes) || 1), 0);
+
+  const months = Object.keys(monthMap).sort((a, b) => b.localeCompare(a)); // newest month first
+
+  el.innerHTML = "";
+
+  // Year summary bar
+  const summary = document.createElement("div");
+  summary.className = "year-summary-bar";
+  summary.innerHTML = `
+    <span class="year-summary-title">${year}</span>
+    <span class="year-pill accent">${yearItems.length} item${yearItems.length !== 1 ? "s" : ""}</span>
+    <span class="year-pill">${totalVols} vol${totalVols !== 1 ? "s" : ""}</span>
+    ${totalSpent > 0 ? `<span class="year-pill">£${totalSpent.toFixed(2)}</span>` : ""}`;
+  el.appendChild(summary);
+
+  // Month sections
+  months.forEach(m => {
+    const monthItems = monthMap[m];
+    const key = `${year}-${m}`;
+    const monthName = MONTH_NAMES[parseInt(m) - 1];
+    const spent = monthItems.reduce((s, i) => s + (toGBP(i.pricePaid, i.priceCurrency || "GBP") || 0), 0);
+    const vols = monthItems.reduce((s, i) => s + (parseInt(i.volumes) || 1), 0);
+
+    const sorted = [...monthItems].sort((a, b) => {
+      if (a.dateBought && b.dateBought) return a.dateBought.localeCompare(b.dateBought);
+      return a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'});
+    });
+
+    const section = document.createElement("div");
+    section.className = "month-section";
+    section.innerHTML = `
+      <div class="month-header" onclick="toggleMonth('${key}')">
+        <div class="month-label">${monthName}</div>
+        <div class="month-pills">
+          <span class="year-pill accent">${monthItems.length} item${monthItems.length !== 1 ? "s" : ""}</span>
+          <span class="year-pill">${vols} vol${vols !== 1 ? "s" : ""}</span>
+          ${spent > 0 ? `<span class="year-pill">£${spent.toFixed(2)}</span>` : ""}
+        </div>
+        <div class="month-divider"></div>
+        <button class="month-toggle" id="month-btn-${key}" onclick="event.stopPropagation();toggleMonth('${key}')">Hide</button>
+      </div>
+      <div class="month-grid-wrap" id="month-wrap-${key}" style="max-height:9999px">
+        <div class="grid" id="month-grid-${key}"></div>
+      </div>`;
+
+    el.appendChild(section);
+
+    const grid = section.querySelector(`#month-grid-${key}`);
+    const frag = document.createDocumentFragment();
+    sorted.forEach(item => frag.appendChild(_buildYearCard(item)));
+    grid.appendChild(frag);
+    observeCovers(grid);
+  });
+}
+
 
 function _buildYearCard(item) {
   const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
@@ -1268,149 +1535,31 @@ function _buildYearCard(item) {
   return div;
 }
 
-function _yearAppendNext(year) {
-  const state = _yearSections[year];
-  if (!state || state.appending) return;
-  const remaining = state.list.length - state.rendered;
-  if (remaining <= 0) {
-    const sentinel = document.getElementById(`year-sentinel-${year}`);
-    if (sentinel) state.observer.unobserve(sentinel);
-    const loading = document.getElementById(`year-loading-${year}`);
-    if (loading) loading.style.display = "none";
-    return;
-  }
-  state.appending = true;
-  const loading = document.getElementById(`year-loading-${year}`);
-  if (loading) loading.style.display = "block";
-  requestAnimationFrame(() => setTimeout(() => {
-    const grid = document.getElementById(`year-grid-${year}`);
-    if (!grid) { state.appending = false; return; }
-    const chunk = state.list.slice(state.rendered, state.rendered + PAGE_SIZE);
-    const frag = document.createDocumentFragment();
-    chunk.forEach(item => frag.appendChild(_buildYearCard(item)));
-    grid.appendChild(frag);
-    state.rendered += chunk.length;
-    observeCovers(grid);
-    if (loading) loading.style.display = "none";
-    state.appending = false;
-    const sentinel = document.getElementById(`year-sentinel-${year}`);
-    if (sentinel && state.rendered < state.list.length) {
-      state.observer.unobserve(sentinel);
-      state.observer.observe(sentinel);
-    } else if (sentinel) {
-      state.observer.unobserve(sentinel);
-    }
-    // Start virtualization for this year section if large enough
-    if (state.list.length > PAGE_SIZE && !state.virtHandler) {
-      state.virtHandler = () => _yearVirtualize(year);
-      window.addEventListener("scroll", state.virtHandler, { passive: true });
-    }
-  }, 0));
-}
-
-function _yearVirtualize(year) {
-  const grid = document.getElementById(`year-grid-${year}`);
-  if (!grid) return;
-  const cards = grid.children;
-  const viewTop = window.scrollY - 200;
-  const viewBottom = window.scrollY + window.innerHeight + 600;
-  for (let i = 0; i < cards.length; i++) {
-    const card = cards[i];
-    const top = card.offsetTop + grid.offsetTop + (grid.offsetParent ? grid.offsetParent.offsetTop : 0);
-    const bottom = top + card.offsetHeight;
-    const visible = bottom >= viewTop && top <= viewBottom;
-    if (!visible) {
-      if (!card._virtHidden) {
-        card._virtHidden = true;
-        card._virtHeight = card.offsetHeight;
-        card.style.minHeight = card._virtHeight + "px";
-        card.style.visibility = "hidden";
-        card.style.overflow = "hidden";
-        card.style.contain = "strict";
-      }
-    } else {
-      if (card._virtHidden) {
-        card._virtHidden = false;
-        card.style.visibility = "";
-        card.style.overflow = "";
-        card.style.contain = "";
-        requestAnimationFrame(() => { if (!card._virtHidden) card.style.minHeight = ""; });
-      }
-    }
-  }
-}
-
-function _teardownYearSections() {
-  Object.values(_yearSections).forEach(state => {
-    if (state.observer) state.observer.disconnect();
-    if (state.virtHandler) window.removeEventListener("scroll", state.virtHandler);
-  });
-  for (const k of Object.keys(_yearSections)) delete _yearSections[k];
-}
-/* ---- END YEAR VIEW INFINITE SCROLL ---- */
-
 function renderYear() {
-  // Tear down any previous year section state
-  _teardownYearSections();
-
+  const selectorBar = document.getElementById("year-selector-bar");
   const el = document.getElementById("year-content");
 
-  // Only include items with a purchase date
-  const yearMap = {};
+  // Collect all years that have at least one item with a date
+  const yearSet = new Set();
   items.forEach(item => {
-    if (!item.dateBought) return;
-    const y = item.dateBought.slice(0, 4);
-    if (!yearMap[y]) yearMap[y] = [];
-    yearMap[y].push(item);
+    if (item.dateBought) yearSet.add(item.dateBought.slice(0, 4));
   });
-
-  const years = Object.keys(yearMap).sort((a, b) => b - a); // newest first
+  const years = [...yearSet].sort((a, b) => b - a); // newest first
 
   if (years.length === 0) {
+    selectorBar.innerHTML = "";
     el.innerHTML = `<div class="empty"><div class="empty-icon">📅</div><p>Add purchase dates to your items to see them organised by year.</p></div>`;
     return;
   }
 
-  // Build skeleton HTML for each year section (no cards yet — appended by observer)
-  el.innerHTML = years.map(year => {
-    const yearItems = yearMap[year];
-    const spent = yearItems.reduce((s, i) => s + (toGBP(i.pricePaid, i.priceCurrency || "GBP") || 0), 0);
-    const vols = yearItems.reduce((s, i) => s + (parseInt(i.volumes) || 1), 0);
-    return `<div class="year-section">
-      <div class="year-header" onclick="toggleYear('${year}')">
-        <div class="year-label">${year}</div>
-        <div class="year-pills">
-          <span class="year-pill accent">${yearItems.length} item${yearItems.length !== 1 ? "s" : ""}</span>
-          <span class="year-pill">${vols} vol${vols !== 1 ? "s" : ""}</span>
-          ${spent > 0 ? `<span class="year-pill">£${spent.toFixed(2)}</span>` : ""}
-        </div>
-        <div class="year-divider"></div>
-        <button class="year-toggle" id="year-btn-${year}" onclick="event.stopPropagation();toggleYear('${year}')">Hide</button>
-      </div>
-      <div class="year-grid-wrap" id="year-wrap-${year}" style="max-height:9999px">
-        <div class="grid" id="year-grid-${year}"></div>
-        <div id="year-sentinel-${year}" style="height:1px;margin-top:8px"></div>
-        <div id="year-loading-${year}" style="display:none;text-align:center;padding:16px 0;color:var(--text3);font-size:13px">Loading more…</div>
-      </div>
-    </div>`;
-  }).join("");
+  // Build year selector buttons
+  selectorBar.innerHTML = years.map(y =>
+    `<button class="year-selector-btn" data-year="${y}" onclick="selectYear('${y}')">${y}</button>`
+  ).join("");
 
-  // Set up per-year state and observers
-  years.forEach(year => {
-    const sorted = [...yearMap[year]].sort((a, b) => {
-      if (a.dateBought && b.dateBought) return a.dateBought.localeCompare(b.dateBought);
-      return a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'});
-    });
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) _yearAppendNext(year);
-    }, { rootMargin: "300px" });
-
-    _yearSections[year] = { list: sorted, rendered: 0, appending: false, observer, virtHandler: null };
-
-    const sentinel = document.getElementById(`year-sentinel-${year}`);
-    if (sentinel) observer.observe(sentinel);
-  });
+  // Default to most recent year (or keep current selection if still valid)
+  const target = years.includes(String(_selectedYear)) ? String(_selectedYear) : years[0];
+  selectYear(target);
 }
 
 function renderSeries() {
@@ -2140,16 +2289,21 @@ function overlayClick(e) { if (e.target === document.getElementById("modal")) cl
 function openFXModal() {
   document.getElementById("fx-rate-input").value = FX.rate;
   document.getElementById("fx-rate-display").textContent = `£${FX.rate.toFixed(4)}`;
+  document.getElementById("fx-inr-rate-input").value = FX.inrRate;
+  document.getElementById("fx-inr-rate-display").textContent = `£${FX.inrRate.toFixed(4)}`;
   document.getElementById("fx-modal").style.display = "flex";
 }
 function closeFXModal() { document.getElementById("fx-modal").style.display = "none"; }
 function saveFXRate() {
   const v = parseFloat(document.getElementById("fx-rate-input").value);
-  if (isNaN(v) || v <= 0) { showToast("⚠️ Enter a valid rate"); return; }
+  if (isNaN(v) || v <= 0) { showToast("⚠️ Enter a valid USD rate"); return; }
+  const inrV = parseFloat(document.getElementById("fx-inr-rate-input").value);
+  if (isNaN(inrV) || inrV <= 0) { showToast("⚠️ Enter a valid INR rate"); return; }
   FX.save(v);
+  FX.saveINR(inrV);
   closeFXModal();
   render(); markDirty();
-  showToast(`✅ Rate updated: 1 USD = £${v.toFixed(4)}`);
+  showToast(`✅ Rates updated: 1 USD = £${v.toFixed(4)}, 1 INR = £${inrV.toFixed(4)}`);
 }
 
 function saveItem() {
@@ -2234,6 +2388,7 @@ function deleteItem(id) {
 // Async startup: load all covers into memory cache, then render
 (async () => {
   await loadAllCoversIntoCache();
+  switchView('overview');
   render();
   renderRecent();
 })();
@@ -2281,6 +2436,509 @@ function compressToRanges(nums) {
   }
   ranges.push(start === end ? String(start) : `${start}–${end}`);
   return ranges.join(", ");
+}
+
+function renderOverview() {
+  const el = document.getElementById("overview-content");
+  if (!el) return;
+
+  const COLORS = ["#2D4A3E","#3D3BAA","#8B4A00","#7B3553","#185FA5","#3B6D11","#BA7517","#A32D2D","#5B7B6F","#6B4CAA"];
+
+  // ---- Aggregate data ----
+  const mangaItems = items.filter(i => i.type !== "Book");
+  const bookItems  = items.filter(i => i.type === "Book");
+  const total = items.length;
+  const totalManga = mangaItems.length;
+  const totalBooks = bookItems.length;
+
+  // For books, treat MSRP as the cost (fall back to pricePaid if no MSRP)
+  function bookCost(i) {
+    if (i.msrp != null) return toGBP(i.msrp, i.msrpCurrency || "GBP");
+    if (i.pricePaid != null) return toGBP(i.pricePaid, i.priceCurrency || "GBP");
+    return 0;
+  }
+
+  // Spending (combined)
+  const mangaSpent = mangaItems.reduce((s, i) => s + (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : 0), 0);
+  const bookSpent  = bookItems.reduce((s, i) => s + bookCost(i), 0);
+  const allSpent   = mangaSpent + bookSpent;
+  const allMsrp    = items.reduce((s, i) => s + (i.msrp != null ? toGBP(i.msrp, i.msrpCurrency || "GBP") : 0), 0);
+  const booksWithCost = bookItems.filter(i => i.msrp != null || i.pricePaid != null).length;
+  const avgPrice   = (mangaItems.filter(i => i.pricePaid != null).length + booksWithCost) > 0
+    ? allSpent / (mangaItems.filter(i => i.pricePaid != null).length + booksWithCost) : null;
+
+  // Manga volumes owned
+  const mangaVols = mangaItems.reduce((s, i) => s + (parseInt(i.volumes) || 1), 0);
+
+  // Status counts (manga)
+  const mCompleted = mangaItems.filter(i => i.status === "Completed").length;
+  const mReading   = mangaItems.filter(i => i.status === "Reading").length;
+  const mPlan      = mangaItems.filter(i => i.status === "Plan to Read").length;
+  const mOnHold    = mangaItems.filter(i => i.status === "On Hold").length;
+  const mDropped   = mangaItems.filter(i => i.status === "Dropped").length;
+
+  // Book status
+  const bRead   = bookItems.filter(i => i.status === "Completed").length;
+  const bUnread = bookItems.filter(i => i.status === "Plan to Read").length;
+
+  // Monthly acquisition last 12 months (combined)
+  const now = new Date();
+  const monthBuckets = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    const label = d.toLocaleDateString("en-GB", { month:"short" });
+    monthBuckets.push({ key, label, manga: 0, books: 0 });
+  }
+  items.forEach(item => {
+    if (!item.dateBought) return;
+    const key = item.dateBought.slice(0, 7);
+    const bucket = monthBuckets.find(b => b.key === key);
+    if (!bucket) return;
+    if (item.type === "Book") bucket.books++;
+    else bucket.manga++;
+  });
+  const maxMonthTotal = Math.max(...monthBuckets.map(b => b.manga + b.books), 1);
+
+  // Yearly spend
+  const yearlySpend = {};
+  items.forEach(i => {
+    if (!i.dateBought || i.pricePaid == null) return;
+    const yr = i.dateBought.slice(0,4);
+    yearlySpend[yr] = (yearlySpend[yr] || 0) + toGBP(i.pricePaid, i.priceCurrency || "GBP");
+  });
+
+  // Recent purchases (last 12, with date)
+  const recentPurchases = [...items]
+    .filter(i => i.dateBought)
+    .sort((a, b) => b.dateBought.localeCompare(a.dateBought))
+    .slice(0, 12);
+
+  // Recent 30-day spend
+  const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const recentSpend = items.filter(i => i.dateBought && new Date(i.dateBought) >= thirtyDaysAgo && i.pricePaid != null)
+    .reduce((s, i) => s + toGBP(i.pricePaid, i.priceCurrency || "GBP"), 0);
+  const recentCount = items.filter(i => i.dateBought && new Date(i.dateBought) >= thirtyDaysAgo).length;
+
+  // Manga series count
+  const seriesSet = new Set(mangaItems.map(i => i.series).filter(Boolean));
+  const numSeries = seriesSet.size;
+
+  // Avg pace (manga, last 3 months)
+  const purchasesByMonth = {};
+  mangaItems.forEach(i => {
+    if (!i.dateBought) return;
+    const key = i.dateBought.slice(0,7);
+    purchasesByMonth[key] = (purchasesByMonth[key] || 0) + 1;
+  });
+  const thisMonthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const sortedMonthKeys = Object.keys(purchasesByMonth).sort().filter(k => k !== thisMonthKey);
+  const last3months = sortedMonthKeys.slice(-3);
+  const mangaPace = last3months.length
+    ? last3months.reduce((s, m) => s + purchasesByMonth[m], 0) / last3months.length : null;
+
+  // Pages read (books completed)
+  const pagesRead = bookItems.filter(i => i.status === "Completed" && i.pageCount).reduce((s, i) => s + i.pageCount, 0);
+
+  // Next to complete (manga series closest to 100%)
+  const meta = _seriesMeta;
+  const seriesProgress = [];
+  seriesSet.forEach(name => {
+    const sm = meta[name] || {};
+    const owned = mangaItems.filter(i => i.series === name).length;
+    const total = parseInt(sm.total);
+    if (total > 0 && owned < total) {
+      seriesProgress.push({ name, owned, total, pct: owned/total*100, needed: total - owned });
+    }
+  });
+  seriesProgress.sort((a, b) => b.pct - a.pct);
+  const nextToFinish = seriesProgress.slice(0, 5);
+
+  // Fully collected series (collection status = Completed OR owned >= total when total is set)
+  const fullyCollected = [];
+  seriesSet.forEach(name => {
+    const sm = meta[name] || {};
+    const owned = mangaItems.filter(i => i.series === name).length;
+    const total = parseInt(sm.total);
+    const collectionDone = sm.collectionStatus === "Completed";
+    const countDone = !isNaN(total) && total > 0 && owned >= total;
+    if (collectionDone || countDone) {
+      const spent = mangaItems.filter(i => i.series === name)
+        .reduce((s, i) => s + (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : 0), 0);
+      const mangaStatus = sm.mangaStatus || "Unknown";
+      fullyCollected.push({ name, owned, total: isNaN(total) ? null : total, spent, mangaStatus, rating: sm.rating ?? null });
+    }
+  });
+  fullyCollected.sort((a, b) => a.name.localeCompare(b.name));
+
+  // Top series by volumes
+  const seriesVolMap = {};
+  mangaItems.forEach(i => {
+    const name = i.series || "Standalone";
+    seriesVolMap[name] = (seriesVolMap[name] || 0) + 1;
+  });
+  const topSeriesByVol = Object.entries(seriesVolMap).sort((a,b) => b[1]-a[1]).slice(0, 6);
+
+  // Publisher breakdown
+  const pubMap = {};
+  mangaItems.forEach(i => {
+    const p = i.publisher || "Unknown"; pubMap[p] = (pubMap[p] || 0) + 1;
+  });
+  const topPubs = Object.entries(pubMap).sort((a,b) => b[1]-a[1]).slice(0, 6);
+  const maxPub = topPubs[0]?.[1] || 1;
+
+  // Books by format
+  const formatMap = {};
+  bookItems.forEach(i => { const f = i.format || "Unknown"; formatMap[f] = (formatMap[f] || 0) + 1; });
+
+  // Books by genre/publisher
+  const bookPubMap = {};
+  bookItems.forEach(i => { if (i.publisher) bookPubMap[i.publisher] = (bookPubMap[i.publisher] || 0) + 1; });
+
+  function daysAgoStr(dateStr) {
+    if (!dateStr) return "";
+    const diff = Math.round((Date.now() - new Date(dateStr)) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    if (diff < 30)  return `${diff}d ago`;
+    const m = Math.round(diff/30);
+    return `${m}mo ago`;
+  }
+
+  // SVG donut helper
+  function svgDonut(segments, size=100, stroke=18) {
+    const r = (size - stroke) / 2;
+    const circ = 2 * Math.PI * r;
+    const cx = size/2, cy = size/2;
+    const tot = segments.reduce((s,[,v]) => s+v, 0) || 1;
+    let offset = 0;
+    const paths = segments.map(([color, val]) => {
+      const pct = val / tot;
+      const dash = pct * circ;
+      const gap  = circ - dash;
+      const svg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}" stroke-dashoffset="${(-offset * circ + circ/4).toFixed(2)}" stroke-linecap="butt"/>`;
+      offset += pct;
+      return svg;
+    });
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex-shrink:0">${paths.join("")}<circle cx="${cx}" cy="${cy}" r="${r-stroke/2+1}" fill="var(--surface)"/></svg>`;
+  }
+
+  const STATUS_C = { "Completed":"#185FA5","Reading":"#0F6E56","On Hold":"#BA7517","Plan to Read":"#5F5E5A","Dropped":"#A32D2D" };
+  const mangaStatusSegs = [
+    [STATUS_C["Completed"], mCompleted],[STATUS_C["Reading"], mReading],
+    [STATUS_C["On Hold"], mOnHold],[STATUS_C["Plan to Read"], mPlan],[STATUS_C["Dropped"], mDropped]
+  ].filter(([,v]) => v > 0);
+
+  const FORMAT_C = { "Paperback":"#8B4A00","Hardcover":"#2D4A3E","Ebook":"#3D3BAA","Audiobook":"#7B3553" };
+  const bookFormatSegs = Object.entries(formatMap).map(([k,v]) => [FORMAT_C[k]||"#888", v]).filter(([,v]) => v > 0);
+
+  // Build monthly activity bars HTML
+  const monthBarsHtml = monthBuckets.map((b, i) => {
+    const total = b.manga + b.books;
+    const heightPct = total / maxMonthTotal * 100;
+    const isThisMonth = b.key === thisMonthKey;
+    const tipText = `${b.label}: ${total} item${total!==1?"s":""} (${b.manga}📚 ${b.books}📖)`;
+    return `<div class="monthly-mini-bar" style="height:${Math.max(heightPct, total > 0 ? 8 : 2)}%;background:${isThisMonth ? "#3D3BAA" : "#2D4A3E"};opacity:${total===0?0.18:isThisMonth?1:0.65}">
+      <div class="monthly-mini-bar-tip">${tipText}</div>
+    </div>`;
+  }).join("");
+
+  el.innerHTML = `<div class="overview-page">
+
+    <!-- Hero banner -->
+    <div class="overview-hero">
+      <div class="overview-hero-left">
+        <div class="overview-hero-title">Total Collection</div>
+        <div class="overview-hero-count">${total}</div>
+        <div class="overview-hero-sub">${totalManga} manga volume${totalManga!==1?"s":""} · ${totalBooks} book${totalBooks!==1?"s":""}</div>
+        ${total === 0 ? '<div style="margin-top:8px;font-size:12px;opacity:0.6">Add titles to see your stats</div>' : ''}
+      </div>
+      <div class="overview-hero-right">
+        ${allSpent > 0 ? `<div class="overview-hero-stat">
+          <div class="overview-hero-stat-label">Total Spent</div>
+          <div class="overview-hero-stat-value">£${allSpent.toFixed(2)}</div>
+          ${allMsrp > 0 ? `<div class="overview-hero-stat-sub">saved £${(allMsrp-allSpent).toFixed(2)} vs MSRP</div>` : ""}
+        </div>` : ""}
+        ${recentCount > 0 ? `<div class="overview-hero-stat">
+          <div class="overview-hero-stat-label">Last 30 Days</div>
+          <div class="overview-hero-stat-value">${recentCount} item${recentCount!==1?"s":""}</div>
+          ${recentSpend > 0 ? `<div class="overview-hero-stat-sub">£${recentSpend.toFixed(2)} spent</div>` : ""}
+        </div>` : ""}
+      </div>
+    </div>
+
+    <!-- Manga + Books split -->
+    <div class="overview-split">
+      <!-- Manga card -->
+      <div class="overview-type-card" style="border-top: 3px solid var(--manga-fg)">
+        <div class="overview-type-header">
+          <span class="overview-type-icon">📚</span>
+          <span class="overview-type-title" style="color:var(--manga-fg)">Manga</span>
+        </div>
+        <div class="overview-type-kpis">
+          <div class="overview-mini-kpi">
+            <div class="overview-mini-kpi-label">Volumes</div>
+            <div class="overview-mini-kpi-value">${totalManga}</div>
+            <div class="overview-mini-kpi-sub">${mangaVols} total owned</div>
+          </div>
+          <div class="overview-mini-kpi">
+            <div class="overview-mini-kpi-label">Series</div>
+            <div class="overview-mini-kpi-value">${numSeries}</div>
+            <div class="overview-mini-kpi-sub">tracked</div>
+          </div>
+          <div class="overview-mini-kpi">
+            <div class="overview-mini-kpi-label">Reading</div>
+            <div class="overview-mini-kpi-value">${mReading}</div>
+            <div class="overview-mini-kpi-sub">${mCompleted} completed</div>
+          </div>
+          <div class="overview-mini-kpi">
+            <div class="overview-mini-kpi-label">Spent</div>
+            <div class="overview-mini-kpi-value" style="font-size:15px;margin-top:2px">£${mangaSpent.toFixed(0)}</div>
+            ${mangaPace != null ? `<div class="overview-mini-kpi-sub">${mangaPace.toFixed(1)} vol/mo pace</div>` : ""}
+          </div>
+        </div>
+        ${mangaStatusSegs.length ? `
+        <div style="margin-top:2px">
+          <div style="font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Reading Status</div>
+          <div class="status-ring-wrap">
+            ${svgDonut(mangaStatusSegs, 80, 16)}
+            <div class="ring-legend">
+              ${[["Completed",mCompleted,STATUS_C["Completed"]],["Reading",mReading,STATUS_C["Reading"]],["Plan to Read",mPlan,STATUS_C["Plan to Read"]],["On Hold",mOnHold,STATUS_C["On Hold"]],["Dropped",mDropped,STATUS_C["Dropped"]]].filter(([,v])=>v>0).map(([k,v,c])=>`
+              <div class="ring-legend-row">
+                <div class="ring-legend-dot" style="background:${c}"></div>
+                <span style="flex:1">${k}</span>
+                <span class="ring-legend-val">${v}</span>
+              </div>`).join("")}
+            </div>
+          </div>
+        </div>` : ""}
+      </div>
+
+      <!-- Books card -->
+      <div class="overview-type-card" style="border-top: 3px solid var(--book-fg)">
+        <div class="overview-type-header">
+          <span class="overview-type-icon">📖</span>
+          <span class="overview-type-title" style="color:var(--book-fg)">Books</span>
+        </div>
+        ${totalBooks === 0 ? `<p style="color:var(--text3);font-size:13px;margin-top:4px">No books added yet. Add your first book from the Library tab.</p>` : `
+        <div class="overview-type-kpis">
+          <div class="overview-mini-kpi">
+            <div class="overview-mini-kpi-label">Total</div>
+            <div class="overview-mini-kpi-value">${totalBooks}</div>
+            <div class="overview-mini-kpi-sub">in collection</div>
+          </div>
+          <div class="overview-mini-kpi">
+            <div class="overview-mini-kpi-label">Read</div>
+            <div class="overview-mini-kpi-value">${bRead}</div>
+            <div class="overview-mini-kpi-sub">${Math.round(bRead/totalBooks*100)}% read</div>
+          </div>
+          <div class="overview-mini-kpi">
+            <div class="overview-mini-kpi-label">TBR</div>
+            <div class="overview-mini-kpi-value">${bUnread}</div>
+            <div class="overview-mini-kpi-sub">to be read</div>
+          </div>
+          <div class="overview-mini-kpi">
+            <div class="overview-mini-kpi-label">MSRP</div>
+            <div class="overview-mini-kpi-value" style="font-size:15px;margin-top:2px">£${bookSpent.toFixed(0)}</div>
+            ${pagesRead > 0 ? `<div class="overview-mini-kpi-sub">${pagesRead.toLocaleString()} pg read</div>` : ""}
+          </div>
+        </div>
+        ${bookFormatSegs.length ? `
+        <div style="margin-top:2px">
+          <div style="font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">By Format</div>
+          <div class="status-ring-wrap">
+            ${svgDonut(bookFormatSegs, 80, 16)}
+            <div class="ring-legend">
+              ${Object.entries(formatMap).map(([k,v], i)=>`
+              <div class="ring-legend-row">
+                <div class="ring-legend-dot" style="background:${FORMAT_C[k]||COLORS[i]}"></div>
+                <span style="flex:1">${k}</span>
+                <span class="ring-legend-val">${v}</span>
+              </div>`).join("")}
+            </div>
+          </div>
+        </div>` : ""}`}
+      </div>
+    </div>
+
+    <!-- Activity chart -->
+    ${items.some(i => i.dateBought) ? `
+    <div class="chart-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="chart-title" style="margin-bottom:0">Monthly Acquisitions — last 12 months</div>
+        ${recentCount > 0 ? `<span style="font-size:11px;color:var(--text3)">${recentCount} item${recentCount!==1?"s":""} this month</span>` : ""}
+      </div>
+      <div class="monthly-mini" style="height:56px">${monthBarsHtml}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px">
+        <span style="font-size:10px;color:var(--text3)">${monthBuckets[0].label}</span>
+        <span style="font-size:10px;color:var(--text3)">${monthBuckets[monthBuckets.length-1].label} (current)</span>
+      </div>
+    </div>` : ""}
+
+    <!-- Spending banner -->
+    ${allSpent > 0 ? `
+    <div class="spend-banner">
+      <div class="spend-banner-item">
+        <div class="spend-banner-label">Total Spent</div>
+        <div class="spend-banner-value">£${allSpent.toFixed(2)}</div>
+        ${allMsrp > 0 ? `<div class="spend-banner-sub">£${allMsrp.toFixed(2)} at MSRP</div>` : ""}
+      </div>
+      ${allMsrp > 0 ? `<div class="spend-banner-item">
+        <div class="spend-banner-label">Saved vs MSRP</div>
+        <div class="spend-banner-value">£${(allMsrp - allSpent).toFixed(2)}</div>
+        <div class="spend-banner-sub">${Math.round((allMsrp-allSpent)/allMsrp*100)}% off</div>
+      </div>` : ""}
+      ${avgPrice != null ? `<div class="spend-banner-item">
+        <div class="spend-banner-label">Avg per Item</div>
+        <div class="spend-banner-value">£${avgPrice.toFixed(2)}</div>
+        <div class="spend-banner-sub">${items.filter(i=>i.pricePaid!=null).length} items priced</div>
+      </div>` : ""}
+      ${mangaSpent > 0 && totalBooks > 0 ? `<div class="spend-banner-item">
+        <div class="spend-banner-label">Manga vs Books</div>
+        <div class="spend-banner-value">£${mangaSpent.toFixed(0)} / £${bookSpent.toFixed(0)}</div>
+        <div class="spend-banner-sub">manga / books</div>
+      </div>` : ""}
+    </div>` : ""}
+
+    <!-- Manga top series & publisher side by side -->
+    ${totalManga > 0 ? `
+    <div class="overview-split">
+      ${topSeriesByVol.length > 0 ? `<div class="chart-card">
+        <div class="chart-title">Top Series by Volumes</div>
+        <div class="bar-list">
+          ${topSeriesByVol.map(([name, count], i) => `
+          <div class="bar-row">
+            <div class="bar-row-label">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(name)}</span>
+              <span>${count}</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/topSeriesByVol[0][1]*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+          </div>`).join("")}
+        </div>
+      </div>` : ""}
+      ${topPubs.length > 0 ? `<div class="chart-card">
+        <div class="chart-title">Manga by Publisher</div>
+        <div class="bar-list">
+          ${topPubs.map(([name, count], i) => `
+          <div class="bar-row">
+            <div class="bar-row-label">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(name)}</span>
+              <span>${count}</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxPub*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+          </div>`).join("")}
+        </div>
+      </div>` : ""}
+    </div>` : ""}
+
+    <!-- Next to complete (manga) -->
+    ${nextToFinish.length ? `
+    <div>
+      <div class="overview-section-header">
+        <div class="overview-section-title">🎯 Closest to Completing</div>
+        <div class="overview-section-meta">Manga series near 100%</div>
+      </div>
+      <div class="next-up-list">
+        ${nextToFinish.map((s, i) => {
+          const pct = Math.round(s.pct);
+          const col = pct >= 80 ? "#2D4A3E" : pct >= 50 ? "#3D3BAA" : "#BA7517";
+          return `<div class="next-up-row" onclick="switchView('series')">
+            <div class="next-up-num">${i+1}</div>
+            <div class="next-up-info">
+              <div class="next-up-title">${esc(s.name)}</div>
+              <div style="margin-top:5px">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:3px">
+                  <span>${s.owned} / ${s.total} volumes</span>
+                  <span style="font-weight:600;color:${col}">${pct}%</span>
+                </div>
+                <div style="height:5px;background:var(--surface2);border-radius:99px;overflow:hidden">
+                  <div style="height:100%;width:${pct}%;background:${col};border-radius:99px"></div>
+                </div>
+              </div>
+            </div>
+            <div class="next-up-badge" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border)">${s.needed} left</div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>` : ""}
+
+    <!-- Fully Collected Manga Series -->
+    ${fullyCollected.length ? `
+    <div>
+      <div class="overview-section-header">
+        <div class="overview-section-title">✅ Fully Collected Series</div>
+        <div class="overview-section-meta">${fullyCollected.length} complete collection${fullyCollected.length !== 1 ? "s" : ""}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+        ${fullyCollected.map(s => {
+          const ratingCol = s.rating === 10 ? "#7C3AED" : s.rating >= 9 ? "#8B4A00" : s.rating >= 7 ? "#185FA5" : "#2D4A3E";
+          const mangaStatusColor = s.mangaStatus === "Completed" ? "#0F6E56" : s.mangaStatus === "Publishing" ? "#3D3BAA" : s.mangaStatus === "Hiatus" ? "#BA7517" : "#5F5E5A";
+          return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid #2D4A3E;border-radius:var(--radius);padding:13px 14px;display:flex;align-items:center;gap:12px;transition:box-shadow 0.15s,border-color 0.15s" onmouseover="this.style.boxShadow='var(--shadow)';this.style.borderColor='var(--border2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='rgba(0,0,0,0.1)';this.style.borderLeftColor='#2D4A3E'">
+            <div style="width:36px;height:36px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✅</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;align-items:center">
+                <span style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--accent-light);color:var(--accent);border:1px solid rgba(45,74,62,0.2)">${s.owned}${s.total ? " / " + s.total : ""} vol${s.owned !== 1 ? "s" : ""}</span>
+                <span style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--surface2);color:${mangaStatusColor};border:1px solid var(--border)">${s.mangaStatus}</span>
+                ${s.spent > 0 ? `<span style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--surface2);color:var(--text2);border:1px solid var(--border)">£${s.spent.toFixed(2)}</span>` : ""}
+                ${s.rating != null ? `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:${ratingCol};color:white">★ ${s.rating}/10</span>` : ""}
+              </div>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>` : ""}
+
+    <!-- Recently Purchased (enhanced) -->
+    ${recentPurchases.length ? `
+    <div class="overview-recent-section">
+      <div class="overview-section-header">
+        <div class="overview-section-title">Recently Purchased</div>
+        <div class="overview-section-meta">Last ${recentPurchases.length} bought</div>
+      </div>
+      <div class="recent-enhanced-grid" id="overview-recent-grid">
+        ${recentPurchases.map(item => {
+          const lazyCover = lazyCoverHtml(item.id, item.title, "recent-enhanced-cover");
+          const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
+          const color = COLORS[item.title.length % COLORS.length];
+          const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
+          const priceGbp = item.pricePaid != null ? toGBP(item.pricePaid, item.priceCurrency || "GBP") : null;
+          return `<div class="recent-enhanced-card" onclick="openEdit(${item.id})">
+            ${lazyCover || `<div class="recent-enhanced-cover-placeholder" style="background:${color}">${initials}</div>`}
+            <div class="recent-enhanced-body">
+              <div class="recent-enhanced-title">${esc(item.title)}</div>
+              ${item.author ? `<div class="recent-enhanced-author">${esc(item.author)}</div>` : ""}
+              <div style="margin-top:auto;padding-top:4px">
+                <span style="font-size:10px;font-weight:500;padding:2px 6px;border-radius:10px;background:${item.type==="Book"?"var(--book-bg)":"var(--manga-bg)"};color:${item.type==="Book"?"var(--book-fg)":"var(--manga-fg)"}">${item.type}</span>
+              </div>
+            </div>
+            <div class="recent-enhanced-footer">
+              <div>
+                <div class="recent-enhanced-date">${daysAgoStr(item.dateBought)}</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:1px">
+                  <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${sc.fg};margin-right:3px;vertical-align:middle"></span>${item.status}
+                </div>
+              </div>
+              ${priceGbp != null ? `<div class="recent-enhanced-price">£${priceGbp.toFixed(2)}</div>` : ""}
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>` : `
+    <div style="text-align:center;padding:60px 20px;border:2px dashed var(--border);border-radius:var(--radius-lg)">
+      <div style="font-size:48px;margin-bottom:12px">📚</div>
+      <p style="color:var(--text2);font-size:14px">Add purchase dates to your items to see recent acquisitions here.</p>
+      <button class="btn-add" style="margin-top:16px" onclick="openAdd()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Add title
+      </button>
+    </div>`}
+
+  </div>`;
+
+  // Observe covers in recent grid
+  const recentGrid = document.getElementById("overview-recent-grid");
+  if (recentGrid) observeCovers(recentGrid);
 }
 
 function renderStats() {
@@ -3398,35 +4056,39 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 2800);
 }
 
-async function exportJSON() {
+async function exportJSON(typeOnly) {
   document.getElementById("ie-dropdown").style.display = "none";
   const seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}");
   const allCovers = await CoverDB.getAll();
-  const itemsWithCovers = items.map(i => ({
+  const filtered = typeOnly ? items.filter(i => i.type === typeOnly) : items;
+  const itemsWithCovers = filtered.map(i => ({
     ...i,
     cover: allCovers[String(i.id)] || null
   }));
+  const suffix = typeOnly ? `-${typeOnly.toLowerCase()}s` : "";
   const payload = { version: 1, exportedAt: new Date().toISOString(), items: itemsWithCovers, seriesMeta };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = `my-collection-${new Date().toISOString().slice(0,10)}.json`;
+  a.href = url; a.download = `my-collection${suffix}-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); URL.revokeObjectURL(url);
-  showToast(`✅ Exported ${items.length} titles as JSON`);
+  showToast(`✅ Exported ${filtered.length} title${filtered.length !== 1 ? "s" : ""} as JSON`);
 }
 
-function exportCSV() {
+function exportCSV(typeOnly) {
   document.getElementById("ie-dropdown").style.display = "none";
   const cols = ["id","title","type","author","status","volumes","series","demographic","genre","publisher","dateBought","pricePaid","msrp","format","translator","narrator","pageCount","notes","addedAt"];
   const escape = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const filtered = typeOnly ? items.filter(i => i.type === typeOnly) : items;
   const rows = [cols.join(",")];
-  items.forEach(item => rows.push(cols.map(c => escape(item[c] ?? "")).join(",")));
+  filtered.forEach(item => rows.push(cols.map(c => escape(item[c] ?? "")).join(",")));
+  const suffix = typeOnly ? `-${typeOnly.toLowerCase()}s` : "";
   const blob = new Blob([rows.join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = `my-collection-${new Date().toISOString().slice(0,10)}.csv`;
+  a.href = url; a.download = `my-collection${suffix}-${new Date().toISOString().slice(0,10)}.csv`;
   a.click(); URL.revokeObjectURL(url);
-  showToast(`✅ Exported ${items.length} titles as CSV`);
+  showToast(`✅ Exported ${filtered.length} title${filtered.length !== 1 ? "s" : ""} as CSV`);
 }
 
 function importJSON(e) {
@@ -3651,19 +4313,24 @@ function importCSV(e) {
 <div class="overlay" id="fx-modal" style="display:none" onclick="if(event.target===this)closeFXModal()">
   <div class="modal" style="max-width:360px">
     <div class="modal-header">
-      <div class="modal-title">USD → GBP Rate</div>
+      <div class="modal-title">Exchange Rates</div>
       <button class="btn-close" onclick="closeFXModal()">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Set the exchange rate used to convert USD prices to GBP in stats and totals. Prices are always stored in their original currency.</p>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Set exchange rates used to convert prices to GBP in stats and totals. Prices are always stored in their original currency.</p>
       <div class="form-group">
         <label>1 USD = ? GBP</label>
-        <input type="number" id="fx-rate-input" step="0.0001" min="0.01" max="10" placeholder="e.g. 0.79">
+        <input type="number" id="fx-rate-input" step="0.0001" min="0.0001" max="10" placeholder="e.g. 0.79">
       </div>
       <p style="font-size:11px;color:var(--text3);margin-bottom:16px">Current rate: <strong id="fx-rate-display"></strong></p>
+      <div class="form-group">
+        <label>1 INR = ? GBP</label>
+        <input type="number" id="fx-inr-rate-input" step="0.0001" min="0.0001" max="1" placeholder="e.g. 0.0095">
+      </div>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:16px">Current rate: <strong id="fx-inr-rate-display"></strong></p>
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeFXModal()">Cancel</button>
-        <button class="btn-save" onclick="saveFXRate()">Save rate</button>
+        <button class="btn-save" onclick="saveFXRate()">Save rates</button>
       </div>
     </div>
   </div>
