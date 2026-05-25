@@ -227,6 +227,45 @@
   }
 
 
+  /* ---- IMPORT/EXPORT MENU ---- */
+  .ie-wrap { position: relative; }
+  .btn-ie {
+    display: flex; align-items: center; gap: 6px;
+    padding: 9px 14px; background: var(--surface); color: var(--text2);
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-ie:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .ie-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    min-width: 200px; z-index: 200; overflow: hidden;
+    animation: slideUp 0.15s;
+  }
+  .ie-dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; font-size: 13px; cursor: pointer;
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    transition: background 0.12s; border: none; background: none;
+    width: 100%; text-align: left;
+  }
+  .ie-dropdown-item:hover { background: var(--surface2); }
+  .ie-dropdown-item .ie-icon { font-size: 16px; width: 20px; text-align: center; }
+  .ie-dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+  .ie-dropdown-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 16px 4px; }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px);
+    background: var(--text); color: white; padding: 10px 20px;
+    border-radius: 20px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+    z-index: 9999; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   @media (max-width: 600px) {
     .stats { grid-template-columns: 1fr 1fr; }
     .form-row { grid-template-columns: 1fr; }
@@ -239,11 +278,44 @@
 
 <header>
   <div class="logo">My <span>Collection</span></div>
-  <button class="btn-add" onclick="openAdd()">
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-    Add title
-  </button>
+  <div style="display:flex;gap:10px;align-items:center">
+    <div class="ie-wrap" id="ie-wrap">
+      <button class="btn-ie" onclick="toggleIEMenu(event)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Import / Export
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="ie-dropdown" id="ie-dropdown" style="display:none">
+        <div class="ie-dropdown-label">Export</div>
+        <button class="ie-dropdown-item" onclick="exportJSON()">
+          <span class="ie-icon">📦</span>
+          <div><div style="font-weight:500">Export as JSON</div><div style="font-size:11px;color:var(--text3)">Full backup with covers</div></div>
+        </button>
+        <button class="ie-dropdown-item" onclick="exportCSV()">
+          <span class="ie-icon">📊</span>
+          <div><div style="font-weight:500">Export as CSV</div><div style="font-size:11px;color:var(--text3)">Spreadsheet-friendly, no covers</div></div>
+        </button>
+        <div class="ie-dropdown-divider"></div>
+        <div class="ie-dropdown-label">Import</div>
+        <button class="ie-dropdown-item" onclick="document.getElementById('import-json-input').click()">
+          <span class="ie-icon">📥</span>
+          <div><div style="font-weight:500">Import from JSON</div><div style="font-size:11px;color:var(--text3)">Restore or merge a backup</div></div>
+        </button>
+        <button class="ie-dropdown-item" onclick="document.getElementById('import-csv-input').click()">
+          <span class="ie-icon">📋</span>
+          <div><div style="font-weight:500">Import from CSV</div><div style="font-size:11px;color:var(--text3)">Add from a spreadsheet</div></div>
+        </button>
+      </div>
+    </div>
+    <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSON(event)">
+    <input type="file" id="import-csv-input" accept=".csv" style="display:none" onchange="importCSV(event)">
+    <button class="btn-add" onclick="openAdd()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Add title
+    </button>
+  </div>
 </header>
+<div class="toast" id="toast"></div>
 
 <main>
   <div class="view-tabs" style="display:flex;gap:10px;margin-bottom:1.5rem;">
@@ -706,6 +778,122 @@ function deleteItem(id) {
 }
 
 render();
+
+/* ---- IMPORT / EXPORT ---- */
+
+function toggleIEMenu(e) {
+  e.stopPropagation();
+  const dd = document.getElementById("ie-dropdown");
+  dd.style.display = dd.style.display === "none" ? "block" : "none";
+}
+document.addEventListener("click", () => {
+  const dd = document.getElementById("ie-dropdown");
+  if (dd) dd.style.display = "none";
+});
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function exportJSON() {
+  document.getElementById("ie-dropdown").style.display = "none";
+  const seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  const payload = { version: 1, exportedAt: new Date().toISOString(), items, seriesMeta };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `my-collection-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast(`✅ Exported ${items.length} titles as JSON`);
+}
+
+function exportCSV() {
+  document.getElementById("ie-dropdown").style.display = "none";
+  const cols = ["id","title","author","type","status","rating","volumes","series","demographic","genre","notes","addedAt"];
+  const escape = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = [cols.join(",")];
+  items.forEach(item => rows.push(cols.map(c => escape(item[c] ?? "")).join(",")));
+  const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `my-collection-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast(`✅ Exported ${items.length} titles as CSV`);
+}
+
+function importJSON(e) {
+  document.getElementById("ie-dropdown").style.display = "none";
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const incoming = Array.isArray(data) ? data : (data.items || []);
+      if (!incoming.length) { showToast("⚠️ No items found in file"); return; }
+      const existingIds = new Set(items.map(i => i.id));
+      let added = 0;
+      incoming.forEach(inItem => {
+        if (!inItem.title) return;
+        if (existingIds.has(inItem.id)) inItem = { ...inItem, id: Date.now() + Math.random() };
+        items.push(inItem); existingIds.add(inItem.id); added++;
+      });
+      if (data.seriesMeta) {
+        const existing = JSON.parse(localStorage.getItem("series-meta") || "{}");
+        localStorage.setItem("series-meta", JSON.stringify({ ...data.seriesMeta, ...existing }));
+      }
+      save(); render(); renderSeries();
+      showToast(`✅ Imported ${added} title${added !== 1 ? "s" : ""}`);
+    } catch { showToast("❌ Invalid JSON file"); }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+}
+
+function importCSV(e) {
+  document.getElementById("ie-dropdown").style.display = "none";
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const lines = ev.target.result.trim().split("\n");
+      const headers = lines[0].split(",").map(h => h.replace(/^"|"$/g,"").trim());
+      const parseVal = s => s.replace(/^"|"$/g,"").replace(/""/g,'"');
+      let added = 0;
+      lines.slice(1).forEach(line => {
+        if (!line.trim()) return;
+        const cols = []; let cur = "", inQ = false;
+        for (const ch of line) {
+          if (ch === '"') inQ = !inQ;
+          else if (ch === "," && !inQ) { cols.push(cur); cur = ""; }
+          else cur += ch;
+        }
+        cols.push(cur);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = parseVal(cols[i] || ""));
+        if (!obj.title) return;
+        const dup = items.find(i => i.title === obj.title && i.author === (obj.author || ""));
+        if (dup) return;
+        items.push({
+          id: Date.now() + Math.random(),
+          title: obj.title, author: obj.author || "",
+          type: obj.type || "Manga", status: obj.status || "Plan to Read",
+          rating: parseInt(obj.rating) || 0, volumes: obj.volumes || "",
+          series: obj.series || "", demographic: obj.demographic || "",
+          genre: obj.genre || "", notes: obj.notes || "",
+          addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), cover: null
+        });
+        added++;
+      });
+      save(); render(); renderSeries();
+      showToast(`✅ Imported ${added} title${added !== 1 ? "s" : ""} from CSV`);
+    } catch { showToast("❌ Could not parse CSV file"); }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+}
 </script>
 
 <!-- Series Modal -->
