@@ -462,6 +462,7 @@
   .rating-pip.filled { background: var(--accent); color: white; border-color: var(--accent); }
   .rating-pip.filled.high { background: #185FA5; border-color: #185FA5; }
   .rating-pip.filled.top  { background: #8B4A00; border-color: #8B4A00; }
+  .rating-pip.filled.perfect { background: #7C3AED; border-color: #7C3AED; }
   .rating-clear { font-size: 11px; color: var(--text3); background: none; border: none;
     cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 2px 6px;
     border-radius: 6px; margin-left: 4px; }
@@ -474,6 +475,7 @@
   .series-rating-badge.rated { background: var(--accent); color: white; border-color: var(--accent); }
   .series-rating-badge.rated.high { background: #185FA5; border-color: #185FA5; }
   .series-rating-badge.rated.top  { background: #8B4A00; border-color: #8B4A00; }
+  .series-rating-badge.rated.perfect { background: #7C3AED; border-color: #7C3AED; }
 
   @media (max-width: 600px) {
     .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
@@ -1114,7 +1116,7 @@ function renderSeries() {
 /* ---- RATING HELPERS ---- */
 function ratingBadgeHtml(r) {
   if (r == null) return "";
-  const cls = r >= 9 ? "rated top" : r >= 7 ? "rated high" : "rated";
+  const cls = r === 10 ? "rated perfect" : r >= 9 ? "rated top" : r >= 7 ? "rated high" : "rated";
   return `<span class="series-rating-badge ${cls}">★ ${r}/10</span>`;
 }
 
@@ -1126,7 +1128,7 @@ function buildRatingWidget(containerId, currentRating) {
     wrap.innerHTML = Array.from({length: 10}, (_, i) => {
       const n = i + 1;
       const on = n <= active;
-      const cls = on ? (n >= 9 ? "rating-pip filled top" : n >= 7 ? "rating-pip filled high" : "rating-pip filled") : "rating-pip";
+      const cls = on ? (n === 10 ? "rating-pip filled perfect" : n >= 9 ? "rating-pip filled top" : n >= 7 ? "rating-pip filled high" : "rating-pip filled") : "rating-pip";
       return `<div class="${cls}" data-val="${n}">${n}</div>`;
     }).join("") + `<button class="rating-clear" id="${containerId}-clear">Clear</button>`;
     wrap.querySelectorAll(".rating-pip").forEach(pip => {
@@ -2058,7 +2060,7 @@ function renderStats() {
         .map(([k,v]) => [k, v.total/v.count, v.count])
         .sort((a,b) => b[1]-a[1]);
 
-      const ratingColor = r => r >= 9 ? "#8B4A00" : r >= 7 ? "#185FA5" : r >= 5 ? "#2D4A3E" : "#5F5E5A";
+      const ratingColor = r => r === 10 ? "#7C3AED" : r >= 9 ? "#8B4A00" : r >= 7 ? "#185FA5" : r >= 5 ? "#2D4A3E" : "#5F5E5A";
 
       return `
       <div>
