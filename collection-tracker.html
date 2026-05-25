@@ -518,14 +518,13 @@
   }
   .year-no-date-title { font-size: 12px; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.07em; }
 
-  /* ---- SORT REVERSE BUTTON ---- */
+  /* ---- SORT DIRECTION BUTTON ---- */
   .sort-wrap { display: flex; align-items: center; gap: 4px; }
   .btn-sort-dir {
     display: flex; align-items: center; justify-content: center;
     width: 32px; height: 32px; border-radius: var(--radius);
     border: 1px solid var(--border); background: var(--surface);
-    color: var(--text2); cursor: pointer; transition: all 0.15s;
-    flex-shrink: 0; font-size: 14px;
+    color: var(--text2); cursor: pointer; transition: all 0.15s; flex-shrink: 0; font-size: 14px;
   }
   .btn-sort-dir:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
   .btn-sort-dir.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
@@ -623,7 +622,7 @@
       <option>Unread</option>
     </select>
     <div class="sort-wrap">
-      <select id="sort-select" onchange="onSortChange()">
+      <select id="sort-select" onchange="render()">
         <option value="dateBought">Newest first</option>
         <option value="title">Title A–Z</option>
         <option value="author">Author A–Z</option>
@@ -947,17 +946,6 @@ const CoverDB = (() => {
     });
   }
 
-  // Cheap: fetches only keys (no blob data) to know which items have covers
-  async function getAllKeys() {
-    const db = await open();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(STORE, "readonly");
-      const req = tx.objectStore(STORE).getAllKeys();
-      req.onsuccess = () => res(req.result.map(String));
-      req.onerror = () => rej(req.error);
-    });
-  }
-
   async function setMany(map) {
     const db = await open();
     return new Promise((res, rej) => {
@@ -969,55 +957,67 @@ const CoverDB = (() => {
     });
   }
 
+  async function getAllKeys() {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(STORE, "readonly");
+      const req = tx.objectStore(STORE).getAllKeys();
+      req.onsuccess = () => res(req.result.map(String));
+      req.onerror = () => rej(req.error);
+    });
+  }
+
   return { get, set, remove, getAll, getAllKeys, setMany };
 })();
 
-// ---- LAZY COVER CACHE (LRU, max 40 entries) ----
-// Covers are loaded from IndexedDB on demand when a card scrolls into view.
-// We never load all covers at startup — each base64 image can be 500KB-2MB.
-const COVER_CACHE_MAX = 120;
-const coverCache = new Map(); // key -> base64 string, insertion order = LRU
+// In-memory cover cache — plain object, max 150 entries (LRU via _coverOrder).
+// Covers are loaded from IndexedDB on demand by the IntersectionObserver;
+// we never bulk-load all covers at startup.
+const coverCache = {};
+const _coverOrder = []; // insertion-order list of keys for LRU eviction
+const COVER_CACHE_MAX = 150;
 
-function getCover(id) {
-  const k = String(id);
-  if (!coverCache.has(k)) return null;
-  // Refresh LRU position
-  const v = coverCache.get(k);
-  coverCache.delete(k);
-  coverCache.set(k, v);
-  return v;
-}
-
-function setCoverInCache(id, dataUrl) {
-  const k = String(id);
-  if (coverCache.has(k)) coverCache.delete(k);
-  coverCache.set(k, dataUrl);
-  if (coverCache.size > COVER_CACHE_MAX) {
-    coverCache.delete(coverCache.keys().next().value);
-  }
-}
-
-function evictCoverFromCache(id) {
-  coverCache.delete(String(id));
-}
-
-// Lightweight set of item IDs that have a cover stored in IndexedDB.
-// Populated at startup by reading keys only (no blob data) - very cheap.
+// coverIds: lightweight set of IDs that have a cover in IndexedDB.
+// Populated at startup by reading keys only (no blob data) — very cheap.
 const coverIds = new Set();
 
+function getCover(id) {
+  return coverCache[String(id)] || null;
+}
+
+function _setCover(id, dataUrl) {
+  const k = String(id);
+  if (!coverCache[k]) {
+    // Evict oldest if at cap
+    if (_coverOrder.length >= COVER_CACHE_MAX) {
+      const evict = _coverOrder.shift();
+      delete coverCache[evict];
+    }
+    _coverOrder.push(k);
+  }
+  coverCache[k] = dataUrl;
+}
+
+function _evictCover(id) {
+  const k = String(id);
+  delete coverCache[k];
+  const i = _coverOrder.indexOf(k);
+  if (i !== -1) _coverOrder.splice(i, 1);
+  coverIds.delete(k);
+}
+
 async function loadAllCoversIntoCache() {
-  // Read ALL keys (no blobs) - this is cheap regardless of collection size.
-  // Actual cover images are loaded on-demand by the IntersectionObserver.
+  // Read keys only (no blobs) — O(n) in count but zero image data transferred.
   try {
     const keys = await CoverDB.getAllKeys();
     keys.forEach(k => coverIds.add(String(k)));
   } catch(e) {}
 
-  // Migrate legacy .cover fields from item objects if present
+  // Migrate any legacy .cover fields still on item objects
   let migrated = false;
   items.forEach(item => {
     if (item.cover) {
-      setCoverInCache(item.id, item.cover);
+      _setCover(item.id, item.cover);
       CoverDB.set(item.id, item.cover);
       coverIds.add(String(item.id));
       migrated = true;
@@ -1056,10 +1056,8 @@ let _seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}");
 function getSeriesMetaCache() { return _seriesMeta; }
 function refreshSeriesMeta() { _seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}"); }
 
-// IntersectionObserver for lazy cover loading
-// Covers are fetched from IndexedDB on demand - NOT pre-loaded into memory.
-// _pendingCovers tracks in-flight IDB fetches so we don't double-fetch the same cover.
-const _pendingCovers = new Set();
+// IntersectionObserver: loads covers from IndexedDB on demand as cards scroll into view.
+const _pendingFetches = new Set(); // avoid duplicate in-flight fetches for same id
 const _coverObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
@@ -1068,29 +1066,29 @@ const _coverObserver = new IntersectionObserver((entries) => {
     if (!id) { _coverObserver.unobserve(el); return; }
     _coverObserver.unobserve(el);
 
-    // In LRU cache - apply immediately
+    // Already in memory cache
     const cached = getCover(id);
-    if (cached) { _applyCoverToEl(el, cached); return; }
+    if (cached) { _swapInCover(el, cached); return; }
 
-    // Already fetching this cover - it will self-apply when done
-    if (_pendingCovers.has(id)) return;
+    // Fetch already in flight — when it resolves it will query the DOM again
+    if (_pendingFetches.has(id)) return;
 
     // Fetch from IndexedDB
-    _pendingCovers.add(id);
+    _pendingFetches.add(id);
     CoverDB.get(id).then(src => {
-      _pendingCovers.delete(id);
+      _pendingFetches.delete(id);
       if (!src) return;
-      setCoverInCache(id, src);
-      // Apply to ALL placeholders with this id (same item can appear in multiple tabs)
-      document.querySelectorAll('[data-coverid="' + id + '"]').forEach(el => _applyCoverToEl(el, src));
-    }).catch(() => { _pendingCovers.delete(id); });
+      _setCover(id, src);
+      // Apply to every placeholder with this id currently in the DOM
+      // (same item can appear in Library, Year, and Series tabs simultaneously)
+      document.querySelectorAll('[data-coverid="' + id + '"]')
+        .forEach(node => _swapInCover(node, src));
+    }).catch(() => _pendingFetches.delete(id));
   });
 }, { rootMargin: "400px" });
 
-function _applyCoverToEl(el, src) {
+function _swapInCover(el, src) {
   const img = document.createElement("img");
-  // el class is like "card-cover cover-lazy-placeholder [...]" - just use the first class token
-  // which is always the semantic CSS class (card-cover, recent-cover, etc.)
   img.className = el.className.split(" ").filter(c => c !== "cover-lazy-placeholder").join(" ") || "card-cover";
   img.src = src;
   img.alt = el.dataset.alt || "";
@@ -1456,63 +1454,41 @@ function debouncedRender() {
   _renderTimer = setTimeout(render, 150);
 }
 
-let sortDir = 1; // 1 = default/asc, -1 = reversed
+let sortDir = 1;
 let seriesSortDir = 1;
-
-function onSortChange() { render(); }
 
 function toggleSortDir() {
   sortDir = -sortDir;
   const btn = document.getElementById("sort-dir-btn");
-  if (btn) {
-    btn.textContent = sortDir === 1 ? "↑" : "↓";
-    btn.classList.toggle("active", sortDir === -1);
-  }
+  if (btn) { btn.textContent = sortDir === 1 ? "↑" : "↓"; btn.classList.toggle("active", sortDir === -1); }
   render();
 }
 
 function toggleSeriesSortDir() {
   seriesSortDir = -seriesSortDir;
   const btn = document.getElementById("series-sort-dir-btn");
-  if (btn) {
-    btn.textContent = seriesSortDir === 1 ? "↑" : "↓";
-    btn.classList.toggle("active", seriesSortDir === -1);
-  }
+  if (btn) { btn.textContent = seriesSortDir === 1 ? "↑" : "↓"; btn.classList.toggle("active", seriesSortDir === -1); }
   renderSeries();
 }
-
-// Which sort keys are "reversible" (arrow button is meaningful)
-const REVERSIBLE_SORTS = new Set(["title","author","price","pages","publisher","msrp"]);
-// Non-reversible sorts (date/newest already flip with the arrow, but default=desc)
-// We'll allow reversing all sorts for flexibility
 
 function render() {
   const search = document.getElementById("search").value.toLowerCase();
   const status = document.getElementById("status-filter").value;
   const sort = document.getElementById("sort-select").value;
+  const d = sortDir;
 
   let list = items
     .filter(i => typeFilter === "All" || i.type === typeFilter)
     .filter(i => status === "All" || i.status === status)
     .filter(i => !search || i._titleLower.includes(search) || i._authorLower.includes(search));
 
-  const d = sortDir; // 1 = default direction, -1 = reversed
-
-  if (sort === "title") {
-    list.sort((a,b) => d * a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'}));
-  } else if (sort === "author") {
-    list.sort((a,b) => d * (a.author||"").localeCompare(b.author||"", undefined, {sensitivity: 'base'}));
-  } else if (sort === "price") {
-    // default: least->most (asc), reversed: most->least
-    list.sort((a,b) => d * ((a.pricePaid ?? Infinity) - (b.pricePaid ?? Infinity)));
-  } else if (sort === "msrp") {
-    list.sort((a,b) => d * ((a.msrp ?? Infinity) - (b.msrp ?? Infinity)));
-  } else if (sort === "pages") {
-    list.sort((a,b) => d * ((a.pageCount ?? Infinity) - (b.pageCount ?? Infinity)));
-  } else if (sort === "publisher") {
-    list.sort((a,b) => d * (a.publisher||"").localeCompare(b.publisher||"", undefined, {sensitivity: 'base'}));
-  } else {
-    // dateBought — default newest first, reversed = oldest first
+  if (sort === "title")     list.sort((a,b) => d * a.title.localeCompare(b.title, undefined, {numeric:true, sensitivity:'base'}));
+  else if (sort === "author")    list.sort((a,b) => d * (a.author||"").localeCompare(b.author||"", undefined, {sensitivity:'base'}));
+  else if (sort === "price")     list.sort((a,b) => d * ((a.pricePaid ?? Infinity) - (b.pricePaid ?? Infinity)));
+  else if (sort === "msrp")      list.sort((a,b) => d * ((a.msrp ?? Infinity) - (b.msrp ?? Infinity)));
+  else if (sort === "pages")     list.sort((a,b) => d * ((a.pageCount ?? Infinity) - (b.pageCount ?? Infinity)));
+  else if (sort === "publisher") list.sort((a,b) => d * (a.publisher||"").localeCompare(b.publisher||"", undefined, {sensitivity:'base'}));
+  else {
     list.sort((a,b) => {
       const da = a._dateBoughtMs, db = b._dateBoughtMs;
       if (da === null && db === null) return d * (b.addedAt - a.addedAt);
@@ -1586,17 +1562,17 @@ function render() {
 
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-// Returns a lazy placeholder div if this item has a cover, or null if not.
-// The IntersectionObserver will load the actual image from IndexedDB on scroll.
+// Returns cover HTML for a card: real <img> if cached in memory, lazy placeholder
+// div if stored in IndexedDB but not yet loaded, or null if no cover at all.
 function lazyCoverHtml(itemId, title, cssClass) {
-  // Use LRU cache if warm, otherwise check coverIds (lightweight key set)
+  const k = String(itemId);
   const cached = getCover(itemId);
-  if (!cached && !coverIds.has(String(itemId))) return null; // definitely no cover
   if (cached) {
-    // Already in memory - render as real img immediately (no round-trip needed)
+    // Already in LRU cache — render immediately, no observer needed
     return `<img class="${cssClass}" src="${cached}" alt="${esc(title)}">`;
   }
-  // Has a cover in IndexedDB but not yet in memory cache - render lazy placeholder
+  if (!coverIds.has(k)) return null; // no cover stored at all
+  // Cover exists in IndexedDB but not yet in memory — render lazy placeholder
   const initials = title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
   const color = PALETTE[title.length % PALETTE.length];
   return `<div class="${cssClass} cover-lazy-placeholder" data-coverid="${itemId}" data-alt="${esc(title)}" style="background:${color};display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:rgba(255,255,255,0.85)">${initials}</div>`;
@@ -1736,7 +1712,7 @@ function bulkDelete() {
   if (!confirm(`Delete ${selectedIds.size} item${selectedIds.size !== 1 ? "s" : ""}? This cannot be undone.`)) return;
   const toDelete = [...selectedIds];
   items = items.filter(i => !selectedIds.has(i.id));
-  toDelete.forEach(id => { evictCoverFromCache(id); coverIds.delete(String(id)); CoverDB.remove(id); });
+  toDelete.forEach(id => { _evictCover(id); CoverDB.remove(id); });
   selectedIds.clear(); updateBulkCount();
   save(); render(); renderSeries();
   showToast(`🗑 Deleted ${toDelete.length} item${toDelete.length !== 1 ? "s" : ""}`);
@@ -1915,10 +1891,10 @@ function saveItem() {
   }
   // Save cover to IndexedDB
   if (currentCover) {
-    setCoverInCache(savedId, currentCover); coverIds.add(String(savedId));
+    _setCover(savedId, currentCover); coverIds.add(String(savedId));
     CoverDB.set(savedId, currentCover);
   } else if (coverWasRemoved) {
-    evictCoverFromCache(savedId); coverIds.delete(String(savedId));
+    _evictCover(savedId);
     CoverDB.remove(savedId);
   }
   save(); render(); markDirty(); closeModal();
@@ -1927,7 +1903,7 @@ function saveItem() {
 function deleteItem(id) {
   if (!confirm("Remove this title from your collection?")) return;
   items = items.filter(i => i.id !== id);
-  evictCoverFromCache(id); coverIds.delete(String(id));
+  _evictCover(id);
   CoverDB.remove(id);
   save(); render(); markDirty();
 }
