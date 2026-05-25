@@ -317,23 +317,6 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 
-  /* ---- STATS NAV ---- */
-  .stats-nav {
-    position: sticky; top: 60px; z-index: 50;
-    display: flex; gap: 8px; padding: 10px 0;
-    background: var(--bg); border-bottom: 1px solid var(--border);
-    margin-bottom: 1.5rem;
-  }
-  .stats-nav-btn {
-    padding: 7px 18px; border-radius: 20px; border: 1.5px solid var(--border2);
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-    cursor: pointer; background: var(--surface); color: var(--text2);
-    transition: all 0.15s;
-  }
-  .stats-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .stats-nav-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-  .stats-nav-btn.book-active { background: var(--book-fg); color: white; border-color: var(--book-fg); }
-
   /* ---- STATS PAGE ---- */
   .stats-page { display: flex; flex-direction: column; gap: 2rem; }
   .stats-section-title {
@@ -518,18 +501,6 @@
   }
   .year-no-date-title { font-size: 12px; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.07em; }
 
-  /* ---- SORT REVERSE BUTTON ---- */
-  .sort-wrap { display: flex; align-items: center; gap: 4px; }
-  .btn-sort-dir {
-    display: flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px; border-radius: var(--radius);
-    border: 1px solid var(--border); background: var(--surface);
-    color: var(--text2); cursor: pointer; transition: all 0.15s;
-    flex-shrink: 0; font-size: 14px;
-  }
-  .btn-sort-dir:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-  .btn-sort-dir.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-
   @media (max-width: 600px) {
     .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
   }
@@ -598,7 +569,7 @@
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="s-total">0</div></div>
     <div class="stat-card"><div class="stat-label">Manga Volumes</div><div class="stat-value" id="s-manga">0</div></div>
     <div class="stat-card"><div class="stat-label">Books</div><div class="stat-value" id="s-books">0</div></div>
-    <div class="stat-card"><div class="stat-label">Unread Books</div><div class="stat-value" id="s-done">0</div></div>
+    <div class="stat-card"><div class="stat-label">Reading / Active</div><div class="stat-value" id="s-done">0</div></div>
   </div>
 
   <!-- Toolbar -->
@@ -622,18 +593,13 @@
       <option>Read</option>
       <option>Unread</option>
     </select>
-    <div class="sort-wrap">
-      <select id="sort-select" onchange="onSortChange()">
-        <option value="dateBought">Newest first</option>
-        <option value="title">Title A–Z</option>
-        <option value="author">Author A–Z</option>
-        <option value="price">Price</option>
-        <option value="pages">Pages</option>
-        <option value="publisher">Publisher A–Z</option>
-        <option value="msrp">MSRP</option>
-      </select>
-      <button class="btn-sort-dir" id="sort-dir-btn" onclick="toggleSortDir()" title="Reverse sort direction">↑</button>
-    </div>
+    <select id="sort-select" onchange="render()">
+      <option value="dateBought">Newest first</option>
+      <option value="title">A–Z</option>
+      <option value="title-desc">Z–A</option>
+      <option value="price-asc">Least expensive first</option>
+      <option value="price-desc">Most expensive first</option>
+    </select>
     <button class="btn-ie" id="bulk-toggle-btn" onclick="toggleBulkMode()" style="white-space:nowrap">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
       Bulk Edit
@@ -684,15 +650,13 @@
 
   <div id="series-view" style="display:none">
     <div class="toolbar" style="margin-bottom:1.5rem">
-      <div class="sort-wrap">
-        <select id="series-sort" onchange="renderSeries()">
-          <option value="name">Name A–Z</option>
-          <option value="owned">Most owned</option>
-          <option value="rating">Highest rated</option>
-          <option value="pct">% Complete</option>
-        </select>
-        <button class="btn-sort-dir" id="series-sort-dir-btn" onclick="toggleSeriesSortDir()" title="Reverse sort direction">↑</button>
-      </div>
+      <select id="series-sort" onchange="renderSeries()">
+        <option value="name">A–Z</option>
+        <option value="owned">Most owned</option>
+        <option value="rating">Highest rated</option>
+        <option value="pct">% Complete (high first)</option>
+        <option value="pct-asc">% Complete (low first)</option>
+      </select>
     </div>
     <div class="grid" id="series-grid"></div>
   </div>
@@ -807,19 +771,6 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Author Gender</label>
-            <select id="f-book-author-gender">
-              <option value="">Not specified</option>
-              <option value="Woman">Woman</option>
-              <option value="Man">Man</option>
-              <option value="Non-binary">Non-binary</option>
-              <option value="Multiple">Multiple authors</option>
-            </select>
-          </div>
-          <div class="form-group"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
             <label>Translator <span style="font-size:10px;color:var(--text3);font-weight:400">(if applicable)</span></label>
             <input type="text" id="f-book-translator" placeholder="e.g. Ann Sherif">
           </div>
@@ -844,26 +795,19 @@
             <input type="number" id="f-book-pages" placeholder="e.g. 352" min="1">
           </div>
           <div class="form-group">
-            <label>MSRP (£)</label>
-            <input type="number" id="f-book-msrp" placeholder="e.g. 9.99" step="0.01" min="0">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
             <label>Original Language</label>
-            <input type="text" id="f-book-orig-lang" placeholder="e.g. Japanese">
-          </div>
-          <div class="form-group">
-            <label>Author Country of Origin</label>
-            <input type="text" id="f-book-author-country" placeholder="e.g. Japan">
+            <input type="text" id="f-book-language" placeholder="e.g. Japanese">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Original Publication Date</label>
-            <input type="text" id="f-book-orig-pubdate" placeholder="e.g. 1994 or 1994-03-15">
+            <label>Author Country</label>
+            <input type="text" id="f-book-country" placeholder="e.g. Japan">
           </div>
-          <div class="form-group"></div>
+          <div class="form-group">
+            <label>Original Year Published</label>
+            <input type="number" id="f-book-year" placeholder="e.g. 1987" min="0" max="2100">
+          </div>
         </div>
       </div>
 
@@ -1093,19 +1037,6 @@ function switchView(view) {
   if (view === "year"   && yearDirty)   { renderYear();   yearDirty   = false; }
 }
 
-function statsScrollTo(id, btn) {
-  const target = document.getElementById(id);
-  if (!target) return;
-  // offset for sticky header (60px) + stats nav (~52px)
-  const top = target.getBoundingClientRect().top + window.scrollY - 120;
-  window.scrollTo({ top, behavior: "smooth" });
-  // Update active state
-  document.querySelectorAll(".stats-nav-btn").forEach(b => b.classList.remove("active", "book-active"));
-  if (btn) {
-    btn.classList.add(id.startsWith("books") ? "book-active" : "active");
-  }
-}
-
 function toggleYear(year) {
   const wrap = document.getElementById(`year-wrap-${year}`);
   const btn = document.getElementById(`year-btn-${year}`);
@@ -1245,10 +1176,11 @@ function renderSeries() {
     s.pct = (!isNaN(total) && total > 0) ? Math.min(100, Math.round((s.owned / total) * 100)) : null;
   });
 
-  if (sortVal === "owned") seriesList.sort((a, b) => seriesSortDir * (b.owned - a.owned));
-  else if (sortVal === "rating") seriesList.sort((a, b) => seriesSortDir * ((b.rating ?? -1) - (a.rating ?? -1)));
-  else if (sortVal === "pct") seriesList.sort((a, b) => seriesSortDir * ((b.pct ?? -1) - (a.pct ?? -1)));
-  else seriesList.sort((a, b) => seriesSortDir * a.name.localeCompare(b.name));
+  if (sortVal === "owned") seriesList.sort((a, b) => b.owned - a.owned);
+  else if (sortVal === "rating") seriesList.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
+  else if (sortVal === "pct") seriesList.sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1));
+  else if (sortVal === "pct-asc") seriesList.sort((a, b) => (a.pct ?? 101) - (b.pct ?? 101));
+  else seriesList.sort((a, b) => a.name.localeCompare(b.name));
 
   grid.innerHTML = seriesList.map(series => {
     const hasPct = series.pct !== null;
@@ -1389,36 +1321,6 @@ function debouncedRender() {
   _renderTimer = setTimeout(render, 150);
 }
 
-let sortDir = 1; // 1 = default/asc, -1 = reversed
-let seriesSortDir = 1;
-
-function onSortChange() { render(); }
-
-function toggleSortDir() {
-  sortDir = -sortDir;
-  const btn = document.getElementById("sort-dir-btn");
-  if (btn) {
-    btn.textContent = sortDir === 1 ? "↑" : "↓";
-    btn.classList.toggle("active", sortDir === -1);
-  }
-  render();
-}
-
-function toggleSeriesSortDir() {
-  seriesSortDir = -seriesSortDir;
-  const btn = document.getElementById("series-sort-dir-btn");
-  if (btn) {
-    btn.textContent = seriesSortDir === 1 ? "↑" : "↓";
-    btn.classList.toggle("active", seriesSortDir === -1);
-  }
-  renderSeries();
-}
-
-// Which sort keys are "reversible" (arrow button is meaningful)
-const REVERSIBLE_SORTS = new Set(["title","author","price","pages","publisher","msrp"]);
-// Non-reversible sorts (date/newest already flip with the arrow, but default=desc)
-// We'll allow reversing all sorts for flexibility
-
 function render() {
   const search = document.getElementById("search").value.toLowerCase();
   const status = document.getElementById("status-filter").value;
@@ -1429,36 +1331,24 @@ function render() {
     .filter(i => status === "All" || i.status === status)
     .filter(i => !search || i._titleLower.includes(search) || i._authorLower.includes(search));
 
-  const d = sortDir; // 1 = default direction, -1 = reversed
-
-  if (sort === "title") {
-    list.sort((a,b) => d * a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'}));
-  } else if (sort === "author") {
-    list.sort((a,b) => d * (a.author||"").localeCompare(b.author||"", undefined, {sensitivity: 'base'}));
-  } else if (sort === "price") {
-    // default: least->most (asc), reversed: most->least
-    list.sort((a,b) => d * ((a.pricePaid ?? Infinity) - (b.pricePaid ?? Infinity)));
-  } else if (sort === "msrp") {
-    list.sort((a,b) => d * ((a.msrp ?? Infinity) - (b.msrp ?? Infinity)));
-  } else if (sort === "pages") {
-    list.sort((a,b) => d * ((a.pageCount ?? Infinity) - (b.pageCount ?? Infinity)));
-  } else if (sort === "publisher") {
-    list.sort((a,b) => d * (a.publisher||"").localeCompare(b.publisher||"", undefined, {sensitivity: 'base'}));
-  } else {
-    // dateBought — default newest first, reversed = oldest first
+  if (sort === "title") list.sort((a,b) => a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'}));
+  else if (sort === "title-desc") list.sort((a,b) => b.title.localeCompare(a.title, undefined, {numeric: true, sensitivity: 'base'}));
+  else if (sort === "price-asc") list.sort((a,b) => (a.pricePaid ?? Infinity) - (b.pricePaid ?? Infinity));
+  else if (sort === "price-desc") list.sort((a,b) => (b.pricePaid ?? -Infinity) - (a.pricePaid ?? -Infinity));
+  else {
     list.sort((a,b) => {
       const da = a._dateBoughtMs, db = b._dateBoughtMs;
-      if (da === null && db === null) return d * (b.addedAt - a.addedAt);
+      if (da === null && db === null) return b.addedAt - a.addedAt;
       if (da === null) return 1;
       if (db === null) return -1;
-      return d * (db - da);
+      return db - da;
     });
   }
 
   document.getElementById("s-total").textContent = items.length;
   document.getElementById("s-manga").textContent = items.filter(i => i.type !== "Book").length;
   document.getElementById("s-books").textContent = items.filter(i => i.type === "Book").length;
-  document.getElementById("s-done").textContent = items.filter(i => i.type === "Book" && i.status === "Unread").length;
+  document.getElementById("s-done").textContent = items.filter(i => i.status === "Reading" || i.status === "Read").length;
 
   // Recently Added — only re-render when items change (called from markDirty)
   // renderRecent() is NOT called here to avoid cover cost on every filter/search change
@@ -1501,7 +1391,7 @@ function render() {
           ${!isBook && item.genre ? `<span class="meta-tag">${esc(item.genre)}</span>` : ""}
           ${item.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(item.publisher)}</span>` : ""}
         </div>
-        ${isBook && item.pageCount ? `<div style="font-size:11px;color:var(--text3)">${item.pageCount} pages${item.msrp != null ? ` · £${item.msrp.toFixed(2)} MSRP` : ""}</div>` : (isBook && item.msrp != null ? `<div style="font-size:11px;color:var(--text3)">£${item.msrp.toFixed(2)} MSRP</div>` : "")}
+        ${isBook && item.pageCount ? `<div style="font-size:11px;color:var(--text3)">${item.pageCount} pages</div>` : ""}
         ${!isBook && item.volumes ? `<div style="font-size:11px;color:var(--text3)">${esc(item.volumes)} vol.</div>` : ""}
         ${!isBook && item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">£${item.pricePaid.toFixed(2)}${item.dateBought ? ` · ${item.dateBought}` : ""}</div>` : (!isBook && item.dateBought ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${item.dateBought}</div>` : "")}
       </div>
@@ -1726,11 +1616,9 @@ function openAdd() {
   document.getElementById("f-book-series").value = "";
   document.getElementById("f-book-publisher").value = "";
   document.getElementById("f-book-pages").value = "";
-  document.getElementById("f-book-msrp").value = "";
-  document.getElementById("f-book-orig-lang").value = "";
-  document.getElementById("f-book-author-gender").value = "";
-  document.getElementById("f-book-author-country").value = "";
-  document.getElementById("f-book-orig-pubdate").value = "";
+  document.getElementById("f-book-language").value = "";
+  document.getElementById("f-book-country").value = "";
+  document.getElementById("f-book-year").value = "";
   switchModalType("Manga");
   coverWasRemoved = false;
   removeCover();
@@ -1753,11 +1641,9 @@ function openEdit(id) {
     document.getElementById("f-book-series").value = item.series || "";
     document.getElementById("f-book-publisher").value = item.publisher || "";
     document.getElementById("f-book-pages").value = item.pageCount || "";
-    document.getElementById("f-book-msrp").value = item.msrp != null ? item.msrp : "";
-    document.getElementById("f-book-orig-lang").value = item.originalLanguage || "";
-    document.getElementById("f-book-author-country").value = item.authorCountry || "";
-    document.getElementById("f-book-author-gender").value = item.authorGender || "";
-    document.getElementById("f-book-orig-pubdate").value = item.originalPubDate || "";
+    document.getElementById("f-book-language").value = item.originalLanguage || "";
+    document.getElementById("f-book-country").value = item.authorCountry || "";
+    document.getElementById("f-book-year").value = item.originalYearPublished || "";
     switchModalType("Book");
   } else {
     document.getElementById("f-status").value = item.status || "Plan to Read";
@@ -1802,14 +1688,12 @@ function saveItem() {
       series: document.getElementById("f-book-series").value.trim(),
       publisher: document.getElementById("f-book-publisher").value.trim(),
       pageCount: document.getElementById("f-book-pages").value !== "" ? parseInt(document.getElementById("f-book-pages").value) : null,
-      msrp: document.getElementById("f-book-msrp").value !== "" ? parseFloat(document.getElementById("f-book-msrp").value) : null,
-      originalLanguage: document.getElementById("f-book-orig-lang").value.trim() || null,
-      authorCountry: document.getElementById("f-book-author-country").value.trim() || null,
-      authorGender: document.getElementById("f-book-author-gender").value || null,
-      originalPubDate: document.getElementById("f-book-orig-pubdate").value.trim() || null,
+      originalLanguage: document.getElementById("f-book-language").value.trim(),
+      authorCountry: document.getElementById("f-book-country").value.trim(),
+      originalYearPublished: document.getElementById("f-book-year").value !== "" ? parseInt(document.getElementById("f-book-year").value) : null,
       notes: document.getElementById("f-notes").value.trim(),
       // clear manga-only fields
-      volumes: null, volRange: null, dateBought: null, pricePaid: null,
+      volumes: null, volRange: null, dateBought: null, pricePaid: null, msrp: null,
       demographic: "", genre: "",
     };
   } else {
@@ -1918,6 +1802,22 @@ function renderStats() {
 
   // Separate manga from books
   const mangaItems = items.filter(i => i.type !== "Book");
+  const bookItems = items.filter(i => i.type === "Book");
+
+  const languageMap = {};
+  const countryMap = {};
+  const publicationYears = [];
+
+  bookItems.forEach(book => {
+    if (book.originalLanguage) languageMap[book.originalLanguage] = (languageMap[book.originalLanguage] || 0) + 1;
+    if (book.authorCountry) countryMap[book.authorCountry] = (countryMap[book.authorCountry] || 0) + 1;
+    if (book.originalYearPublished) publicationYears.push(book.originalYearPublished);
+  });
+
+  const topLanguage = Object.entries(languageMap).sort((a,b) => b[1]-a[1])[0];
+  const topCountry = Object.entries(countryMap).sort((a,b) => b[1]-a[1])[0];
+  const oldestPublication = publicationYears.length ? Math.min(...publicationYears) : null;
+  const newestPublication = publicationYears.length ? Math.max(...publicationYears) : null;
 
   // ---- Aggregates (manga only) ----
   const total = mangaItems.length;
@@ -2238,29 +2138,6 @@ function renderStats() {
     // By publisher
     const bookPubMap = {};
     bookItems.forEach(i => { if (i.publisher) { bookPubMap[i.publisher] = (bookPubMap[i.publisher] || 0) + 1; } });
-    // By original language
-    const bookLangMap = {};
-    bookItems.forEach(i => { if (i.originalLanguage) { bookLangMap[i.originalLanguage] = (bookLangMap[i.originalLanguage] || 0) + 1; } });
-    // By author country
-    const bookCountryMap = {};
-    bookItems.forEach(i => { if (i.authorCountry) { bookCountryMap[i.authorCountry] = (bookCountryMap[i.authorCountry] || 0) + 1; } });
-    // By author gender
-    const bookGenderMap = {};
-    bookItems.forEach(i => { if (i.authorGender) { bookGenderMap[i.authorGender] = (bookGenderMap[i.authorGender] || 0) + 1; } });
-    // MSRP
-    const bookMsrpItems = bookItems.filter(i => i.msrp != null);
-    const bookTotalMsrp = bookMsrpItems.reduce((s, i) => s + i.msrp, 0);
-    const bookAvgMsrp = bookMsrpItems.length ? bookTotalMsrp / bookMsrpItems.length : null;
-    // Orig pub decade distribution
-    const pubDecadeMap = {};
-    bookItems.forEach(i => {
-      if (!i.originalPubDate) return;
-      const yr = parseInt(i.originalPubDate.slice(0, 4));
-      if (isNaN(yr)) return;
-      const decade = Math.floor(yr / 10) * 10;
-      const label = `${decade}s`;
-      pubDecadeMap[label] = (pubDecadeMap[label] || 0) + 1;
-    });
     // Read/Unread donut
     const readDist = { "Read": bRead, "Unread": bUnread };
     const readColors = ["#185FA5", "#5F5E5A"];
@@ -2297,7 +2174,7 @@ function renderStats() {
       </div>`).join("")}</div>` : `<p style="color:var(--text3);font-size:13px">No publisher data yet.</p>`;
 
     return `
-    <div id="books-overview" style="padding-top:1rem;border-top:2px solid var(--book-bg);margin-top:1rem">
+    <div style="padding-top:1rem;border-top:2px solid var(--book-bg);margin-top:1rem">
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Overview</div>
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">Total Books</div><div class="kpi-value">${bTotal}</div><div class="kpi-sub">${bWithSeries} in series · ${bStandalone} standalone</div></div>
@@ -2305,8 +2182,6 @@ function renderStats() {
         <div class="kpi-card"><div class="kpi-label">Unread</div><div class="kpi-value">${bUnread}</div><div class="kpi-sub">on the TBR pile</div></div>
         ${bPages > 0 ? `<div class="kpi-card"><div class="kpi-label">Total Pages</div><div class="kpi-value" style="font-size:22px">${bPages.toLocaleString()}</div><div class="kpi-sub">${bReadPages.toLocaleString()} pages read</div></div>` : ""}
         ${bPages > 0 && bRead > 0 ? `<div class="kpi-card"><div class="kpi-label">Avg Pages / Book</div><div class="kpi-value" style="font-size:22px">${Math.round(bPages/bTotal)}</div><div class="kpi-sub">across ${bTotal} books</div></div>` : ""}
-        ${bookMsrpItems.length ? `<div class="kpi-card"><div class="kpi-label">Total MSRP</div><div class="kpi-value" style="font-size:22px">£${bookTotalMsrp.toFixed(2)}</div><div class="kpi-sub">${bookMsrpItems.length} book${bookMsrpItems.length!==1?"s":""} with price</div></div>` : ""}
-        ${bookAvgMsrp != null ? `<div class="kpi-card"><div class="kpi-label">Avg MSRP / Book</div><div class="kpi-value" style="font-size:22px">£${bookAvgMsrp.toFixed(2)}</div><div class="kpi-sub">across ${bookMsrpItems.length} book${bookMsrpItems.length!==1?"s":""}</div></div>` : ""}
       </div>
     </div>
 
@@ -2326,15 +2201,9 @@ function renderStats() {
 
     ${topBookAuthors.length ? `<div>
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Authors</div>
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-title">Books by Author (top 10)</div>
-          ${bookAuthorBarHTML}
-        </div>
-        ${Object.keys(bookGenderMap).length ? `<div class="chart-card">
-          <div class="chart-title">By Author Gender</div>
-          ${bookDonutHTML(bookGenderMap, ["#7B3553","#3D3BAA","#3B6D11","#BA7517"], "donut-book-gender", 110)}
-        </div>` : ""}
+      <div class="chart-card">
+        <div class="chart-title">Books by Author (top 10)</div>
+        ${bookAuthorBarHTML}
       </div>
     </div>` : ""}
 
@@ -2345,61 +2214,13 @@ function renderStats() {
         ${bookPubBarHTML}
       </div>
     </div>` : ""}
-
-    ${(Object.keys(bookLangMap).length || Object.keys(bookCountryMap).length || Object.keys(pubDecadeMap).length) ? `<div>
-      <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Origins &amp; Publication</div>
-      <div class="charts-row${Object.keys(pubDecadeMap).length ? "-3" : ""}">
-        ${Object.keys(bookLangMap).length ? `<div class="chart-card">
-          <div class="chart-title">By Original Language</div>
-          ${(()=>{
-            const entries = Object.entries(bookLangMap).sort((a,b)=>b[1]-a[1]);
-            const max = entries[0]?.[1] || 1;
-            return `<div class="bar-list">${entries.map(([k,v],i)=>`
-              <div class="bar-row">
-                <div class="bar-row-label"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(k)}</span><span>${v}</span></div>
-                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
-              </div>`).join("")}</div>`;
-          })()}
-        </div>` : ""}
-        ${Object.keys(bookCountryMap).length ? `<div class="chart-card">
-          <div class="chart-title">By Author Country of Origin</div>
-          ${(()=>{
-            const entries = Object.entries(bookCountryMap).sort((a,b)=>b[1]-a[1]);
-            const max = entries[0]?.[1] || 1;
-            return `<div class="bar-list">${entries.map(([k,v],i)=>`
-              <div class="bar-row">
-                <div class="bar-row-label"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(k)}</span><span>${v}</span></div>
-                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
-              </div>`).join("")}</div>`;
-          })()}
-        </div>` : ""}
-        ${Object.keys(pubDecadeMap).length ? `<div class="chart-card">
-          <div class="chart-title">By Publication Decade</div>
-          ${(()=>{
-            const entries = Object.entries(pubDecadeMap).sort((a,b)=>a[0].localeCompare(b[0]));
-            const max = Math.max(...entries.map(([,v])=>v), 1);
-            return `<div class="bar-list">${entries.map(([k,v],i)=>`
-              <div class="bar-row">
-                <div class="bar-row-label"><span>${esc(k)}</span><span>${v}</span></div>
-                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
-              </div>`).join("")}</div>`;
-          })()}
-        </div>` : ""}
-      </div>
-    </div>` : ""}
     `;
   })();
 
   el.innerHTML = `<div class="stats-page">
 
-    <!-- Sticky section nav -->
-    <div class="stats-nav" id="stats-nav">
-      <button class="stats-nav-btn active" onclick="statsScrollTo('manga-overview', this)">📚 Manga</button>
-      ${bookItems.length ? `<button class="stats-nav-btn" onclick="statsScrollTo('books-overview', this)">📖 Books</button>` : ""}
-    </div>
-
     <!-- KPI row -->
-    <div id="manga-overview">
+    <div>
       <div class="stats-section-title">📚 Manga — Overview</div>
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">Total Volumes</div><div class="kpi-value">${total}</div><div class="kpi-sub">${numSeries} series tracked</div></div>
@@ -2409,6 +2230,9 @@ function renderStats() {
         <div class="kpi-card"><div class="kpi-label">Total Spent</div><div class="kpi-value" style="font-size:22px">£${totalSpent.toFixed(2)}</div><div class="kpi-sub">MSRP £${totalMsrp.toFixed(2)}</div></div>
         <div class="kpi-card"><div class="kpi-label">Saved vs MSRP</div><div class="kpi-value" style="font-size:22px;color:#2D4A3E">£${totalSaved.toFixed(2)}</div><div class="kpi-sub">${totalMsrp > 0 ? Math.round(totalSaved/totalMsrp*100) : 0}% off MSRP</div></div>
         <div class="kpi-card"><div class="kpi-label">Avg Price / Vol</div><div class="kpi-value" style="font-size:22px">${avgPricePerVol != null ? "£"+avgPricePerVol.toFixed(2) : "—"}</div><div class="kpi-sub">${itemsWithPrice.length} vol${itemsWithPrice.length!==1?"s":""} with price</div></div>
+        <div class="kpi-card"><div class="kpi-label">Top Original Language</div><div class="kpi-value" style="font-size:18px">${topLanguage ? esc(topLanguage[0]) : "—"}</div><div class="kpi-sub">${topLanguage ? topLanguage[1] + " book(s)" : "No data yet"}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Top Author Country</div><div class="kpi-value" style="font-size:18px">${topCountry ? esc(topCountry[0]) : "—"}</div><div class="kpi-sub">${topCountry ? topCountry[1] + " book(s)" : "No data yet"}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Oldest Original Publication</div><div class="kpi-value" style="font-size:22px">${oldestPublication || "—"}</div><div class="kpi-sub">${newestPublication ? "Newest: " + newestPublication : "No publication years"}</div></div>
         ${mostRecentItem ? `<div class="kpi-card"><div class="kpi-label">Last Purchase</div><div class="kpi-value" style="font-size:15px;line-height:1.2;margin-top:4px">${esc(mostRecentItem.title)}</div><div class="kpi-sub">${daysAgoStr(mostRecentItem.dateBought)} · ${mostRecentItem.dateBought}</div></div>` : ""}
         ${oldestItem ? `<div class="kpi-card"><div class="kpi-label">Collection Age</div><div class="kpi-value" style="font-size:20px">${collectionAgeStr(oldestItem.dateBought)}</div><div class="kpi-sub">since ${oldestItem.dateBought}</div></div>` : ""}
         ${avgPerMonth != null ? `<div class="kpi-card"><div class="kpi-label">Avg Pace</div><div class="kpi-value" style="font-size:22px">${avgPerMonth.toFixed(1)}</div><div class="kpi-sub">vol${avgPerMonth!==1?"s":""}/month · ${last3.length ? "last "+last3.length+" mo avg" : totalMonthsActive+" mo avg"}</div></div>` : ""}
@@ -2810,9 +2634,6 @@ function renderStats() {
       bookItems2.forEach(i => { const f = i.format || "Unknown"; formatMap2[f] = (formatMap2[f] || 0) + 1; });
       drawDonut("donut-book-read", readDist2, ["#185FA5","#5F5E5A"]);
       drawDonut("donut-book-format", formatMap2, ["#8B4A00","#3D3BAA","#2D4A3E","#BA7517","#185FA5"]);
-      const bookGenderMap2 = {};
-      bookItems2.forEach(i => { if (i.authorGender) { bookGenderMap2[i.authorGender] = (bookGenderMap2[i.authorGender] || 0) + 1; } });
-      if (Object.keys(bookGenderMap2).length) drawDonut("donut-book-gender", bookGenderMap2, ["#7B3553","#3D3BAA","#3B6D11","#BA7517"]);
     }
   });
 }
@@ -3066,12 +2887,12 @@ function importJSON(e) {
       const incoming = Array.isArray(data) ? data : (data.items || []);
       if (!incoming.length) { showToast("⚠️ No items found in file"); return; }
       const existingIds = new Set(items.map(i => i.id));
-      const existingKeys = new Set(items.map(i => `${i.title}||${i.author || ""}||${i.format || ""}||${i.translator || ""}`));
+      const existingKeys = new Set(items.map(i => `${i.title}||${i.author || ""}`));
       let added = 0;
       const newCovers = {};
       incoming.forEach(inItem => {
         if (!inItem.title) return;
-        const key = `${inItem.title}||${inItem.author || ""}||${inItem.format || ""}||${inItem.translator || ""}`;
+        const key = `${inItem.title}||${inItem.author || ""}`;
         if (existingKeys.has(key)) return;
         if (existingIds.has(inItem.id)) inItem = { ...inItem, id: Date.now() + Math.random() };
         const cover = inItem.cover || null;
@@ -3122,7 +2943,7 @@ function importCSV(e) {
         const obj = {};
         headers.forEach((h, i) => obj[h] = parseVal(cols[i] || ""));
         if (!obj.title) return;
-        const dup = items.find(i => i.title === obj.title && i.author === (obj.author || "") && (i.format || "") === (obj.format || "") && (i.translator || "") === (obj.translator || ""));
+        const dup = items.find(i => i.title === obj.title && i.author === (obj.author || ""));
         if (dup) return;
         items.push({
           id: Date.now() + Math.random(),
@@ -3139,11 +2960,6 @@ function importCSV(e) {
           translator: obj.translator || null,
           narrator: obj.narrator || null,
           pageCount: obj.pageCount !== "" ? parseInt(obj.pageCount) : null,
-          msrp: obj.msrp !== "" ? parseFloat(obj.msrp) : null,
-          originalLanguage: obj.originalLanguage || null,
-          authorCountry: obj.authorCountry || null,
-          authorGender: obj.authorGender || null,
-          originalPubDate: obj.originalPubDate || null,
           addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), importedAt: Date.now(), cover: null
         });
         added++;
