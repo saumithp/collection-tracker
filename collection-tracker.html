@@ -487,6 +487,37 @@ let currentView = 'library';
 
 function save() { localStorage.setItem("collection-v1", JSON.stringify(items)); }
 
+// Convert a remote cover URL to a base64 data URL and persist it
+async function fetchCoverAsBase64(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    return await new Promise(res => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = () => res(null);
+      r.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
+
+// Cache all remote covers to base64 in the background, saving as each resolves
+async function cacheRemoteCovers() {
+  let dirty = false;
+  for (let i = 0; i < items.length; i++) {
+    const cover = items[i].cover;
+    if (cover && cover.startsWith("http")) {
+      const b64 = await fetchCoverAsBase64(cover);
+      if (b64) { items[i] = { ...items[i], cover: b64 }; dirty = true; }
+    }
+  }
+  if (dirty) { save(); render(); renderSeries(); }
+}
+
+// Run cover caching after initial render so it doesn't block the UI
+setTimeout(cacheRemoteCovers, 500);
+
 
 function switchView(view) {
   currentView = view;
@@ -849,6 +880,7 @@ function importJSON(e) {
       }
       save(); render(); renderSeries();
       showToast(`✅ Imported ${added} title${added !== 1 ? "s" : ""}`);
+      if (added > 0) setTimeout(cacheRemoteCovers, 300);
     } catch { showToast("❌ Invalid JSON file"); }
   };
   reader.readAsText(file);
