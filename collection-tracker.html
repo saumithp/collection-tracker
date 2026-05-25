@@ -221,6 +221,27 @@
     margin-top:6px;
   }
 
+  /* ---- SERIES RATING ---- */
+  .series-rating {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600; margin-top: 5px;
+  }
+  .series-rating .rating-stars { letter-spacing: 0; font-size: 13px; }
+  .series-rating .rating-num { color: var(--text2); font-weight: 500; }
+  .series-rating.perfect .rating-stars { color: #E8A000; filter: drop-shadow(0 0 3px rgba(232,160,0,0.4)); }
+  .series-rating.perfect .rating-num { color: #B87A00; font-weight: 700; }
+  .series-rating:not(.perfect) .rating-stars { color: #C0B080; }
+  .series-rating-input-wrap {
+    display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  }
+  .star-btn {
+    background: none; border: none; cursor: pointer; font-size: 20px;
+    padding: 2px; transition: transform 0.1s; line-height: 1;
+    color: #D0C8A0;
+  }
+  .star-btn:hover, .star-btn.active { color: #E8A000; transform: scale(1.15); }
+  .star-btn.perfect { color: #E8A000; filter: drop-shadow(0 0 4px rgba(232,160,0,0.5)); }
+
 
   /* ---- IMPORT/EXPORT MENU ---- */
   .ie-wrap { position: relative; }
@@ -446,37 +467,6 @@
   }
   .year-no-date-title { font-size: 12px; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.07em; }
 
-  /* ---- RATING WIDGET ---- */
-  .rating-widget { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
-  .rating-pip {
-    width: 26px; height: 26px; border-radius: 7px;
-    border: 1.5px solid var(--border2);
-    background: var(--surface2);
-    font-size: 11px; font-weight: 700; font-family: 'DM Sans', sans-serif;
-    color: var(--text3); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.1s, color 0.1s, border-color 0.1s, transform 0.1s;
-    user-select: none;
-  }
-  .rating-pip:hover { transform: scale(1.12); }
-  .rating-pip.filled { background: var(--accent); color: white; border-color: var(--accent); }
-  .rating-pip.filled.high { background: #185FA5; border-color: #185FA5; }
-  .rating-pip.filled.top  { background: #8B4A00; border-color: #8B4A00; }
-  .rating-pip.filled.perfect { background: #7C3AED; border-color: #7C3AED; }
-  .rating-clear { font-size: 11px; color: var(--text3); background: none; border: none;
-    cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 2px 6px;
-    border-radius: 6px; margin-left: 4px; }
-  .rating-clear:hover { background: var(--surface2); color: var(--text); }
-  .series-rating-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
-    background: var(--surface2); color: var(--text2); border: 1px solid var(--border);
-  }
-  .series-rating-badge.rated { background: var(--accent); color: white; border-color: var(--accent); }
-  .series-rating-badge.rated.high { background: #185FA5; border-color: #185FA5; }
-  .series-rating-badge.rated.top  { background: #8B4A00; border-color: #8B4A00; }
-  .series-rating-badge.rated.perfect { background: #7C3AED; border-color: #7C3AED; }
-
   @media (max-width: 600px) {
     .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
   }
@@ -626,7 +616,6 @@
       <select id="series-sort" onchange="renderSeries()">
         <option value="name">A–Z</option>
         <option value="owned">Most owned</option>
-        <option value="rating">Highest rated</option>
         <option value="pct">% Complete (high first)</option>
         <option value="pct-asc">% Complete (low first)</option>
       </select>
@@ -1067,7 +1056,6 @@ function renderSeries() {
   });
 
   if (sortVal === "owned") seriesList.sort((a, b) => b.owned - a.owned);
-  else if (sortVal === "rating") seriesList.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
   else if (sortVal === "pct") seriesList.sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1));
   else if (sortVal === "pct-asc") seriesList.sort((a, b) => (a.pct ?? 101) - (b.pct ?? 101));
   else seriesList.sort((a, b) => a.name.localeCompare(b.name));
@@ -1090,7 +1078,6 @@ function renderSeries() {
           ${series.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(series.publisher)}</span>` : ""}
         </div>
         <div class="series-card-stat"><span>Volumes owned</span><span>${series.owned}${series.total ? " / " + series.total : ""}</span></div>
-        ${series.rating != null ? `<div style="margin-top:5px">${ratingBadgeHtml(series.rating)}</div>` : ""}
         ${hasPct ? `
         <div style="margin-top:6px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -1103,6 +1090,15 @@ function renderSeries() {
         </div>` : ""}
         <div class="series-card-stat"><span>Manga status</span><span>${esc(series.mangaStatus)}</span></div>
         <div class="series-card-stat"><span>Collection status</span><span>${esc(series.collectionStatus)}</span></div>
+        ${series.rating ? (() => {
+          const r = parseInt(series.rating);
+          const isPerfect = r === 10;
+          const stars = "★".repeat(r) + "☆".repeat(10 - r);
+          return `<div class="series-rating${isPerfect ? " perfect" : ""}">
+            <span class="rating-stars">${stars}</span>
+            <span class="rating-num">${r}/10</span>
+          </div>`;
+        })() : ""}
       </div>
       <div class="card-footer" onclick="event.stopPropagation()">
         <button class="btn-icon" onclick="openSeriesDetail('${safeName}')">View</button>
@@ -1113,37 +1109,33 @@ function renderSeries() {
   observeCovers(grid);
 }
 
-/* ---- RATING HELPERS ---- */
-function ratingBadgeHtml(r) {
-  if (r == null) return "";
-  const cls = r === 10 ? "rated perfect" : r >= 9 ? "rated top" : r >= 7 ? "rated high" : "rated";
-  return `<span class="series-rating-badge ${cls}">★ ${r}/10</span>`;
-}
-
-function buildRatingWidget(containerId, currentRating) {
-  const wrap = document.getElementById(containerId);
+function renderStarButtons(active) {
+  const wrap = document.getElementById("series-rating-stars");
   if (!wrap) return;
-  function render(hover) {
-    const active = hover ?? currentRating ?? 0;
-    wrap.innerHTML = Array.from({length: 10}, (_, i) => {
-      const n = i + 1;
-      const on = n <= active;
-      const cls = on ? (n === 10 ? "rating-pip filled perfect" : n >= 9 ? "rating-pip filled top" : n >= 7 ? "rating-pip filled high" : "rating-pip filled") : "rating-pip";
-      return `<div class="${cls}" data-val="${n}">${n}</div>`;
-    }).join("") + `<button class="rating-clear" id="${containerId}-clear">Clear</button>`;
-    wrap.querySelectorAll(".rating-pip").forEach(pip => {
-      pip.addEventListener("mouseenter", () => render(+pip.dataset.val));
-      pip.addEventListener("mouseleave", () => render(null));
-      pip.addEventListener("click", () => { currentRating = +pip.dataset.val; render(null); });
+  wrap.innerHTML = "";
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "star-btn" + (i <= active ? (active === 10 ? " perfect" : " active") : "");
+    btn.textContent = "★";
+    btn.title = `${i}/10`;
+    btn.addEventListener("click", () => {
+      // Toggle off if clicking the same star
+      const current = parseInt(document.getElementById("series-rating").value) || 0;
+      const newVal = current === i ? 0 : i;
+      document.getElementById("series-rating").value = newVal;
+      renderStarButtons(newVal);
     });
-    const clr = document.getElementById(`${containerId}-clear`);
-    if (clr) clr.addEventListener("click", () => { currentRating = null; render(null); });
+    btn.addEventListener("mouseover", () => renderStarButtons(i));
+    btn.addEventListener("mouseout", () => renderStarButtons(parseInt(document.getElementById("series-rating").value) || 0));
+    wrap.appendChild(btn);
   }
-  render(null);
-  return { getValue: () => currentRating };
+  // Label
+  const label = document.createElement("span");
+  label.style.cssText = "font-size:12px;color:var(--text3);margin-left:6px";
+  label.textContent = active ? `${active}/10` : "Not rated";
+  wrap.appendChild(label);
 }
-
-let _ratingWidget = null;
 
 function editSeries(name) {
   const current = _seriesMeta[name] || {};
@@ -1160,7 +1152,11 @@ function editSeries(name) {
   document.getElementById("series-owned").value = owned;
   document.getElementById("series-manga-status").value = current.mangaStatus || "Publishing";
   document.getElementById("series-collection-status").value = current.collectionStatus || "Collecting";
-  _ratingWidget = buildRatingWidget("series-rating-widget", current.rating ?? null);
+
+  // Render interactive star rating
+  const currentRating = parseInt(current.rating) || 0;
+  document.getElementById("series-rating").value = currentRating;
+  renderStarButtons(currentRating);
 
   document.getElementById("series-modal").style.display = "flex";
 }
@@ -1185,7 +1181,7 @@ function saveSeriesMeta() {
     total: document.getElementById("series-total").value.trim(),
     mangaStatus: document.getElementById("series-manga-status").value,
     collectionStatus: document.getElementById("series-collection-status").value,
-    rating: _ratingWidget ? _ratingWidget.getValue() : ((_seriesMeta[name] || {}).rating ?? null),
+    rating: parseInt(document.getElementById("series-rating").value) || 0
   };
 
   localStorage.setItem("series-meta", JSON.stringify(_seriesMeta));
@@ -1772,6 +1768,72 @@ function renderStats() {
   });
   missingData.sort((a,b) => a.name.localeCompare(b.name));
 
+  // ---- Most / least complete series (need total set) ----
+  const seriesWithPct = seriesList
+    .filter(s => s.total && s.total > 0)
+    .map(s => ({ ...s, pct: Math.min(100, s.owned / s.total * 100) }))
+    .sort((a, b) => b.pct - a.pct);
+  const mostComplete   = seriesWithPct.filter(s => s.pct < 100)[0] || seriesWithPct[0] || null;
+  const leastComplete  = seriesWithPct.length > 1 ? seriesWithPct[seriesWithPct.length - 1] : null;
+
+  // ---- Acquisition pace ----
+  // Group purchases by month, compute 3-month rolling avg of last 3 full months
+  const purchasesByMonth = {};
+  items.forEach(i => {
+    if (!i.dateBought) return;
+    const d = new Date(i.dateBought);
+    if (isNaN(d)) return;
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    purchasesByMonth[key] = (purchasesByMonth[key] || 0) + 1;
+  });
+  const sortedMonths = Object.keys(purchasesByMonth).sort();
+  // Drop the current partial month from the rolling avg
+  const today = new Date();
+  const thisMonth = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`;
+  const fullMonths = sortedMonths.filter(m => m !== thisMonth);
+  const last3 = fullMonths.slice(-3);
+  const avgPerMonth = last3.length
+    ? (last3.reduce((s, m) => s + purchasesByMonth[m], 0) / last3.length)
+    : (sortedMonths.length ? Object.values(purchasesByMonth).reduce((a,b)=>a+b,0) / sortedMonths.length : null);
+  const totalMonthsActive = fullMonths.length || sortedMonths.length;
+
+  // ---- Most recent purchase & collection age ----
+  const datedItems = items.filter(i => i.dateBought).sort((a, b) => b.dateBought.localeCompare(a.dateBought));
+  const mostRecentItem = datedItems[0] || null;
+  const oldestItem     = datedItems[datedItems.length - 1] || null;
+  function daysAgoStr(dateStr) {
+    if (!dateStr) return null;
+    const diff = Math.round((Date.now() - new Date(dateStr)) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    if (diff < 30)  return `${diff} days ago`;
+    if (diff < 365) return `${Math.round(diff/30)} month${Math.round(diff/30)!==1?"s":""} ago`;
+    const yrs = Math.floor(diff/365), mos = Math.round((diff%365)/30);
+    return `${yrs}y${mos>0?" "+mos+"m":""} ago`;
+  }
+  function collectionAgeStr(dateStr) {
+    if (!dateStr) return null;
+    const diff = Math.round((Date.now() - new Date(dateStr)) / 86400000);
+    const yrs = Math.floor(diff/365), mos = Math.round((diff%365)/30);
+    if (yrs >= 1) return `${yrs} year${yrs!==1?"s":""}${mos>0?", "+mos+" mo":""}`;
+    if (mos >= 1) return `${mos} month${mos!==1?"s":""}`;
+    return `${diff} day${diff!==1?"s":""}`;
+  }
+
+  // ---- Price per volume by publisher ----
+  const pubPriceMap = {};
+  items.forEach(i => {
+    if (i.pricePaid == null) return;
+    const p = i.publisher || "Unknown";
+    if (!pubPriceMap[p]) pubPriceMap[p] = { total: 0, count: 0 };
+    pubPriceMap[p].total += i.pricePaid;
+    pubPriceMap[p].count++;
+  });
+  const pubAvgEntries = Object.entries(pubPriceMap)
+    .filter(([, v]) => v.count >= 2)
+    .map(([k, v]) => [k, v.total / v.count, v.count])
+    .sort((a, b) => b[1] - a[1]);
+
   // Status distribution
   const statusDist = {
     "Completed": completed, "Reading": reading,
@@ -1867,6 +1929,9 @@ function renderStats() {
         <div class="kpi-card"><div class="kpi-label">Total Spent</div><div class="kpi-value" style="font-size:22px">£${totalSpent.toFixed(2)}</div><div class="kpi-sub">MSRP £${totalMsrp.toFixed(2)}</div></div>
         <div class="kpi-card"><div class="kpi-label">Saved vs MSRP</div><div class="kpi-value" style="font-size:22px;color:#2D4A3E">£${totalSaved.toFixed(2)}</div><div class="kpi-sub">${totalMsrp > 0 ? Math.round(totalSaved/totalMsrp*100) : 0}% off MSRP</div></div>
         <div class="kpi-card"><div class="kpi-label">Avg Price / Vol</div><div class="kpi-value" style="font-size:22px">${avgPricePerVol != null ? "£"+avgPricePerVol.toFixed(2) : "—"}</div><div class="kpi-sub">${itemsWithPrice.length} vol${itemsWithPrice.length!==1?"s":""} with price</div></div>
+        ${mostRecentItem ? `<div class="kpi-card"><div class="kpi-label">Last Purchase</div><div class="kpi-value" style="font-size:15px;line-height:1.2;margin-top:4px">${esc(mostRecentItem.title)}</div><div class="kpi-sub">${daysAgoStr(mostRecentItem.dateBought)} · ${mostRecentItem.dateBought}</div></div>` : ""}
+        ${oldestItem ? `<div class="kpi-card"><div class="kpi-label">Collection Age</div><div class="kpi-value" style="font-size:20px">${collectionAgeStr(oldestItem.dateBought)}</div><div class="kpi-sub">since ${oldestItem.dateBought}</div></div>` : ""}
+        ${avgPerMonth != null ? `<div class="kpi-card"><div class="kpi-label">Avg Pace</div><div class="kpi-value" style="font-size:22px">${avgPerMonth.toFixed(1)}</div><div class="kpi-sub">vol${avgPerMonth!==1?"s":""}/month · ${last3.length ? "last "+last3.length+" mo avg" : totalMonthsActive+" mo avg"}</div></div>` : ""}
       </div>
     </div>
 
@@ -1973,6 +2038,53 @@ function renderStats() {
       </div>
     </div>
 
+    <!-- Series Spotlight & Publisher Pricing -->
+    <div>
+      <div class="stats-section-title">Series Spotlight</div>
+      <div class="charts-row${pubAvgEntries.length ? "" : ""}">
+        <div class="chart-card">
+          <div class="chart-title">Completion Spotlight</div>
+          ${(()=>{
+            if (!seriesWithPct.length) return '<p style="color:var(--text3);font-size:13px">Set "Total Volumes" on a series to see completion callouts.</p>';
+            const rows = [];
+            if (mostComplete) {
+              const needed = Math.ceil(mostComplete.total - mostComplete.owned);
+              const pct = Math.round(mostComplete.pct);
+              rows.push(`<div style="background:var(--accent-light);border:1px solid rgba(45,74,62,0.18);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px">
+                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:5px">🎯 Closest to finishing</div>
+                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px">${esc(mostComplete.name)}</div>
+                <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${mostComplete.owned} / ${mostComplete.total} volumes · ${pct}% complete · <strong>${needed} vol${needed!==1?"s":""} to go</strong></div>
+                <div style="height:7px;background:rgba(45,74,62,0.15);border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent);border-radius:99px"></div></div>
+              </div>`);
+            }
+            if (leastComplete) {
+              const pct2 = Math.round(leastComplete.pct);
+              const needed2 = leastComplete.total - leastComplete.owned;
+              rows.push(`<div style="background:#FEF7ED;border:1px solid rgba(186,117,23,0.2);border-radius:var(--radius);padding:12px 14px">
+                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#BA7517;margin-bottom:5px">📦 Most to collect</div>
+                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px">${esc(leastComplete.name)}</div>
+                <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${leastComplete.owned} / ${leastComplete.total} volumes · ${pct2}% complete · <strong>${needed2} vol${needed2!==1?"s":""} still needed</strong></div>
+                <div style="height:7px;background:rgba(186,117,23,0.15);border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct2}%;background:#BA7517;border-radius:99px"></div></div>
+              </div>`);
+            }
+            return rows.join("");
+          })()}
+        </div>
+        ${pubAvgEntries.length >= 2 ? `<div class="chart-card">
+          <div class="chart-title">Avg Price / Vol by Publisher</div>
+          <div class="bar-list">${pubAvgEntries.map(([k, avg, cnt], i) => `
+            <div class="bar-row">
+              <div class="bar-row-label">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${esc(k)}</span>
+                <span>£${avg.toFixed(2)} <span style="font-weight:400;color:var(--text3)">(${cnt} vol${cnt!==1?"s":""})</span></span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:${Math.round(avg/pubAvgEntries[0][1]*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+            </div>`).join("")}
+          </div>
+        </div>` : ""}
+      </div>
+    </div>
+
     <!-- Author Stats -->
     <div>
       <div class="stats-section-title">Authors</div>
@@ -2025,92 +2137,6 @@ function renderStats() {
         </div>`;
       })()}
     </div>
-
-    <!-- Ratings -->
-    ${(()=>{
-      const ratedSeries = seriesList
-        .map(s => ({ ...s, rating: (_seriesMeta[s.name] || {}).rating ?? null }))
-        .filter(s => s.rating != null)
-        .sort((a, b) => b.rating - a.rating);
-      if (!ratedSeries.length) return "";
-
-      const avgRating = ratedSeries.reduce((s, x) => s + x.rating, 0) / ratedSeries.length;
-
-      // Avg rating by genre
-      const genreRatings = {};
-      ratedSeries.forEach(s => {
-        const g = s.genre || "Unknown";
-        if (!genreRatings[g]) genreRatings[g] = { total: 0, count: 0 };
-        genreRatings[g].total += s.rating; genreRatings[g].count++;
-      });
-      const genreRatingEntries = Object.entries(genreRatings)
-        .filter(([,v]) => v.count >= 1)
-        .map(([k,v]) => [k, v.total/v.count, v.count])
-        .sort((a,b) => b[1]-a[1]);
-
-      // Avg rating by publisher
-      const pubRatings = {};
-      ratedSeries.forEach(s => {
-        const p = s.publisher || "Unknown";
-        if (!pubRatings[p]) pubRatings[p] = { total: 0, count: 0 };
-        pubRatings[p].total += s.rating; pubRatings[p].count++;
-      });
-      const pubRatingEntries = Object.entries(pubRatings)
-        .filter(([,v]) => v.count >= 1)
-        .map(([k,v]) => [k, v.total/v.count, v.count])
-        .sort((a,b) => b[1]-a[1]);
-
-      const ratingColor = r => r === 10 ? "#7C3AED" : r >= 9 ? "#8B4A00" : r >= 7 ? "#185FA5" : r >= 5 ? "#2D4A3E" : "#5F5E5A";
-
-      return `
-      <div>
-        <div class="stats-section-title">Ratings</div>
-        <div class="kpi-grid" style="margin-bottom:14px">
-          <div class="kpi-card"><div class="kpi-label">Rated Series</div><div class="kpi-value">${ratedSeries.length}</div><div class="kpi-sub">of ${numSeries} total</div></div>
-          <div class="kpi-card"><div class="kpi-label">Average Rating</div><div class="kpi-value" style="color:${ratingColor(avgRating)}">${avgRating.toFixed(1)}</div><div class="kpi-sub">out of 10</div></div>
-          ${ratedSeries[0] ? `<div class="kpi-card"><div class="kpi-label">Top Rated</div><div class="kpi-value" style="font-size:15px;line-height:1.2;margin-top:4px">${esc(ratedSeries[0].name)}</div><div class="kpi-sub">★ ${ratedSeries[0].rating}/10</div></div>` : ""}
-          ${ratedSeries.length > 1 ? `<div class="kpi-card"><div class="kpi-label">Lowest Rated</div><div class="kpi-value" style="font-size:15px;line-height:1.2;margin-top:4px">${esc(ratedSeries[ratedSeries.length-1].name)}</div><div class="kpi-sub">★ ${ratedSeries[ratedSeries.length-1].rating}/10</div></div>` : ""}
-        </div>
-        <div class="charts-row">
-          <div class="chart-card">
-            <div class="chart-title">All Rated Series</div>
-            <div class="bar-list">${ratedSeries.map((s, i) => {
-              const col = ratingColor(s.rating);
-              return `<div class="bar-row">
-                <div class="bar-row-label">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(s.name)}</span>
-                  <span style="color:${col};font-weight:600">★ ${s.rating}</span>
-                </div>
-                <div class="bar-track"><div class="bar-fill" style="width:${s.rating*10}%;background:${col}"></div></div>
-              </div>`;
-            }).join("")}</div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">Avg Rating by Genre</div>
-            ${genreRatingEntries.length ? `<div class="bar-list">${genreRatingEntries.map(([k, avg, cnt]) => {
-              const col = ratingColor(avg);
-              return `<div class="bar-row">
-                <div class="bar-row-label">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${esc(k)}</span>
-                  <span style="color:${col}">★ ${avg.toFixed(1)} <span style="font-weight:400;color:var(--text3)">(${cnt})</span></span>
-                </div>
-                <div class="bar-track"><div class="bar-fill" style="width:${avg*10}%;background:${col}"></div></div>
-              </div>`;
-            }).join("")}</div>` : '<p style="color:var(--text3);font-size:13px">Add genres to your series to see this breakdown.</p>'}
-            ${pubRatingEntries.length >= 2 ? `<div style="margin-top:16px"><div class="chart-title" style="margin-bottom:10px">Avg Rating by Publisher</div><div class="bar-list">${pubRatingEntries.map(([k, avg, cnt]) => {
-              const col = ratingColor(avg);
-              return `<div class="bar-row">
-                <div class="bar-row-label">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${esc(k)}</span>
-                  <span style="color:${col}">★ ${avg.toFixed(1)} <span style="font-weight:400;color:var(--text3)">(${cnt})</span></span>
-                </div>
-                <div class="bar-track"><div class="bar-fill" style="width:${avg*10}%;background:${col}"></div></div>
-              </div>`;
-            }).join("")}</div></div>` : ""}
-          </div>
-        </div>
-      </div>`;
-    })()}
 
     <!-- Missing Volumes -->
     <div>
@@ -2238,7 +2264,6 @@ function openSeriesDetail(name) {
       ${sm.demographic ? `<span class="meta-tag">${esc(sm.demographic)}</span>` : ""}
       ${sm.genre ? `<span class="meta-tag">${esc(sm.genre)}</span>` : ""}
       ${sm.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(sm.publisher)}</span>` : ""}
-      ${sm.rating != null ? ratingBadgeHtml(sm.rating) : ""}
     </div>
     ${pct !== null ? `<div style="margin-top:8px">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px"><span>Collection progress</span><span style="font-weight:600;color:${pctColor}">${pct}%</span></div>
@@ -2251,7 +2276,12 @@ function openSeriesDetail(name) {
     <div class="series-kpi"><div class="series-kpi-label">Total Spent</div><div class="series-kpi-value" style="font-size:18px">£${totalSpent.toFixed(2)}</div></div>
     ${avgPrice != null ? `<div class="series-kpi"><div class="series-kpi-label">Avg / Vol</div><div class="series-kpi-value" style="font-size:18px">£${avgPrice.toFixed(2)}</div></div>` : ""}
     <div class="series-kpi"><div class="series-kpi-label">Manga Status</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.mangaStatus||"—")}</div></div>
-    <div class="series-kpi"><div class="series-kpi-label">Collection</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.collectionStatus||"—")}</div></div>`;
+    <div class="series-kpi"><div class="series-kpi-label">Collection</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.collectionStatus||"—")}</div></div>
+    ${sm.rating ? (() => {
+      const r = parseInt(sm.rating);
+      const isPerfect = r === 10;
+      return `<div class="series-kpi"><div class="series-kpi-label">Rating</div><div class="series-kpi-value" style="font-size:15px;margin-top:2px;${isPerfect ? "color:#B87A00" : ""}">${r}/10${isPerfect ? " ★" : ""}</div></div>`;
+    })() : ""}`;
 
   document.getElementById("series-detail-body").innerHTML = bubbleHTML + volListHTML;
   document.getElementById("series-detail-edit-btn").onclick = () => { closeSeriesDetail(); editSeries(name); };
@@ -2532,11 +2562,6 @@ function importCSV(e) {
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Your Rating</label>
-        <div class="rating-widget" id="series-rating-widget"></div>
-      </div>
-
       <div class="form-row">
         <div class="form-group">
           <label>Manga Status</label>
@@ -2557,6 +2582,12 @@ function importCSV(e) {
             <option>Dropped</option>
           </select>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label>Your Rating (out of 10)</label>
+        <div class="star-btn-row" id="series-rating-stars" style="display:flex;gap:4px;align-items:center;margin-top:4px"></div>
+        <input type="hidden" id="series-rating">
       </div>
 
       <div class="modal-footer">
