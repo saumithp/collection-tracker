@@ -674,6 +674,8 @@
 
   <!-- Grid -->
   <div class="grid" id="grid"></div>
+  <div id="grid-sentinel" style="height:1px;margin-top:32px"></div>
+  <div id="grid-loading" style="display:none;text-align:center;padding:24px 0;color:var(--text3);font-size:13px">Loading more…</div>
   </div>
 
   <div id="stats-view" style="display:none">
@@ -1188,6 +1190,7 @@ backfillItemsFromSeries();
 
 
 function switchView(view) {
+  if (view !== "library") _stopVirtualization();
   currentView = view;
   document.getElementById("library-view").style.display = view === "library" ? "block" : "none";
   document.getElementById("series-view").style.display = view === "series" ? "block" : "none";
@@ -1504,6 +1507,168 @@ function debouncedRender() {
 let sortDir = 1;
 let seriesSortDir = 1;
 
+/* ---- INFINITE SCROLL + VIRTUALIZATION ---- */
+const PAGE_SIZE = 30;          // cards per page
+let _filteredList = [];        // full sorted+filtered list
+let _renderedCount = 0;        // how many cards are currently in the DOM
+let _isAppending = false;      // guard against concurrent appends
+
+// Row height estimate for virtualization (cover aspect 3/4 + body ~120px)
+// We keep a buffer of ±3 pages rendered and recycle the rest
+const VIRT_BUFFER_PAGES = 3;
+
+// Sentinel observer: triggers next page load
+const _sentinelObserver = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) _appendNextPage();
+}, { rootMargin: "300px" });
+
+// Virtualization observer: watches grid children and hides/shows rows
+// Uses a single ResizeObserver + scroll handler instead to avoid 1-observer-per-card overhead
+let _virtScrollHandler = null;
+
+function _startVirtualization() {
+  if (_virtScrollHandler) return; // already running
+  _virtScrollHandler = _doVirtualize;
+  window.addEventListener("scroll", _virtScrollHandler, { passive: true });
+}
+
+function _stopVirtualization() {
+  if (_virtScrollHandler) {
+    window.removeEventListener("scroll", _virtScrollHandler);
+    _virtScrollHandler = null;
+  }
+}
+
+function _doVirtualize() {
+  const grid = document.getElementById("grid");
+  if (!grid) return;
+  const cards = grid.children;
+  if (cards.length === 0) return;
+
+  const viewTop = window.scrollY - 200;
+  const viewBottom = window.scrollY + window.innerHeight + 600;
+
+  for (let i = 0; i < cards.length; i++) {
+    const card = cards[i];
+    const top = card.offsetTop;
+    const bottom = top + card.offsetHeight;
+    const visible = bottom >= viewTop && top <= viewBottom;
+    if (!visible) {
+      // Hide card content but keep the DOM node so the grid height is stable
+      if (!card._virtHidden) {
+        card._virtHidden = true;
+        card._virtHeight = card.offsetHeight;
+        card.style.minHeight = card._virtHeight + "px";
+        card.style.visibility = "hidden";
+        card.style.overflow = "hidden";
+        card.style.contain = "strict";
+      }
+    } else {
+      if (card._virtHidden) {
+        card._virtHidden = false;
+        card.style.visibility = "";
+        card.style.overflow = "";
+        card.style.contain = "";
+        // Don't clear minHeight yet — let natural reflow settle first
+        requestAnimationFrame(() => { if (!card._virtHidden) card.style.minHeight = ""; });
+      }
+    }
+  }
+}
+
+function _appendNextPage() {
+  if (_isAppending) return;
+  const remaining = _filteredList.length - _renderedCount;
+  if (remaining <= 0) {
+    // All items rendered — stop observing sentinel
+    const sentinel = document.getElementById("grid-sentinel");
+    if (sentinel) _sentinelObserver.unobserve(sentinel);
+    document.getElementById("grid-loading").style.display = "none";
+    return;
+  }
+
+  _isAppending = true;
+  document.getElementById("grid-loading").style.display = "block";
+
+  // Use rAF + setTimeout to avoid blocking the main thread
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      const grid = document.getElementById("grid");
+      if (!grid) { _isAppending = false; return; }
+
+      const chunk = _filteredList.slice(_renderedCount, _renderedCount + PAGE_SIZE);
+      const frag = document.createDocumentFragment();
+      chunk.forEach(item => {
+        const el = _buildCard(item);
+        frag.appendChild(el);
+      });
+      grid.appendChild(frag);
+      _renderedCount += chunk.length;
+
+      // Observe new lazy covers
+      observeCovers(grid);
+
+      document.getElementById("grid-loading").style.display = "none";
+      _isAppending = false;
+
+      // Re-observe sentinel if more items remain
+      const sentinel = document.getElementById("grid-sentinel");
+      if (sentinel && _renderedCount < _filteredList.length) {
+        _sentinelObserver.unobserve(sentinel);
+        _sentinelObserver.observe(sentinel);
+      }
+    }, 0);
+  });
+}
+
+function _buildCard(item) {
+  const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
+  const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
+  const color = PALETTE[item.title.length % PALETTE.length];
+  const lazyHtml = lazyCoverHtml(item.id, item.title, "card-cover");
+  const coverHtml = lazyHtml || `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`;
+  const isSelected = selectedIds.has(item.id);
+  const isBook = item.type === "Book";
+  const typeColor = isBook ? "var(--book-fg)" : "var(--manga-fg)";
+  const typeBg = isBook ? "var(--book-bg)" : "var(--manga-bg)";
+
+  const div = document.createElement("div");
+  div.className = "card" + (isSelected ? " selected" : "");
+  if (bulkMode) {
+    div.onclick = () => toggleSelectCard(item.id, div);
+    div.style.cursor = "pointer";
+  }
+  div.innerHTML = `
+    <div class="card-cover-wrap" style="position:relative">
+      ${coverHtml}
+      <div class="card-select-checkbox" onclick="event.stopPropagation();toggleSelectCard(${item.id}, this.closest('.card'))">${isSelected ? "✓" : ""}</div>
+    </div>
+    <div class="card-body">
+      <span class="card-type" style="background:${typeBg};color:${typeColor}">${isBook ? "Book" : "Manga"}</span>
+      <div class="card-title" style="margin-top:4px">${esc(item.title)}</div>
+      <div class="card-author">${esc(item.author||"Unknown author")}</div>
+      <div class="meta-tags">
+        ${item.series ? `<span class="meta-tag">${esc(item.series)}</span>` : ""}
+        ${isBook && item.format ? `<span class="meta-tag" style="background:#FFF3E8;color:#8B4A00;border-color:rgba(139,74,0,0.2)">${esc(item.format)}</span>` : ""}
+        ${!isBook && item.demographic ? `<span class="meta-tag">${esc(item.demographic)}</span>` : ""}
+        ${!isBook && item.genre ? `<span class="meta-tag">${esc(item.genre)}</span>` : ""}
+        ${item.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(item.publisher)}</span>` : ""}
+      </div>
+      ${isBook && item.pageCount ? `<div style="font-size:11px;color:var(--text3)">${item.pageCount} pages${item.msrp != null ? ` · ${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP` : ""}</div>` : (isBook && item.msrp != null ? `<div style="font-size:11px;color:var(--text3)">${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP</div>` : "")}
+      ${!isBook && item.volumes ? `<div style="font-size:11px;color:var(--text3)">${esc(item.volumes)} vol.</div>` : ""}
+      ${!isBook && item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.pricePaid, item.priceCurrency || "GBP")}${item.dateBought ? ` · ${item.dateBought}` : ""}</div>` : (!isBook && item.dateBought ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${item.dateBought}</div>` : "")}
+    </div>
+    <div class="card-footer">
+      <span class="status-pill" style="background:${sc.bg};color:${sc.fg}">${item.status}</span>
+      <div class="card-actions">
+        ${!bulkMode ? `<button class="btn-icon" onclick="openEdit(${item.id})">Edit</button>
+        <button class="btn-icon del" onclick="deleteItem(${item.id})">Delete</button>` : ""}
+      </div>
+    </div>`;
+  return div;
+}
+/* ---- END INFINITE SCROLL + VIRTUALIZATION ---- */
+
 function toggleSortDir() {
   sortDir = -sortDir;
   const btn = document.getElementById("sort-dir-btn");
@@ -1551,11 +1716,25 @@ function render() {
   document.getElementById("s-books").textContent = _books.length;
   document.getElementById("s-done").textContent = _books.filter(i => i.status === "Unread").length;
 
-  // Recently Added — only re-render when items change (called from markDirty)
-  // renderRecent() is NOT called here to avoid cover cost on every filter/search change
+  // Reset infinite scroll state
+  _filteredList = list;
+  _renderedCount = 0;
+  _isAppending = false;
+
+  // Stop virtualization while we rebuild
+  _stopVirtualization();
 
   const grid = document.getElementById("grid");
   grid.className = "grid" + (bulkMode ? " bulk-mode" : "");
+
+  // Detach sentinel observer before clearing
+  const sentinel = document.getElementById("grid-sentinel");
+  if (sentinel) _sentinelObserver.unobserve(sentinel);
+  document.getElementById("grid-loading").style.display = "none";
+
+  // Clear grid
+  grid.innerHTML = "";
+
   if (list.length === 0) {
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
       <div class="empty-icon">📚</div>
@@ -1564,46 +1743,23 @@ function render() {
     return;
   }
 
-  grid.innerHTML = list.map(item => {
-    const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
-    const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
-    const color = PALETTE[item.title.length % PALETTE.length];
-    const lazyHtml = lazyCoverHtml(item.id, item.title, "card-cover");
-    const coverHtml = lazyHtml || `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`;
-    const isSelected = selectedIds.has(item.id);
-    const isBook = item.type === "Book";
-    const typeColor = isBook ? "var(--book-fg)" : "var(--manga-fg)";
-    const typeBg = isBook ? "var(--book-bg)" : "var(--manga-bg)";
-    return `<div class="card${isSelected ? " selected" : ""}" ${bulkMode ? `onclick="toggleSelectCard(${item.id}, this)" style="cursor:pointer"` : ""}>
-      <div class="card-cover-wrap" style="position:relative">
-        ${coverHtml}
-        <div class="card-select-checkbox" onclick="event.stopPropagation();toggleSelectCard(${item.id}, this.closest('.card'))">${isSelected ? "✓" : ""}</div>
-      </div>
-      <div class="card-body">
-        <span class="card-type" style="background:${typeBg};color:${typeColor}">${isBook ? "Book" : "Manga"}</span>
-        <div class="card-title" style="margin-top:4px">${esc(item.title)}</div>
-        <div class="card-author">${esc(item.author||"Unknown author")}</div>
-        <div class="meta-tags">
-          ${item.series ? `<span class="meta-tag">${esc(item.series)}</span>` : ""}
-          ${isBook && item.format ? `<span class="meta-tag" style="background:#FFF3E8;color:#8B4A00;border-color:rgba(139,74,0,0.2)">${esc(item.format)}</span>` : ""}
-          ${!isBook && item.demographic ? `<span class="meta-tag">${esc(item.demographic)}</span>` : ""}
-          ${!isBook && item.genre ? `<span class="meta-tag">${esc(item.genre)}</span>` : ""}
-          ${item.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(item.publisher)}</span>` : ""}
-        </div>
-        ${isBook && item.pageCount ? `<div style="font-size:11px;color:var(--text3)">${item.pageCount} pages${item.msrp != null ? ` · ${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP` : ""}</div>` : (isBook && item.msrp != null ? `<div style="font-size:11px;color:var(--text3)">${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP</div>` : "")}
-        ${!isBook && item.volumes ? `<div style="font-size:11px;color:var(--text3)">${esc(item.volumes)} vol.</div>` : ""}
-        ${!isBook && item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.pricePaid, item.priceCurrency || "GBP")}${item.dateBought ? ` · ${item.dateBought}` : ""}</div>` : (!isBook && item.dateBought ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${item.dateBought}</div>` : "")}
-      </div>
-      <div class="card-footer">
-        <span class="status-pill" style="background:${sc.bg};color:${sc.fg}">${item.status}</span>
-        <div class="card-actions">
-          ${!bulkMode ? `<button class="btn-icon" onclick="openEdit(${item.id})">Edit</button>
-          <button class="btn-icon del" onclick="deleteItem(${item.id})">Delete</button>` : ""}
-        </div>
-      </div>
-    </div>`;
-  }).join("");
+  // Render first page
+  const firstPage = list.slice(0, PAGE_SIZE);
+  const frag = document.createDocumentFragment();
+  firstPage.forEach(item => frag.appendChild(_buildCard(item)));
+  grid.appendChild(frag);
+  _renderedCount = firstPage.length;
   observeCovers(grid);
+
+  // Set up sentinel for next pages
+  if (_renderedCount < list.length && sentinel) {
+    _sentinelObserver.observe(sentinel);
+  }
+
+  // Start virtualization once we have enough cards to benefit from it
+  if (list.length > PAGE_SIZE) {
+    _startVirtualization();
+  }
 }
 
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -1716,12 +1872,17 @@ function updateBulkCount() {
 }
 
 function bulkSelectAll() {
-  const search = document.getElementById("search").value.toLowerCase();
-  const status = document.getElementById("status-filter").value;
-  const filtered = items
+  // Use _filteredList so all matching items are selected, not just rendered ones
+  const filtered = _filteredList.length > 0 ? _filteredList : items
     .filter(i => typeFilter === "All" || i.type === typeFilter)
-    .filter(i => status === "All" || i.status === status)
-    .filter(i => !search || i._titleLower.includes(search) || i._authorLower.includes(search));
+    .filter(i => {
+      const status = document.getElementById("status-filter").value;
+      return status === "All" || i.status === status;
+    })
+    .filter(i => {
+      const search = document.getElementById("search").value.toLowerCase();
+      return !search || i._titleLower.includes(search) || i._authorLower.includes(search);
+    });
   const allShownSelected = filtered.every(i => selectedIds.has(i.id));
   if (allShownSelected) {
     filtered.forEach(i => selectedIds.delete(i.id));
