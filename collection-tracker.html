@@ -834,11 +834,14 @@ function importJSON(e) {
       const incoming = Array.isArray(data) ? data : (data.items || []);
       if (!incoming.length) { showToast("⚠️ No items found in file"); return; }
       const existingIds = new Set(items.map(i => i.id));
+      const existingKeys = new Set(items.map(i => `${i.title}||${i.author || ""}`));
       let added = 0;
       incoming.forEach(inItem => {
         if (!inItem.title) return;
+        const key = `${inItem.title}||${inItem.author || ""}`;
+        if (existingKeys.has(key)) return;
         if (existingIds.has(inItem.id)) inItem = { ...inItem, id: Date.now() + Math.random() };
-        items.push(inItem); existingIds.add(inItem.id); added++;
+        items.push(inItem); existingIds.add(inItem.id); existingKeys.add(key); added++;
       });
       if (data.seriesMeta) {
         const existing = JSON.parse(localStorage.getItem("series-meta") || "{}");
