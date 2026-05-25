@@ -2261,15 +2261,19 @@ function importJSON(e) {
         items.push({ ...inItem, importedAt: Date.now() }); existingIds.add(inItem.id); existingKeys.add(key); added++;
       });
       if (data.seriesMeta) {
-        const existing = JSON.parse(localStorage.getItem("series-meta") || "{}");
-        localStorage.setItem("series-meta", JSON.stringify({ ...data.seriesMeta, ...existing }));
+        // Merge: imported data fills in fields, but existing local values win per-field
+        // so we deep-merge per series rather than shallow-merging the whole object
+        Object.entries(data.seriesMeta).forEach(([name, importedMeta]) => {
+          _seriesMeta[name] = { ...importedMeta, ...(_seriesMeta[name] || {}) };
+        });
+        localStorage.setItem("series-meta", JSON.stringify(_seriesMeta));
       }
       // Write new covers to IndexedDB and cache
       if (Object.keys(newCovers).length) {
         Object.assign(coverCache, newCovers);
         await CoverDB.setMany(newCovers);
       }
-      save(); render(); renderSeries();
+      save(); render(); markDirty();
       showToast(`✅ Imported ${added} title${added !== 1 ? "s" : ""}`);
     } catch { showToast("❌ Invalid JSON file"); }
   };
