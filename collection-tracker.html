@@ -2942,12 +2942,12 @@ function importJSON(e) {
       const incoming = Array.isArray(data) ? data : (data.items || []);
       if (!incoming.length) { showToast("⚠️ No items found in file"); return; }
       const existingIds = new Set(items.map(i => i.id));
-      const existingKeys = new Set(items.map(i => `${i.title}||${i.author || ""}`));
+      const existingKeys = new Set(items.map(i => `${i.title}||${i.author || ""}||${i.format || ""}||${i.translator || ""}`));
       let added = 0;
       const newCovers = {};
       incoming.forEach(inItem => {
         if (!inItem.title) return;
-        const key = `${inItem.title}||${inItem.author || ""}`;
+        const key = `${inItem.title}||${inItem.author || ""}||${inItem.format || ""}||${inItem.translator || ""}`;
         if (existingKeys.has(key)) return;
         if (existingIds.has(inItem.id)) inItem = { ...inItem, id: Date.now() + Math.random() };
         const cover = inItem.cover || null;
@@ -2998,7 +2998,7 @@ function importCSV(e) {
         const obj = {};
         headers.forEach((h, i) => obj[h] = parseVal(cols[i] || ""));
         if (!obj.title) return;
-        const dup = items.find(i => i.title === obj.title && i.author === (obj.author || ""));
+        const dup = items.find(i => i.title === obj.title && i.author === (obj.author || "") && (i.format || "") === (obj.format || "") && (i.translator || "") === (obj.translator || ""));
         if (dup) return;
         items.push({
           id: Date.now() + Math.random(),
