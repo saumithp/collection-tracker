@@ -1012,18 +1012,26 @@ function setType(btn) {
 function renderRecent() {
   const rs = document.getElementById("recent-section");
   if (!rs) return;
-  if (recentHidden || items.length === 0) { rs.style.display = "none"; return; }
+  if (recentHidden || items.length === 0 || !items.some(i => i.dateBought)) { rs.style.display = "none"; return; }
   rs.style.display = "";
-  const recent = [...items].sort((a,b) => (b.importedAt||b.addedAt||0)-(a.importedAt||a.addedAt||0)).slice(0, 8);
+  const recent = [...items]
+    .filter(i => i.dateBought)
+    .sort((a,b) => new Date(b.dateBought) - new Date(a.dateBought))
+    .slice(0, 8);
   const grid = document.getElementById("recent-grid");
   grid.innerHTML = recent.map(item => {
     const cover = getCover(item.id);
     const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
     const color = PALETTE[item.title.length % PALETTE.length];
+    const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
+    const boughtMidnight = new Date(item.dateBought); boughtMidnight.setHours(0,0,0,0);
+    const daysAgo = Math.round((todayMidnight - boughtMidnight) / 86400000);
+    const dateStr = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo}d ago`;
     return `<div class="recent-card" onclick="openEdit(${item.id})">
       ${cover ? `<img class="recent-cover" src="${cover}" alt="${esc(item.title)}">` : `<div class="recent-cover-placeholder" style="background:${color}">${initials}</div>`}
       <div class="recent-info">
         <div class="recent-name">${esc(item.title)}</div>
+        <div class="recent-date">${dateStr}</div>
       </div>
     </div>`;
   }).join("");
