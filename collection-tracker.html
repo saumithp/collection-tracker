@@ -223,20 +223,20 @@
 
   /* ---- SERIES RATING BADGE ---- */
   .rating-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 20px;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
-    margin-top: 6px; color: white;
-    background: var(--accent); /* default blue-green */
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px;
+    font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700;
+    margin-top: 6px; color: white; white-space: nowrap; flex-shrink: 0;
+    background: var(--accent);
   }
-  .rating-badge .rb-star { font-size: 12px; }
+  .rating-badge .rb-star { font-size: 10px; }
   .rating-badge .rb-num { letter-spacing: 0.01em; }
   /* 1-4: muted grey-blue */
-  .rating-badge.rb-low   { background: #6B7F9E; }
-  /* 5-7: brand blue */
-  .rating-badge.rb-mid   { background: #3D3BAA; }
-  /* 8-9: brand green */
-  .rating-badge.rb-high  { background: var(--accent); }
+  .rating-badge.rb-low     { background: #6B7F9E; }
+  /* 5-7: indigo */
+  .rating-badge.rb-mid     { background: #3D3BAA; }
+  /* 8-9: dark green */
+  .rating-badge.rb-high    { background: #1E3D30; }
   /* 10: gold */
   .rating-badge.rb-perfect { background: #C07000; }
 
@@ -248,24 +248,17 @@
   .star-btn:hover, .star-btn.active { color: #E8A000; transform: scale(1.15); }
   .star-btn.perfect { color: #E8A000; filter: drop-shadow(0 0 4px rgba(232,160,0,0.5)); }
 
-  /* Rating stats table */
-  .rating-stats-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;
-  }
-  .rating-stat-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
-  }
-  .rating-stat-badge-wrap { flex-shrink: 0; }
-  .rating-stat-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .rating-stat-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rating-stat-sub  { font-size: 11px; color: var(--text3); }
-
-  .rating-dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .rating-dist-label { width: 42px; flex-shrink: 0; }
+  .rating-dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .rating-dist-label { width: 68px; flex-shrink: 0; }
   .rating-dist-bar-wrap { flex: 1; height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
-  .rating-dist-bar { height: 100%; border-radius: 99px; transition: width 0.4s; }
-  .rating-dist-count { width: 24px; text-align: right; font-size: 12px; color: var(--text2); font-weight: 500; flex-shrink: 0; }
+  .rating-dist-bar { height: 100%; border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+  .rating-dist-count { width: 20px; text-align: right; font-size: 12px; color: var(--text2); font-weight: 500; flex-shrink: 0; }
+
+  /* avg-by bar list (genre / publisher ratings) */
+  .avg-rating-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+  .avg-rating-row-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
+  .avg-rating-row-label .arv { font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 4px; }
+  .avg-rating-row-label .arv .rb-star { color: #3D3BAA; font-size: 11px; }
 
 
   /* ---- IMPORT/EXPORT MENU ---- */
@@ -2170,7 +2163,9 @@ function renderStats() {
       const ratedWithData = rated.map(([name, sm]) => {
         const r = parseInt(sm.rating);
         const owned = items.filter(i => (i.series||"Standalone")===name).length;
-        return { name, rating: r, owned };
+        const genre = sm.genre || "";
+        const publisher = sm.publisher || "";
+        return { name, rating: r, owned, genre, publisher };
       }).sort((a,b) => b.rating - a.rating);
 
       const avg = (ratedWithData.reduce((s,x)=>s+x.rating,0) / ratedWithData.length).toFixed(1);
@@ -2184,10 +2179,52 @@ function renderStats() {
       ratedWithData.forEach(x=>dist[x.rating]++);
       const maxDist = Math.max(...Object.values(dist), 1);
 
+      // Avg by genre
+      const genreRatings = {};
+      ratedWithData.forEach(x => {
+        if (!x.genre) return;
+        if (!genreRatings[x.genre]) genreRatings[x.genre] = { sum:0, count:0 };
+        genreRatings[x.genre].sum += x.rating;
+        genreRatings[x.genre].count++;
+      });
+      const genreAvgs = Object.entries(genreRatings)
+        .map(([g,v]) => ({ name:g, avg: v.sum/v.count, count: v.count }))
+        .sort((a,b) => b.avg - a.avg);
+
+      // Avg by publisher
+      const pubRatings = {};
+      ratedWithData.forEach(x => {
+        if (!x.publisher) return;
+        if (!pubRatings[x.publisher]) pubRatings[x.publisher] = { sum:0, count:0 };
+        pubRatings[x.publisher].sum += x.rating;
+        pubRatings[x.publisher].count++;
+      });
+      const pubAvgs = Object.entries(pubRatings)
+        .map(([p,v]) => ({ name:p, avg: v.sum/v.count, count: v.count }))
+        .sort((a,b) => b.avg - a.avg);
+
       function badgeHtml(r) {
         const cls = r===10?"rb-perfect":r>=8?"rb-high":r>=5?"rb-mid":"rb-low";
-        return `<div class="rating-badge ${cls}" style="margin-top:0"><span class="rb-star">★</span><span class="rb-num">${r}/10</span></div>`;
+        return `<span class="rating-badge ${cls}" style="margin-top:0"><span class="rb-star">★</span><span class="rb-num">${r}/10</span></span>`;
       }
+
+      function avgBarHtml(entries, maxAvg) {
+        if (!entries.length) return '<p style="color:var(--text3);font-size:13px">Not enough rated series with this data yet.</p>';
+        return entries.map(e => {
+          const barColor = e.avg===10?"#C07000":e.avg>=8?"#1E3D30":e.avg>=5?"#3D3BAA":"#6B7F9E";
+          const pct = Math.round((e.avg / maxAvg) * 100);
+          return `<div class="avg-rating-row">
+            <div class="avg-rating-row-label">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%">${esc(e.name)}</span>
+              <span class="arv"><span class="rb-star">★</span>${e.avg.toFixed(1)} <span style="font-weight:400;color:var(--text3)">(${e.count})</span></span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+          </div>`;
+        }).join("");
+      }
+
+      const maxGenreAvg = genreAvgs.length ? Math.max(...genreAvgs.map(x=>x.avg)) : 10;
+      const maxPubAvg   = pubAvgs.length   ? Math.max(...pubAvgs.map(x=>x.avg))   : 10;
 
       return `<div>
         <div class="stats-section-title">Ratings</div>
@@ -2208,18 +2245,18 @@ function renderStats() {
             ${tens.length ? `<div class="kpi-sub">${tens.map(x=>esc(x.name)).join(", ").slice(0,40)}${tens.map(x=>x.name).join("").length>40?"…":""}</div>` : ""}
           </div>
         </div>
+
         <div class="charts-row">
           <div class="chart-card">
             <div class="chart-title">Rating Distribution</div>
-            <div style="margin-top:4px">
+            <div style="margin-top:6px">
               ${[10,9,8,7,6,5,4,3,2,1].map(r => {
                 const count = dist[r] || 0;
                 const cls = r===10?"rb-perfect":r>=8?"rb-high":r>=5?"rb-mid":"rb-low";
-                const colors = {rb_perfect:"#C07000",rb_high:"#2D4A3E",rb_mid:"#3D3BAA",rb_low:"#6B7F9E"};
-                const barColor = cls==="rb-perfect"?"#C07000":cls==="rb-high"?"#2D4A3E":cls==="rb-mid"?"#3D3BAA":"#6B7F9E";
+                const barColor = cls==="rb-perfect"?"#C07000":cls==="rb-high"?"#1E3D30":cls==="rb-mid"?"#3D3BAA":"#6B7F9E";
                 return `<div class="rating-dist-row">
                   <div class="rating-dist-label">${badgeHtml(r)}</div>
-                  <div class="rating-dist-bar-wrap"><div class="rating-dist-bar" style="width:${count?Math.max(4,Math.round(count/maxDist*100)):0}%;background:${barColor}"></div></div>
+                  <div class="rating-dist-bar-wrap"><div class="rating-dist-bar" style="width:${count?Math.max(3,Math.round(count/maxDist*100)):0}%;background:${barColor}"></div></div>
                   <div class="rating-dist-count">${count||""}</div>
                 </div>`;
               }).join("")}
@@ -2236,6 +2273,14 @@ function renderStats() {
             </div>
           </div>
         </div>
+
+        ${(genreAvgs.length || pubAvgs.length) ? `<div class="chart-card" style="margin-top:14px">
+          ${genreAvgs.length ? `<div class="chart-title">Avg Rating by Genre</div>
+          <div class="bar-list" style="margin-bottom:${pubAvgs.length?20:0}px">${avgBarHtml(genreAvgs, maxGenreAvg)}</div>` : ""}
+          ${pubAvgs.length ? `<div class="chart-title" style="margin-top:4px">Avg Rating by Publisher</div>
+          <div class="bar-list">${avgBarHtml(pubAvgs, maxPubAvg)}</div>` : ""}
+        </div>` : ""}
+
         ${(top && bottom && top.name !== bottom.name) ? `<div class="charts-row" style="margin-top:14px">
           <div class="chart-card" style="background:var(--accent-light);border-color:rgba(45,74,62,0.2)">
             <div class="chart-title" style="color:var(--accent)">⭐ Highest Rated</div>
