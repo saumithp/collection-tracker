@@ -1222,8 +1222,8 @@ function saveItem() {
     publisher: sm.publisher || "",
     notes: document.getElementById("f-notes").value.trim(),
     dateBought: document.getElementById("f-dateBought").value || null,
-    pricePaid: parseFloat(document.getElementById("f-pricePaid").value) || null,
-    msrp: parseFloat(document.getElementById("f-msrp").value) || null,
+    pricePaid: document.getElementById("f-pricePaid").value !== "" ? parseFloat(document.getElementById("f-pricePaid").value) : null,
+    msrp: document.getElementById("f-msrp").value !== "" ? parseFloat(document.getElementById("f-msrp").value) : null,
   };
   let savedId;
   if (editId) {
@@ -1933,8 +1933,8 @@ function importCSV(e) {
           genre: obj.genre || "", publisher: obj.publisher || "",
           notes: obj.notes || "",
           dateBought: obj.dateBought || null,
-          pricePaid: obj.pricePaid ? parseFloat(obj.pricePaid) : null,
-          msrp: obj.msrp ? parseFloat(obj.msrp) : null,
+          pricePaid: obj.pricePaid !== "" ? parseFloat(obj.pricePaid) : null,
+          msrp: obj.msrp !== "" ? parseFloat(obj.msrp) : null,
           addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), importedAt: Date.now(), cover: null
         });
         added++;
