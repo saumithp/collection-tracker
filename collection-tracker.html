@@ -462,7 +462,7 @@
   <div class="toolbar">
     <div class="search-wrap">
       <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
-      <input type="search" id="search" placeholder="Search titles, authors…" oninput="render()">
+      <input type="search" id="search" placeholder="Search titles, authors…" oninput="debouncedRender()">
     </div>
     <div class="filter-btns">
       <button class="filter-btn active" data-type="All" onclick="setType(this)">All</button>
@@ -741,8 +741,9 @@ let recentHidden = false;
 
 function save() {
   // Never write cover data to localStorage — covers live in IndexedDB
-  const slim = items.map(i => { const c = {...i}; delete c.cover; return c; });
+  const slim = items.map(i => { const c = {...i}; delete c.cover; delete c._titleLower; delete c._authorLower; delete c._dateBoughtMs; return c; });
   localStorage.setItem("collection-v1", JSON.stringify(slim));
+  buildIndex();
 }
 
 
@@ -921,6 +922,23 @@ function saveSeriesMeta() {
   closeSeriesModal();
 }
 
+/* ---- SEARCH OPTIMISATION ---- */
+// Pre-compute lowercase fields and parsed dates used on every render
+function buildIndex() {
+  items.forEach(i => {
+    i._titleLower  = (i.title  || "").toLowerCase();
+    i._authorLower = (i.author || "").toLowerCase();
+    i._dateBoughtMs = i.dateBought ? new Date(i.dateBought).getTime() : null;
+  });
+}
+buildIndex();
+
+let _renderTimer = null;
+function debouncedRender() {
+  clearTimeout(_renderTimer);
+  _renderTimer = setTimeout(render, 150);
+}
+
 function render() {
   const search = document.getElementById("search").value.toLowerCase();
   const status = document.getElementById("status-filter").value;
@@ -929,7 +947,7 @@ function render() {
   let list = items
     .filter(i => typeFilter === "All" || i.type === typeFilter)
     .filter(i => status === "All" || i.status === status)
-    .filter(i => !search || i.title.toLowerCase().includes(search) || (i.author||"").toLowerCase().includes(search));
+    .filter(i => !search || i._titleLower.includes(search) || i._authorLower.includes(search));
 
   if (sort === "title") list.sort((a,b) => a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'}));
   else if (sort === "title-desc") list.sort((a,b) => b.title.localeCompare(a.title, undefined, {numeric: true, sensitivity: 'base'}));
@@ -937,8 +955,7 @@ function render() {
   else if (sort === "price-desc") list.sort((a,b) => (b.pricePaid ?? -Infinity) - (a.pricePaid ?? -Infinity));
   else {
     list.sort((a,b) => {
-      const da = a.dateBought ? new Date(a.dateBought).getTime() : null;
-      const db = b.dateBought ? new Date(b.dateBought).getTime() : null;
+      const da = a._dateBoughtMs, db = b._dateBoughtMs;
       if (da === null && db === null) return b.addedAt - a.addedAt;
       if (da === null) return 1;
       if (db === null) return -1;
