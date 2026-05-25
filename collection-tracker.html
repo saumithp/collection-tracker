@@ -221,53 +221,36 @@
     margin-top:6px;
   }
 
-  /* ---- SERIES RATING BADGE ---- */
-  .rating-badge {
+  /* ---- RATING WIDGET ---- */
+  .rating-widget { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  .rating-pip {
+    width: 26px; height: 26px; border-radius: 7px;
+    border: 1.5px solid var(--border2);
+    background: var(--surface2);
+    font-size: 11px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+    color: var(--text3); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.1s, color 0.1s, border-color 0.1s, transform 0.1s;
+    user-select: none;
+  }
+  .rating-pip:hover { transform: scale(1.12); }
+  .rating-pip.filled { background: var(--accent); color: white; border-color: var(--accent); }
+  .rating-pip.filled.high { background: #185FA5; border-color: #185FA5; }
+  .rating-pip.filled.top  { background: #8B4A00; border-color: #8B4A00; }
+  .rating-pip.filled.perfect { background: #7C3AED; border-color: #7C3AED; }
+  .rating-clear { font-size: 11px; color: var(--text3); background: none; border: none;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 2px 6px;
+    border-radius: 6px; margin-left: 4px; }
+  .rating-clear:hover { background: var(--surface2); color: var(--text); }
+  .series-rating-badge {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 9px; border-radius: 20px;
-    font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700;
-    margin-top: 6px; color: white; white-space: nowrap; flex-shrink: 0;
-    background: var(--accent);
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+    background: var(--surface2); color: var(--text2); border: 1px solid var(--border);
   }
-  .rating-badge .rb-star { font-size: 10px; }
-  .rating-badge .rb-num { letter-spacing: 0.01em; }
-  /* 1-4: muted grey-blue */
-  .rating-badge.rb-low     { background: #6B7F9E; }
-  /* 5-7: indigo */
-  .rating-badge.rb-mid     { background: #3D3BAA; }
-  /* 8-9: dark green */
-  .rating-badge.rb-high    { background: #1E3D30; }
-  /* 10: gold */
-  .rating-badge.rb-perfect { background: #C07000; }
-
-  .num-btn {
-    width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-    transition: background 0.12s, color 0.12s, transform 0.1s;
-    background: var(--surface2); color: var(--text2);
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .num-btn:hover  { background: #3D3BAA; color: white; transform: scale(1.08); }
-  .num-btn.active { background: #1E3D30; color: white; }
-  .num-btn.active-10 { background: #C07000; color: white; }
-  .num-btn-clear {
-    background: none; border: none; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text3);
-    padding: 4px 6px; border-radius: 6px; margin-left: 2px;
-  }
-  .num-btn-clear:hover { color: var(--text); background: var(--surface2); }
-
-  .rating-dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
-  .rating-dist-label { width: 68px; flex-shrink: 0; }
-  .rating-dist-bar-wrap { flex: 1; height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
-  .rating-dist-bar { height: 100%; border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
-  .rating-dist-count { width: 20px; text-align: right; font-size: 12px; color: var(--text2); font-weight: 500; flex-shrink: 0; }
-
-  /* avg-by bar list (genre / publisher ratings) */
-  .avg-rating-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
-  .avg-rating-row-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
-  .avg-rating-row-label .arv { font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 4px; }
-  .avg-rating-row-label .arv .rb-star { color: #3D3BAA; font-size: 11px; }
+  .series-rating-badge.rated { background: var(--accent); color: white; border-color: var(--accent); }
+  .series-rating-badge.rated.high { background: #185FA5; border-color: #185FA5; }
+  .series-rating-badge.rated.top  { background: #8B4A00; border-color: #8B4A00; }
+  .series-rating-badge.rated.perfect { background: #7C3AED; border-color: #7C3AED; }
 
 
   /* ---- IMPORT/EXPORT MENU ---- */
@@ -643,6 +626,7 @@
       <select id="series-sort" onchange="renderSeries()">
         <option value="name">A–Z</option>
         <option value="owned">Most owned</option>
+        <option value="rating">Highest rated</option>
         <option value="pct">% Complete (high first)</option>
         <option value="pct-asc">% Complete (low first)</option>
       </select>
@@ -1083,6 +1067,7 @@ function renderSeries() {
   });
 
   if (sortVal === "owned") seriesList.sort((a, b) => b.owned - a.owned);
+  else if (sortVal === "rating") seriesList.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
   else if (sortVal === "pct") seriesList.sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1));
   else if (sortVal === "pct-asc") seriesList.sort((a, b) => (a.pct ?? 101) - (b.pct ?? 101));
   else seriesList.sort((a, b) => a.name.localeCompare(b.name));
@@ -1105,6 +1090,7 @@ function renderSeries() {
           ${series.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(series.publisher)}</span>` : ""}
         </div>
         <div class="series-card-stat"><span>Volumes owned</span><span>${series.owned}${series.total ? " / " + series.total : ""}</span></div>
+        ${series.rating != null ? `<div style="margin-top:5px">${ratingBadgeHtml(series.rating)}</div>` : ""}
         ${hasPct ? `
         <div style="margin-top:6px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -1117,11 +1103,6 @@ function renderSeries() {
         </div>` : ""}
         <div class="series-card-stat"><span>Manga status</span><span>${esc(series.mangaStatus)}</span></div>
         <div class="series-card-stat"><span>Collection status</span><span>${esc(series.collectionStatus)}</span></div>
-        ${series.rating ? (() => {
-          const r = parseInt(series.rating);
-          const cls = r === 10 ? "rb-perfect" : r >= 8 ? "rb-high" : r >= 5 ? "rb-mid" : "rb-low";
-          return `<div class="rating-badge ${cls}"><span class="rb-star">★</span><span class="rb-num">${r}/10</span></div>`;
-        })() : ""}
       </div>
       <div class="card-footer" onclick="event.stopPropagation()">
         <button class="btn-icon" onclick="openSeriesDetail('${safeName}')">View</button>
@@ -1132,51 +1113,36 @@ function renderSeries() {
   observeCovers(grid);
 }
 
-function renderStarButtons(active) {
-  const wrap = document.getElementById("series-rating-stars");
-  if (!wrap) return;
-  wrap.innerHTML = "";
-  wrap.style.cssText = "display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:4px";
-
-  for (let i = 1; i <= 10; i++) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = i;
-    btn.title = `${i}/10`;
-    if (i <= active) {
-      btn.className = "num-btn " + (active === 10 ? "active-10" : "active");
-    } else {
-      btn.className = "num-btn";
-    }
-    btn.addEventListener("click", () => {
-      const cur = parseInt(document.getElementById("series-rating").value) || 0;
-      const newVal = cur === i ? 0 : i;
-      document.getElementById("series-rating").value = newVal;
-      renderStarButtons(newVal);
-    });
-    btn.addEventListener("mouseover", () => {
-      // preview hover state without committing
-      wrap.querySelectorAll(".num-btn").forEach((b, idx) => {
-        b.className = "num-btn" + (idx < i ? (i === 10 ? " active-10" : " active") : "");
-      });
-    });
-    btn.addEventListener("mouseout", () => {
-      renderStarButtons(parseInt(document.getElementById("series-rating").value) || 0);
-    });
-    wrap.appendChild(btn);
-  }
-
-  // Clear button
-  const clear = document.createElement("button");
-  clear.type = "button";
-  clear.className = "num-btn-clear";
-  clear.textContent = "Clear";
-  clear.addEventListener("click", () => {
-    document.getElementById("series-rating").value = 0;
-    renderStarButtons(0);
-  });
-  wrap.appendChild(clear);
+function ratingBadgeHtml(r) {
+  if (r == null) return "";
+  const cls = r === 10 ? "rated perfect" : r >= 9 ? "rated top" : r >= 7 ? "rated high" : "rated";
+  return `<span class="series-rating-badge ${cls}">★ ${r}/10</span>`;
 }
+
+function buildRatingWidget(containerId, currentRating) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  function render(hover) {
+    const active = hover ?? currentRating ?? 0;
+    wrap.innerHTML = Array.from({length: 10}, (_, i) => {
+      const n = i + 1;
+      const on = n <= active;
+      const cls = on ? (n === 10 ? "rating-pip filled perfect" : n >= 9 ? "rating-pip filled top" : n >= 7 ? "rating-pip filled high" : "rating-pip filled") : "rating-pip";
+      return `<div class="${cls}" data-val="${n}">${n}</div>`;
+    }).join("") + `<button class="rating-clear" id="${containerId}-clear">Clear</button>`;
+    wrap.querySelectorAll(".rating-pip").forEach(pip => {
+      pip.addEventListener("mouseenter", () => render(+pip.dataset.val));
+      pip.addEventListener("mouseleave", () => render(null));
+      pip.addEventListener("click", () => { currentRating = +pip.dataset.val; render(null); });
+    });
+    const clr = document.getElementById(`${containerId}-clear`);
+    if (clr) clr.addEventListener("click", () => { currentRating = null; render(null); });
+  }
+  render(null);
+  return { getValue: () => currentRating };
+}
+
+let _ratingWidget = null;
 
 function editSeries(name) {
   const current = _seriesMeta[name] || {};
@@ -1193,11 +1159,7 @@ function editSeries(name) {
   document.getElementById("series-owned").value = owned;
   document.getElementById("series-manga-status").value = current.mangaStatus || "Publishing";
   document.getElementById("series-collection-status").value = current.collectionStatus || "Collecting";
-
-  // Render interactive star rating
-  const currentRating = parseInt(current.rating) || 0;
-  document.getElementById("series-rating").value = currentRating;
-  renderStarButtons(currentRating);
+  _ratingWidget = buildRatingWidget("series-rating-widget", current.rating ?? null);
 
   document.getElementById("series-modal").style.display = "flex";
 }
@@ -1222,7 +1184,7 @@ function saveSeriesMeta() {
     total: document.getElementById("series-total").value.trim(),
     mangaStatus: document.getElementById("series-manga-status").value,
     collectionStatus: document.getElementById("series-collection-status").value,
-    rating: parseInt(document.getElementById("series-rating").value) || 0
+    rating: _ratingWidget ? _ratingWidget.getValue() : ((_seriesMeta[name] || {}).rating ?? null),
   };
 
   localStorage.setItem("series-meta", JSON.stringify(_seriesMeta));
@@ -2231,21 +2193,20 @@ function renderStats() {
         .sort((a,b) => b.avg - a.avg);
 
       function badgeHtml(r) {
-        const cls = r===10?"rb-perfect":r>=8?"rb-high":r>=5?"rb-mid":"rb-low";
-        return `<span class="rating-badge ${cls}" style="margin-top:0"><span class="rb-star">★</span><span class="rb-num">${r}/10</span></span>`;
+        return ratingBadgeHtml(r);
       }
 
       function avgBarHtml(entries, maxAvg) {
         if (!entries.length) return '<p style="color:var(--text3);font-size:13px">Not enough rated series with this data yet.</p>';
         return entries.map(e => {
-          const barColor = e.avg===10?"#C07000":e.avg>=8?"#1E3D30":e.avg>=5?"#3D3BAA":"#6B7F9E";
+          const col = e.avg===10?"#7C3AED":e.avg>=9?"#8B4A00":e.avg>=7?"#185FA5":e.avg>=5?"#2D4A3E":"#5F5E5A";
           const pct = Math.round((e.avg / maxAvg) * 100);
           return `<div class="avg-rating-row">
             <div class="avg-rating-row-label">
               <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%">${esc(e.name)}</span>
-              <span class="arv"><span class="rb-star">★</span>${e.avg.toFixed(1)} <span style="font-weight:400;color:var(--text3)">(${e.count})</span></span>
+              <span class="arv"><span style="color:#3D3BAA;font-size:11px">★</span>${e.avg.toFixed(1)} <span style="font-weight:400;color:var(--text3)">(${e.count})</span></span>
             </div>
-            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
           </div>`;
         }).join("");
       }
@@ -2279,8 +2240,7 @@ function renderStats() {
             <div style="margin-top:6px">
               ${[10,9,8,7,6,5,4,3,2,1].map(r => {
                 const count = dist[r] || 0;
-                const cls = r===10?"rb-perfect":r>=8?"rb-high":r>=5?"rb-mid":"rb-low";
-                const barColor = cls==="rb-perfect"?"#C07000":cls==="rb-high"?"#1E3D30":cls==="rb-mid"?"#3D3BAA":"#6B7F9E";
+                const barColor = r===10?"#7C3AED":r>=9?"#8B4A00":r>=7?"#185FA5":r>=5?"#2D4A3E":"#5F5E5A";
                 return `<div class="rating-dist-row">
                   <div class="rating-dist-label">${badgeHtml(r)}</div>
                   <div class="rating-dist-bar-wrap"><div class="rating-dist-bar" style="width:${count?Math.max(3,Math.round(count/maxDist*100)):0}%;background:${barColor}"></div></div>
@@ -2462,11 +2422,7 @@ function openSeriesDetail(name) {
     ${avgPrice != null ? `<div class="series-kpi"><div class="series-kpi-label">Avg / Vol</div><div class="series-kpi-value" style="font-size:18px">£${avgPrice.toFixed(2)}</div></div>` : ""}
     <div class="series-kpi"><div class="series-kpi-label">Manga Status</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.mangaStatus||"—")}</div></div>
     <div class="series-kpi"><div class="series-kpi-label">Collection</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.collectionStatus||"—")}</div></div>
-    ${sm.rating ? (() => {
-      const r = parseInt(sm.rating);
-      const cls = r === 10 ? "rb-perfect" : r >= 8 ? "rb-high" : r >= 5 ? "rb-mid" : "rb-low";
-      return `<div class="series-kpi"><div class="series-kpi-label">Rating</div><div style="margin-top:4px"><div class="rating-badge ${cls}"><span class="rb-star">★</span><span class="rb-num">${r}/10</span></div></div></div>`;
-    })() : ""}`;
+    ${sm.rating != null ? `<div class="series-kpi"><div class="series-kpi-label">Rating</div><div style="margin-top:4px">${ratingBadgeHtml(sm.rating)}</div></div>` : ""}`;
 
   document.getElementById("series-detail-body").innerHTML = bubbleHTML + volListHTML;
   document.getElementById("series-detail-edit-btn").onclick = () => { closeSeriesDetail(); editSeries(name); };
@@ -2770,9 +2726,8 @@ function importCSV(e) {
       </div>
 
       <div class="form-group">
-        <label>Your Rating (out of 10)</label>
-        <div class="star-btn-row" id="series-rating-stars" style="display:flex;gap:4px;align-items:center;margin-top:4px"></div>
-        <input type="hidden" id="series-rating">
+        <label>Your Rating</label>
+        <div class="rating-widget" id="series-rating-widget"></div>
       </div>
 
       <div class="modal-footer">
