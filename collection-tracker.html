@@ -1161,13 +1161,19 @@ function renderStats() {
     const volNum = extractVolNum(item.title);
     if (volNum !== null) missingSeriesMap[key].ownedNums.add(volNum);
   });
-  // Pull series totals from meta
+  // Pull series totals and collection status from meta
   Object.values(missingSeriesMap).forEach(sg => {
     const sm = meta[sg.name] || {};
     if (sm.total) sg.seriesTotal = parseInt(sm.total) || null;
+    sg.collectionComplete = sm.collectionStatus === "Completed";
   });
   Object.values(missingSeriesMap).forEach(sg => {
     const { ownedNums, seriesTotal } = sg;
+    // If marked complete in series meta, show as complete with no gap analysis
+    if (sg.collectionComplete) {
+      missingData.push({ name: sg.name, author: sg.author, owned: ownedNums, total: seriesTotal, missing: [], forceComplete: true });
+      return;
+    }
     // Need either a series total set, or at least 2 items with vol numbers to infer a range
     if (!seriesTotal && ownedNums.size < 2) return;
     const maxOwned = ownedNums.size ? Math.max(...ownedNums) : 0;
@@ -1417,12 +1423,12 @@ function renderStats() {
               const missingStr = compressToRanges(sg.missing);
               const complete = sg.missing.length === 0;
               const pct = sg.total ? Math.min(100, Math.round(sg.owned.size / sg.total * 100)) : null;
-              return `<div class="missing-series-row" data-name="${esc(sg.name.toLowerCase())}" data-author="${esc((sg.author||"").toLowerCase())}" data-status="${complete?"complete":"incomplete"}">
+              return `<div class="missing-series-row" data-name="${esc(sg.name.toLowerCase())}" data-author="${esc((sg.author||"").toLowerCase())}" data-status="${(complete || sg.forceComplete)?"complete":"incomplete"}">
                 <div class="missing-series-name">${esc(sg.name)}</div>
                 <div class="missing-series-meta">${sg.author ? esc(sg.author)+" · " : ""}${sg.owned.size} owned${sg.total ? " / "+sg.total+" total"+(pct!==null?" ("+pct+"%)":"") : ""}</div>
                 <div class="missing-vols-chips">
-                  ${complete
-                    ? `<span class="missing-none">✓ Complete${sg.total?" — all "+sg.total+" volumes owned":""}</span>`
+                  ${complete || sg.forceComplete
+                    ? `<span class="missing-none">✓ Complete${sg.forceComplete && !sg.total ? " — marked as collected" : sg.total ? " — all "+sg.total+" volumes owned" : ""}</span>`
                     : missingStr.split(", ").map(r => `<span class="vol-chip${r.includes("–")?" range":""}">${r}</span>`).join("")
                   }
                 </div>
