@@ -621,8 +621,6 @@
       <option>On Hold</option>
       <option>Plan to Read</option>
       <option>Dropped</option>
-      <option>Read</option>
-      <option>Unread</option>
     </select>
     <div class="sort-wrap">
       <select id="sort-select" onchange="render()">
@@ -802,8 +800,8 @@
         <div class="form-group">
           <label>Read Status</label>
           <select id="f-book-status">
-            <option selected>Unread</option>
-            <option>Read</option>
+            <option selected>Plan to Read</option>
+            <option>Completed</option>
           </select>
         </div>
         <div class="form-row">
@@ -1058,12 +1056,21 @@ const STATUS_COLORS = {
   "On Hold":       { bg:"#FEF0CD", fg:"#BA7517" },
   "Plan to Read":  { bg:"#E8E8E8", fg:"#5F5E5A" },
   "Dropped":       { bg:"#FDDEDE", fg:"#A32D2D" },
-  "Read":          { bg:"#D6EAF8", fg:"#185FA5" },
-  "Unread":        { bg:"#E8E8E8", fg:"#5F5E5A" },
 };
 const PALETTE = ["#2D4A3E","#3D3BAA","#8B4A00","#7B3553","#185FA5","#3B6D11","#BA7517","#A32D2D"];
 
 let items = JSON.parse(localStorage.getItem("collection-v1") || "[]");
+
+// Migrate legacy book statuses: "Read" -> "Completed", "Unread" -> "Plan to Read"
+(function migrateStatuses() {
+  let changed = false;
+  items = items.map(i => {
+    if (i.status === "Read")   { changed = true; return { ...i, status: "Completed" }; }
+    if (i.status === "Unread") { changed = true; return { ...i, status: "Plan to Read" }; }
+    return i;
+  });
+  if (changed) localStorage.setItem("collection-v1", JSON.stringify(items));
+})();
 
 /* ---- CURRENCY CONVERSION ---- */
 const FX = {
@@ -1803,7 +1810,7 @@ function render() {
   document.getElementById("s-total").textContent = items.length;
   document.getElementById("s-manga").textContent = items.length - _books.length;
   document.getElementById("s-books").textContent = _books.length;
-  document.getElementById("s-done").textContent = _books.filter(i => i.status === "Unread").length;
+  document.getElementById("s-done").textContent = _books.filter(i => i.status === "Plan to Read").length;
 
   // Reset infinite scroll state
   _filteredList = list;
@@ -2061,7 +2068,7 @@ function openAdd() {
   document.getElementById("f-msrp").value = "";
   document.getElementById("f-msrpCurrency").value = "GBP";
   // Book fields
-  document.getElementById("f-book-status").value = "Unread";
+  document.getElementById("f-book-status").value = "Plan to Read";
   document.getElementById("f-book-author").value = "";
   document.getElementById("f-book-format").value = "Paperback";
   document.getElementById("f-book-translator").value = "";
@@ -2089,7 +2096,7 @@ function openEdit(id) {
   document.getElementById("f-title").value = item.title;
   document.getElementById("f-notes").value = item.notes || "";
   if (item.type === "Book") {
-    document.getElementById("f-book-status").value = item.status || "Unread";
+    document.getElementById("f-book-status").value = item.status || "Plan to Read";
     document.getElementById("f-book-author").value = item.author || "";
     document.getElementById("f-book-format").value = item.format || "Paperback";
     document.getElementById("f-book-translator").value = item.translator || "";
@@ -2585,10 +2592,10 @@ function renderStats() {
   const bookItems = items.filter(i => i.type === "Book");
   const bookStatsHTML = bookItems.length === 0 ? "" : (() => {
     const bTotal = bookItems.length;
-    const bRead = bookItems.filter(i => i.status === "Read").length;
-    const bUnread = bookItems.filter(i => i.status === "Unread").length;
+    const bRead = bookItems.filter(i => i.status === "Completed").length;
+    const bUnread = bookItems.filter(i => i.status === "Plan to Read").length;
     const bPages = bookItems.filter(i => i.pageCount).reduce((s, i) => s + i.pageCount, 0);
-    const bReadPages = bookItems.filter(i => i.status === "Read" && i.pageCount).reduce((s, i) => s + i.pageCount, 0);
+    const bReadPages = bookItems.filter(i => i.status === "Completed" && i.pageCount).reduce((s, i) => s + i.pageCount, 0);
     const bWithSeries = bookItems.filter(i => i.series).length;
     const bStandalone = bookItems.filter(i => !i.series).length;
     // By format
@@ -2628,7 +2635,7 @@ function renderStats() {
       pubDecadeMap[label] = (pubDecadeMap[label] || 0) + 1;
     });
     // Read/Unread donut
-    const readDist = { "Read": bRead, "Unread": bUnread };
+    const readDist = { "Completed": bRead, "Plan to Read": bUnread };
     const readColors = ["#185FA5", "#5F5E5A"];
     function bookDonutHTML(map, colorArr, canvasId, size=110) {
       const entries = Object.entries(map).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
@@ -2667,8 +2674,8 @@ function renderStats() {
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Overview</div>
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">Total Books</div><div class="kpi-value">${bTotal}</div><div class="kpi-sub">${bWithSeries} in series · ${bStandalone} standalone</div></div>
-        <div class="kpi-card"><div class="kpi-label">Read</div><div class="kpi-value" style="color:#185FA5">${bRead}</div><div class="kpi-sub">${bTotal ? Math.round(bRead/bTotal*100) : 0}% of collection</div></div>
-        <div class="kpi-card"><div class="kpi-label">Unread</div><div class="kpi-value">${bUnread}</div><div class="kpi-sub">on the TBR pile</div></div>
+        <div class="kpi-card"><div class="kpi-label">Completed</div><div class="kpi-value" style="color:#185FA5">${bRead}</div><div class="kpi-sub">${bTotal ? Math.round(bRead/bTotal*100) : 0}% of collection</div></div>
+        <div class="kpi-card"><div class="kpi-label">Plan to Read</div><div class="kpi-value">${bUnread}</div><div class="kpi-sub">on the TBR pile</div></div>
         ${bPages > 0 ? `<div class="kpi-card"><div class="kpi-label">Total Pages</div><div class="kpi-value" style="font-size:22px">${bPages.toLocaleString()}</div><div class="kpi-sub">${bReadPages.toLocaleString()} pages read</div></div>` : ""}
         ${bPages > 0 && bRead > 0 ? `<div class="kpi-card"><div class="kpi-label">Avg Pages / Book</div><div class="kpi-value" style="font-size:22px">${Math.round(bPages/bTotal)}</div><div class="kpi-sub">across ${bTotal} books</div></div>` : ""}
         ${bookMsrpItems.length ? `<div class="kpi-card"><div class="kpi-label">Total MSRP</div><div class="kpi-value" style="font-size:22px">£${bookTotalMsrp.toFixed(2)}</div><div class="kpi-sub">${bookMsrpItems.length} book${bookMsrpItems.length!==1?"s":""} with price</div></div>` : ""}
@@ -2680,7 +2687,7 @@ function renderStats() {
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Reading Status &amp; Formats</div>
       <div class="charts-row">
         <div class="chart-card">
-          <div class="chart-title">Read vs Unread</div>
+          <div class="chart-title">Completed vs Plan to Read</div>
           ${bookDonutHTML(readDist, readColors, "donut-book-read", 110)}
         </div>
         <div class="chart-card">
@@ -3169,9 +3176,9 @@ function renderStats() {
     // Book donuts
     const bookItems2 = items.filter(i => i.type === "Book");
     if (bookItems2.length) {
-      const bRead2 = bookItems2.filter(i => i.status === "Read").length;
-      const bUnread2 = bookItems2.filter(i => i.status === "Unread").length;
-      const readDist2 = { "Read": bRead2, "Unread": bUnread2 };
+      const bRead2 = bookItems2.filter(i => i.status === "Completed").length;
+      const bUnread2 = bookItems2.filter(i => i.status === "Plan to Read").length;
+      const readDist2 = { "Completed": bRead2, "Plan to Read": bUnread2 };
       const formatMap2 = {};
       bookItems2.forEach(i => { const f = i.format || "Unknown"; formatMap2[f] = (formatMap2[f] || 0) + 1; });
       drawDonut("donut-book-read", readDist2, ["#185FA5","#5F5E5A"]);
