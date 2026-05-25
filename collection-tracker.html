@@ -815,7 +815,6 @@ function render() {
   else if (sort === "price-asc") list.sort((a,b) => (a.pricePaid ?? Infinity) - (b.pricePaid ?? Infinity));
   else if (sort === "price-desc") list.sort((a,b) => (b.pricePaid ?? -Infinity) - (a.pricePaid ?? -Infinity));
   else {
-    // dateBought: sort by dateBought date descending; items without a date fall to the end
     list.sort((a,b) => {
       const da = a.dateBought ? new Date(a.dateBought).getTime() : null;
       const db = b.dateBought ? new Date(b.dateBought).getTime() : null;
@@ -956,7 +955,7 @@ function overlayClick(e) { if (e.target === document.getElementById("modal")) cl
 function saveItem() {
   const title = document.getElementById("f-title").value.trim();
   if (!title) { document.getElementById("f-title").focus(); return; }
-  const editId = parseInt(document.getElementById("edit-id").value);
+  const editId = parseFloat(document.getElementById("edit-id").value);
   const seriesName = document.getElementById("f-series").value.trim();
   const sm = getSeriesMeta(seriesName);
   const obj = {
