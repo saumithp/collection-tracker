@@ -1191,6 +1191,7 @@ backfillItemsFromSeries();
 
 function switchView(view) {
   if (view !== "library") _stopVirtualization();
+  if (view !== "year") _teardownYearSections();
   currentView = view;
   document.getElementById("library-view").style.display = view === "library" ? "block" : "none";
   document.getElementById("series-view").style.display = view === "series" ? "block" : "none";
@@ -1229,63 +1230,145 @@ function toggleYear(year) {
   if (btn) btn.textContent = isOpen ? "Show" : "Hide";
 }
 
+/* ---- YEAR VIEW INFINITE SCROLL + VIRTUALIZATION ---- */
+// Per-year scroll state: yearKey -> { list, rendered, appending, observer, virtHandler }
+const _yearSections = {};
+
+function _buildYearCard(item) {
+  const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
+  const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
+  const color = PALETTE[item.title.length % PALETTE.length];
+  const lazyCover = lazyCoverHtml(item.id, item.title, "card-cover");
+  const div = document.createElement("div");
+  div.className = "card";
+  div.innerHTML = `
+    <div class="card-cover-wrap">
+      ${lazyCover || `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`}
+    </div>
+    <div class="card-body">
+      <div class="card-title">${esc(item.title)}</div>
+      <div class="card-author">${esc(item.author || "Unknown author")}</div>
+      ${item.series ? `<div class="meta-tags"><span class="meta-tag">${esc(item.series)}</span></div>` : ""}
+      ${item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.pricePaid, item.priceCurrency || "GBP")}</div>` : ""}
+    </div>
+    <div class="card-footer">
+      <span class="status-pill" style="background:${sc.bg};color:${sc.fg}">${item.status}</span>
+      <div class="card-actions">
+        <button class="btn-icon" onclick="openEdit(${item.id})">Edit</button>
+        <button class="btn-icon del" onclick="deleteItem(${item.id})">Delete</button>
+      </div>
+    </div>`;
+  return div;
+}
+
+function _yearAppendNext(year) {
+  const state = _yearSections[year];
+  if (!state || state.appending) return;
+  const remaining = state.list.length - state.rendered;
+  if (remaining <= 0) {
+    const sentinel = document.getElementById(`year-sentinel-${year}`);
+    if (sentinel) state.observer.unobserve(sentinel);
+    const loading = document.getElementById(`year-loading-${year}`);
+    if (loading) loading.style.display = "none";
+    return;
+  }
+  state.appending = true;
+  const loading = document.getElementById(`year-loading-${year}`);
+  if (loading) loading.style.display = "block";
+  requestAnimationFrame(() => setTimeout(() => {
+    const grid = document.getElementById(`year-grid-${year}`);
+    if (!grid) { state.appending = false; return; }
+    const chunk = state.list.slice(state.rendered, state.rendered + PAGE_SIZE);
+    const frag = document.createDocumentFragment();
+    chunk.forEach(item => frag.appendChild(_buildYearCard(item)));
+    grid.appendChild(frag);
+    state.rendered += chunk.length;
+    observeCovers(grid);
+    if (loading) loading.style.display = "none";
+    state.appending = false;
+    const sentinel = document.getElementById(`year-sentinel-${year}`);
+    if (sentinel && state.rendered < state.list.length) {
+      state.observer.unobserve(sentinel);
+      state.observer.observe(sentinel);
+    } else if (sentinel) {
+      state.observer.unobserve(sentinel);
+    }
+    // Start virtualization for this year section if large enough
+    if (state.list.length > PAGE_SIZE && !state.virtHandler) {
+      state.virtHandler = () => _yearVirtualize(year);
+      window.addEventListener("scroll", state.virtHandler, { passive: true });
+    }
+  }, 0));
+}
+
+function _yearVirtualize(year) {
+  const grid = document.getElementById(`year-grid-${year}`);
+  if (!grid) return;
+  const cards = grid.children;
+  const viewTop = window.scrollY - 200;
+  const viewBottom = window.scrollY + window.innerHeight + 600;
+  for (let i = 0; i < cards.length; i++) {
+    const card = cards[i];
+    const top = card.offsetTop + grid.offsetTop + (grid.offsetParent ? grid.offsetParent.offsetTop : 0);
+    const bottom = top + card.offsetHeight;
+    const visible = bottom >= viewTop && top <= viewBottom;
+    if (!visible) {
+      if (!card._virtHidden) {
+        card._virtHidden = true;
+        card._virtHeight = card.offsetHeight;
+        card.style.minHeight = card._virtHeight + "px";
+        card.style.visibility = "hidden";
+        card.style.overflow = "hidden";
+        card.style.contain = "strict";
+      }
+    } else {
+      if (card._virtHidden) {
+        card._virtHidden = false;
+        card.style.visibility = "";
+        card.style.overflow = "";
+        card.style.contain = "";
+        requestAnimationFrame(() => { if (!card._virtHidden) card.style.minHeight = ""; });
+      }
+    }
+  }
+}
+
+function _teardownYearSections() {
+  Object.values(_yearSections).forEach(state => {
+    if (state.observer) state.observer.disconnect();
+    if (state.virtHandler) window.removeEventListener("scroll", state.virtHandler);
+  });
+  for (const k of Object.keys(_yearSections)) delete _yearSections[k];
+}
+/* ---- END YEAR VIEW INFINITE SCROLL ---- */
+
 function renderYear() {
+  // Tear down any previous year section state
+  _teardownYearSections();
+
   const el = document.getElementById("year-content");
 
-  // Group items by year of dateBought; fallback bucket for undated
+  // Only include items with a purchase date
   const yearMap = {};
-  const undated = [];
-
   items.forEach(item => {
-    if (item.dateBought) {
-      const y = item.dateBought.slice(0, 4);
-      if (!yearMap[y]) yearMap[y] = [];
-      yearMap[y].push(item);
-    } else {
-      undated.push(item);
-    }
+    if (!item.dateBought) return;
+    const y = item.dateBought.slice(0, 4);
+    if (!yearMap[y]) yearMap[y] = [];
+    yearMap[y].push(item);
   });
 
   const years = Object.keys(yearMap).sort((a, b) => b - a); // newest first
 
-  if (years.length === 0 && undated.length === 0) {
+  if (years.length === 0) {
     el.innerHTML = `<div class="empty"><div class="empty-icon">📅</div><p>Add purchase dates to your items to see them organised by year.</p></div>`;
     return;
   }
 
-  function cardHtml(item) {
-    const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
-    const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
-    const color = PALETTE[item.title.length % PALETTE.length];
-    const lazyCover = lazyCoverHtml(item.id, item.title, "card-cover");
-    return `<div class="card">
-      <div class="card-cover-wrap">
-        ${lazyCover || `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`}
-      </div>
-      <div class="card-body">
-        <div class="card-title">${esc(item.title)}</div>
-        <div class="card-author">${esc(item.author || "Unknown author")}</div>
-        ${item.series ? `<div class="meta-tags"><span class="meta-tag">${esc(item.series)}</span></div>` : ""}
-        ${item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.pricePaid, item.priceCurrency || "GBP")}</div>` : ""}
-      </div>
-      <div class="card-footer">
-        <span class="status-pill" style="background:${sc.bg};color:${sc.fg}">${item.status}</span>
-        <div class="card-actions">
-          <button class="btn-icon" onclick="openEdit(${item.id})">Edit</button>
-          <button class="btn-icon del" onclick="deleteItem(${item.id})">Delete</button>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  function yearSectionHtml(year, yearItems) {
+  // Build skeleton HTML for each year section (no cards yet — appended by observer)
+  el.innerHTML = years.map(year => {
+    const yearItems = yearMap[year];
     const spent = yearItems.reduce((s, i) => s + (toGBP(i.pricePaid, i.priceCurrency || "GBP") || 0), 0);
     const vols = yearItems.reduce((s, i) => s + (parseInt(i.volumes) || 1), 0);
-    // Sort by dateBought within year, then title
-    const sorted = [...yearItems].sort((a, b) => {
-      if (a.dateBought && b.dateBought) return a.dateBought.localeCompare(b.dateBought);
-      return a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'});
-    });
     return `<div class="year-section">
       <div class="year-header" onclick="toggleYear('${year}')">
         <div class="year-label">${year}</div>
@@ -1298,23 +1381,29 @@ function renderYear() {
         <button class="year-toggle" id="year-btn-${year}" onclick="event.stopPropagation();toggleYear('${year}')">Hide</button>
       </div>
       <div class="year-grid-wrap" id="year-wrap-${year}" style="max-height:9999px">
-        <div class="grid">${sorted.map(cardHtml).join("")}</div>
+        <div class="grid" id="year-grid-${year}"></div>
+        <div id="year-sentinel-${year}" style="height:1px;margin-top:8px"></div>
+        <div id="year-loading-${year}" style="display:none;text-align:center;padding:16px 0;color:var(--text3);font-size:13px">Loading more…</div>
       </div>
     </div>`;
-  }
+  }).join("");
 
-  let html = years.map(y => yearSectionHtml(y, yearMap[y])).join("");
+  // Set up per-year state and observers
+  years.forEach(year => {
+    const sorted = [...yearMap[year]].sort((a, b) => {
+      if (a.dateBought && b.dateBought) return a.dateBought.localeCompare(b.dateBought);
+      return a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'});
+    });
 
-  if (undated.length > 0) {
-    const sorted = [...undated].sort((a, b) => a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'}));
-    html += `<div class="year-no-date">
-      <div class="year-no-date-title">No purchase date — ${undated.length} item${undated.length !== 1 ? "s" : ""}</div>
-      <div class="grid">${sorted.map(cardHtml).join("")}</div>
-    </div>`;
-  }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) _yearAppendNext(year);
+    }, { rootMargin: "300px" });
 
-  el.innerHTML = html;
-  observeCovers(el);
+    _yearSections[year] = { list: sorted, rendered: 0, appending: false, observer, virtHandler: null };
+
+    const sentinel = document.getElementById(`year-sentinel-${year}`);
+    if (sentinel) observer.observe(sentinel);
+  });
 }
 
 function renderSeries() {
