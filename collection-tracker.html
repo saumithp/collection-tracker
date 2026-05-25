@@ -614,18 +614,32 @@ const PRELOADED = [{"id":1700000000000,"addedAt":1700000000000,"title":"Ayashimo
 
 let items = JSON.parse(localStorage.getItem("collection-v1") || "null");
 if (!items) {
-  items = PRELOADED.map(i => { const c = {...i}; delete c.cover; return c; });
-  localStorage.setItem("collection-v1", JSON.stringify(items));
+  items = PRELOADED.map(i => ({...i}));
+  localStorage.setItem("collection-v1", JSON.stringify(items.map(i => { const c = {...i}; delete c.cover; return c; })));
 } else {
   // Repair: if every item has series="One Piece" but PRELOADED has diverse series,
   // the data was corrupted by the bad forEach loop — restore series from PRELOADED by id.
   const allOnepiece = items.length > 5 && items.every(i => i.series === "One Piece");
   if (allOnepiece) {
     const preloadedMap = {};
-    PRELOADED.forEach(p => preloadedMap[p.id] = p.series);
-    items = items.map(i => preloadedMap[i.id] ? { ...i, series: preloadedMap[i.id] } : i);
-    localStorage.setItem("collection-v1", JSON.stringify(items));
+    PRELOADED.forEach(p => preloadedMap[p.id] = p);
+    items = items.map(i => {
+      const p = preloadedMap[i.id];
+      if (!p) return i;
+      const updated = { ...i, series: p.series };
+      if (p.cover) updated.cover = p.cover; // re-attach URL so cacheRemoteCovers picks it up
+      return updated;
+    });
+    localStorage.setItem("collection-v1", JSON.stringify(items.map(i => { const c = {...i}; delete c.cover; return c; })));
   }
+  // Also re-attach cover URLs for any item that has no cover in IndexedDB yet
+  // (covers missing due to previous bad save) — cacheRemoteCovers will handle fetching
+  const preloadedById = {};
+  PRELOADED.forEach(p => { if (p.cover) preloadedById[p.id] = p.cover; });
+  items = items.map(i => {
+    if (!i.cover && preloadedById[i.id]) return { ...i, cover: preloadedById[i.id] };
+    return i;
+  });
 }
 let typeFilter = "All";
 let currentCover = null;      // base64 string or null
@@ -694,10 +708,8 @@ async function cacheRemoteCovers() {
   let dirty = false;
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    const existing = coverCache[String(item.id)];
-    // item.cover may still have a URL from PRELOADED before migration
-    const url = item.cover || (!existing ? null : null);
-    if (url && url.startsWith("http")) {
+    const url = item.cover;
+    if (url && url.startsWith("http") && !coverCache[String(item.id)]) {
       const b64 = await fetchCoverAsBase64(url);
       if (b64) {
         coverCache[String(item.id)] = b64;
