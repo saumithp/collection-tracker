@@ -975,7 +975,7 @@ const CoverDB = (() => {
 // ---- LAZY COVER CACHE (LRU, max 40 entries) ----
 // Covers are loaded from IndexedDB on demand when a card scrolls into view.
 // We never load all covers at startup — each base64 image can be 500KB-2MB.
-const COVER_CACHE_MAX = 40;
+const COVER_CACHE_MAX = 120;
 const coverCache = new Map(); // key -> base64 string, insertion order = LRU
 
 function getCover(id) {
@@ -1006,25 +1006,14 @@ function evictCoverFromCache(id) {
 const coverIds = new Set();
 
 async function loadAllCoversIntoCache() {
-  // 1. Read ALL keys (no blobs) to populate coverIds - cheap, just IDs
-  let keys = [];
+  // Read ALL keys (no blobs) - this is cheap regardless of collection size.
+  // Actual cover images are loaded on-demand by the IntersectionObserver.
   try {
-    keys = await CoverDB.getAllKeys();
+    const keys = await CoverDB.getAllKeys();
     keys.forEach(k => coverIds.add(String(k)));
   } catch(e) {}
 
-  // 2. Eagerly load the first COVER_CACHE_MAX covers into the LRU cache
-  //    so visible cards render immediately without waiting for the observer.
-  //    We fetch them individually to keep peak memory low (Promise.all would
-  //    load everything at once, defeating the purpose).
-  for (const k of keys.slice(0, COVER_CACHE_MAX)) {
-    try {
-      const src = await CoverDB.get(k);
-      if (src) setCoverInCache(k, src);
-    } catch(e) {}
-  }
-
-  // 3. Migrate legacy .cover fields from item objects if present
+  // Migrate legacy .cover fields from item objects if present
   let migrated = false;
   items.forEach(item => {
     if (item.cover) {
@@ -1069,32 +1058,34 @@ function refreshSeriesMeta() { _seriesMeta = JSON.parse(localStorage.getItem("se
 
 // IntersectionObserver for lazy cover loading
 // Covers are fetched from IndexedDB on demand - NOT pre-loaded into memory.
+// _pendingCovers tracks in-flight IDB fetches so we don't double-fetch the same cover.
+const _pendingCovers = new Set();
 const _coverObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
     const el = entry.target;
     const id = el.dataset.coverid;
     if (!id) { _coverObserver.unobserve(el); return; }
-
     _coverObserver.unobserve(el);
 
-    // Check in-memory LRU cache first (avoids IndexedDB round-trip for recently seen)
+    // In LRU cache - apply immediately
     const cached = getCover(id);
-    if (cached) {
-      _applyCoverToEl(el, cached);
-      return;
-    }
+    if (cached) { _applyCoverToEl(el, cached); return; }
 
-    // Not cached - load from IndexedDB asynchronously
+    // Already fetching this cover - it will self-apply when done
+    if (_pendingCovers.has(id)) return;
+
+    // Fetch from IndexedDB
+    _pendingCovers.add(id);
     CoverDB.get(id).then(src => {
-      if (!src) return; // no cover stored
+      _pendingCovers.delete(id);
+      if (!src) return;
       setCoverInCache(id, src);
-      // el may have been replaced by a re-render - find current placeholder by data-coverid
-      const current = document.querySelector('[data-coverid="' + id + '"]');
-      if (current) _applyCoverToEl(current, src);
-    }).catch(() => {});
+      // Apply to ALL placeholders with this id (same item can appear in multiple tabs)
+      document.querySelectorAll('[data-coverid="' + id + '"]').forEach(el => _applyCoverToEl(el, src));
+    }).catch(() => { _pendingCovers.delete(id); });
   });
-}, { rootMargin: "300px" });
+}, { rootMargin: "400px" });
 
 function _applyCoverToEl(el, src) {
   const img = document.createElement("img");
@@ -1163,8 +1154,10 @@ function switchView(view) {
   document.getElementById("stats-tab").classList.toggle("active", view === "stats");
   document.getElementById("year-tab").classList.toggle("active", view === "year");
   if (view === "series" && seriesDirty) { renderSeries(); seriesDirty = false; }
+  else if (view === "series") { observeCovers(document.getElementById("series-view")); }
   if (view === "stats"  && statsDirty)  { renderStats();  statsDirty  = false; }
   if (view === "year"   && yearDirty)   { renderYear();   yearDirty   = false; }
+  else if (view === "year") { observeCovers(document.getElementById("year-view")); }
 }
 
 function statsScrollTo(id, btn) {
