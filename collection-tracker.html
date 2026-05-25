@@ -317,6 +317,23 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 
+  /* ---- STATS NAV ---- */
+  .stats-nav {
+    position: sticky; top: 60px; z-index: 50;
+    display: flex; gap: 8px; padding: 10px 0;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .stats-nav-btn {
+    padding: 7px 18px; border-radius: 20px; border: 1.5px solid var(--border2);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; background: var(--surface); color: var(--text2);
+    transition: all 0.15s;
+  }
+  .stats-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stats-nav-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .stats-nav-btn.book-active { background: var(--book-fg); color: white; border-color: var(--book-fg); }
+
   /* ---- STATS PAGE ---- */
   .stats-page { display: flex; flex-direction: column; gap: 2rem; }
   .stats-section-title {
@@ -501,6 +518,17 @@
   }
   .year-no-date-title { font-size: 12px; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.07em; }
 
+  /* ---- SORT DIRECTION BUTTON ---- */
+  .sort-wrap { display: flex; align-items: center; gap: 4px; }
+  .btn-sort-dir {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text2); cursor: pointer; transition: all 0.15s; flex-shrink: 0; font-size: 14px;
+  }
+  .btn-sort-dir:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .btn-sort-dir.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
   @media (max-width: 600px) {
     .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
   }
@@ -551,6 +579,9 @@
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       Add title
     </button>
+    <button class="btn-ie" onclick="openFXModal()" title="Set USD→GBP exchange rate" style="padding:9px 10px">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 0 1 5.12-1.5M15 15a3 3 0 0 1-5.12 1.5M12 6v2m0 8v2"/></svg>
+    </button>
   </div>
 </header>
 <div class="toast" id="toast"></div>
@@ -569,7 +600,7 @@
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="s-total">0</div></div>
     <div class="stat-card"><div class="stat-label">Manga Volumes</div><div class="stat-value" id="s-manga">0</div></div>
     <div class="stat-card"><div class="stat-label">Books</div><div class="stat-value" id="s-books">0</div></div>
-    <div class="stat-card"><div class="stat-label">Reading / Active</div><div class="stat-value" id="s-done">0</div></div>
+    <div class="stat-card"><div class="stat-label">Unread Books</div><div class="stat-value" id="s-done">0</div></div>
   </div>
 
   <!-- Toolbar -->
@@ -593,13 +624,18 @@
       <option>Read</option>
       <option>Unread</option>
     </select>
-    <select id="sort-select" onchange="render()">
-      <option value="dateBought">Newest first</option>
-      <option value="title">A–Z</option>
-      <option value="title-desc">Z–A</option>
-      <option value="price-asc">Least expensive first</option>
-      <option value="price-desc">Most expensive first</option>
-    </select>
+    <div class="sort-wrap">
+      <select id="sort-select" onchange="render()">
+        <option value="dateBought">Newest first</option>
+        <option value="title">Title A–Z</option>
+        <option value="author">Author A–Z</option>
+        <option value="price">Price</option>
+        <option value="pages">Pages</option>
+        <option value="publisher">Publisher A–Z</option>
+        <option value="msrp">MSRP</option>
+      </select>
+      <button class="btn-sort-dir" id="sort-dir-btn" onclick="toggleSortDir()" title="Reverse sort direction">↑</button>
+    </div>
     <button class="btn-ie" id="bulk-toggle-btn" onclick="toggleBulkMode()" style="white-space:nowrap">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
       Bulk Edit
@@ -650,13 +686,15 @@
 
   <div id="series-view" style="display:none">
     <div class="toolbar" style="margin-bottom:1.5rem">
-      <select id="series-sort" onchange="renderSeries()">
-        <option value="name">A–Z</option>
-        <option value="owned">Most owned</option>
-        <option value="rating">Highest rated</option>
-        <option value="pct">% Complete (high first)</option>
-        <option value="pct-asc">% Complete (low first)</option>
-      </select>
+      <div class="sort-wrap">
+        <select id="series-sort" onchange="renderSeries()">
+          <option value="name">Name A–Z</option>
+          <option value="owned">Most owned</option>
+          <option value="rating">Highest rated</option>
+          <option value="pct">% Complete</option>
+        </select>
+        <button class="btn-sort-dir" id="series-sort-dir-btn" onclick="toggleSeriesSortDir()" title="Reverse sort direction">↑</button>
+      </div>
     </div>
     <div class="grid" id="series-grid"></div>
   </div>
@@ -732,14 +770,26 @@
             <input type="date" id="f-dateBought">
           </div>
           <div class="form-group">
-            <label>Price Paid (£)</label>
-            <input type="number" id="f-pricePaid" placeholder="e.g. 7.99" step="0.01" min="0">
+            <label>Price Paid</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <select id="f-priceCurrency" style="width:58px;flex-shrink:0">
+                <option value="GBP">£</option>
+                <option value="USD">$</option>
+              </select>
+              <input type="number" id="f-pricePaid" placeholder="e.g. 7.99" step="0.01" min="0" style="flex:1">
+            </div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>MSRP (£)</label>
-            <input type="number" id="f-msrp" placeholder="e.g. 8.99" step="0.01" min="0">
+            <label>MSRP</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <select id="f-msrpCurrency" style="width:58px;flex-shrink:0">
+                <option value="GBP">£</option>
+                <option value="USD">$</option>
+              </select>
+              <input type="number" id="f-msrp" placeholder="e.g. 8.99" step="0.01" min="0" style="flex:1">
+            </div>
           </div>
           <div class="form-group"></div>
         </div>
@@ -771,6 +821,19 @@
         </div>
         <div class="form-row">
           <div class="form-group">
+            <label>Author Gender</label>
+            <select id="f-book-author-gender">
+              <option value="">Not specified</option>
+              <option value="Woman">Woman</option>
+              <option value="Man">Man</option>
+              <option value="Non-binary">Non-binary</option>
+              <option value="Multiple">Multiple authors</option>
+            </select>
+          </div>
+          <div class="form-group"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
             <label>Translator <span style="font-size:10px;color:var(--text3);font-weight:400">(if applicable)</span></label>
             <input type="text" id="f-book-translator" placeholder="e.g. Ann Sherif">
           </div>
@@ -795,19 +858,32 @@
             <input type="number" id="f-book-pages" placeholder="e.g. 352" min="1">
           </div>
           <div class="form-group">
-            <label>Original Language</label>
-            <input type="text" id="f-book-language" placeholder="e.g. Japanese">
+            <label>MSRP</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <select id="f-book-msrpCurrency" style="width:58px;flex-shrink:0">
+                <option value="GBP">£</option>
+                <option value="USD">$</option>
+              </select>
+              <input type="number" id="f-book-msrp" placeholder="e.g. 9.99" step="0.01" min="0" style="flex:1">
+            </div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Author Country</label>
-            <input type="text" id="f-book-country" placeholder="e.g. Japan">
+            <label>Original Language</label>
+            <input type="text" id="f-book-orig-lang" placeholder="e.g. Japanese">
           </div>
           <div class="form-group">
-            <label>Original Year Published</label>
-            <input type="number" id="f-book-year" placeholder="e.g. 1987" min="0" max="2100">
+            <label>Author Country of Origin</label>
+            <input type="text" id="f-book-author-country" placeholder="e.g. Japan">
           </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Original Publication Date</label>
+            <input type="text" id="f-book-orig-pubdate" placeholder="e.g. 1994 or 1994-03-15">
+          </div>
+          <div class="form-group"></div>
         </div>
       </div>
 
@@ -902,30 +978,74 @@ const CoverDB = (() => {
     });
   }
 
-  return { get, set, remove, getAll, setMany };
+  async function getAllKeys() {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(STORE, "readonly");
+      const req = tx.objectStore(STORE).getAllKeys();
+      req.onsuccess = () => res(req.result.map(String));
+      req.onerror = () => rej(req.error);
+    });
+  }
+
+  return { get, set, remove, getAll, getAllKeys, setMany };
 })();
 
-// In-memory cover cache so renders are instant after first load
+// In-memory cover cache — plain object, max 150 entries (LRU via _coverOrder).
+// Covers are loaded from IndexedDB on demand by the IntersectionObserver;
+// we never bulk-load all covers at startup.
 const coverCache = {};
+const _coverOrder = []; // insertion-order list of keys for LRU eviction
+const COVER_CACHE_MAX = 150;
 
-async function loadAllCoversIntoCache() {
-  const all = await CoverDB.getAll();
-  Object.assign(coverCache, all);
-  // Also migrate any covers still living in the items array (old format)
-  let migrated = false;
-  items.forEach(item => {
-    if (item.cover && !coverCache[String(item.id)]) {
-      coverCache[String(item.id)] = item.cover;
-      CoverDB.set(item.id, item.cover);
-      migrated = true;
-    }
-    delete item.cover; // always strip from item object
-  });
-  if (migrated) save();
-}
+// coverIds: lightweight set of IDs that have a cover in IndexedDB.
+// Populated at startup by reading keys only (no blob data) — very cheap.
+const coverIds = new Set();
 
 function getCover(id) {
   return coverCache[String(id)] || null;
+}
+
+function _setCover(id, dataUrl) {
+  const k = String(id);
+  if (!coverCache[k]) {
+    // Evict oldest if at cap
+    if (_coverOrder.length >= COVER_CACHE_MAX) {
+      const evict = _coverOrder.shift();
+      delete coverCache[evict];
+    }
+    _coverOrder.push(k);
+  }
+  coverCache[k] = dataUrl;
+}
+
+function _evictCover(id) {
+  const k = String(id);
+  delete coverCache[k];
+  const i = _coverOrder.indexOf(k);
+  if (i !== -1) _coverOrder.splice(i, 1);
+  coverIds.delete(k);
+}
+
+async function loadAllCoversIntoCache() {
+  // Read keys only (no blobs) — O(n) in count but zero image data transferred.
+  try {
+    const keys = await CoverDB.getAllKeys();
+    keys.forEach(k => coverIds.add(String(k)));
+  } catch(e) {}
+
+  // Migrate any legacy .cover fields still on item objects
+  let migrated = false;
+  items.forEach(item => {
+    if (item.cover) {
+      _setCover(item.id, item.cover);
+      CoverDB.set(item.id, item.cover);
+      coverIds.add(String(item.id));
+      migrated = true;
+      delete item.cover;
+    }
+  });
+  if (migrated) save();
 }
 
 /* ---- END INDEXEDDB COVER STORE ---- */
@@ -942,6 +1062,31 @@ const STATUS_COLORS = {
 const PALETTE = ["#2D4A3E","#3D3BAA","#8B4A00","#7B3553","#185FA5","#3B6D11","#BA7517","#A32D2D"];
 
 let items = JSON.parse(localStorage.getItem("collection-v1") || "[]");
+
+/* ---- CURRENCY CONVERSION ---- */
+const FX = {
+  rate: parseFloat(localStorage.getItem("usd-gbp-rate") || "0.79"),
+  save(r) { this.rate = r; localStorage.setItem("usd-gbp-rate", String(r)); }
+};
+function toGBP(amount, currency) {
+  if (amount == null) return null;
+  return currency === "USD" ? amount * FX.rate : amount;
+}
+function fmtPrice(amount, currency) {
+  if (amount == null) return null;
+  if (currency === "USD") {
+    const gbp = toGBP(amount, "USD");
+    return `$${amount.toFixed(2)} <span style="color:var(--text3);font-size:10px">(≈ £${gbp.toFixed(2)})</span>`;
+  }
+  return `£${amount.toFixed(2)}`;
+}
+function fmtPriceGBP(amount, currency) {
+  // Always returns a plain GBP string (for stats totals)
+  const g = toGBP(amount, currency || "GBP");
+  return g != null ? `£${g.toFixed(2)}` : "—";
+}
+/* ---- END CURRENCY CONVERSION ---- */
+
 let typeFilter = "All";
 let currentCover = null;      // base64 string or null
 let coverWasRemoved = false;  // true when user clicked Remove on an existing cover
@@ -957,24 +1102,44 @@ let _seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}");
 function getSeriesMetaCache() { return _seriesMeta; }
 function refreshSeriesMeta() { _seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}"); }
 
-// IntersectionObserver for lazy cover loading
+// IntersectionObserver: loads covers from IndexedDB on demand as cards scroll into view.
+const _pendingFetches = new Set(); // avoid duplicate in-flight fetches for same id
 const _coverObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
     const el = entry.target;
     const id = el.dataset.coverid;
-    if (!id) return;
-    const src = getCover(id);
-    if (src) {
-      const img = document.createElement("img");
-      img.className = el.className; // card-cover or recent-cover etc
-      img.src = src;
-      img.alt = el.dataset.alt || "";
-      el.replaceWith(img);
-    }
+    if (!id) { _coverObserver.unobserve(el); return; }
     _coverObserver.unobserve(el);
+
+    // Already in memory cache
+    const cached = getCover(id);
+    if (cached) { _swapInCover(el, cached); return; }
+
+    // Fetch already in flight — when it resolves it will query the DOM again
+    if (_pendingFetches.has(id)) return;
+
+    // Fetch from IndexedDB
+    _pendingFetches.add(id);
+    CoverDB.get(id).then(src => {
+      _pendingFetches.delete(id);
+      if (!src) return;
+      _setCover(id, src);
+      // Apply to every placeholder with this id currently in the DOM
+      // (same item can appear in Library, Year, and Series tabs simultaneously)
+      document.querySelectorAll('[data-coverid="' + id + '"]')
+        .forEach(node => _swapInCover(node, src));
+    }).catch(() => _pendingFetches.delete(id));
   });
-}, { rootMargin: "200px" });
+}, { rootMargin: "400px" });
+
+function _swapInCover(el, src) {
+  const img = document.createElement("img");
+  img.className = el.className.split(" ").filter(c => c !== "cover-lazy-placeholder").join(" ") || "card-cover";
+  img.src = src;
+  img.alt = el.dataset.alt || "";
+  el.replaceWith(img);
+}
 let bulkMode = false;
 let selectedIds = new Set();
 let recentHidden = false;
@@ -1033,8 +1198,23 @@ function switchView(view) {
   document.getElementById("stats-tab").classList.toggle("active", view === "stats");
   document.getElementById("year-tab").classList.toggle("active", view === "year");
   if (view === "series" && seriesDirty) { renderSeries(); seriesDirty = false; }
+  else if (view === "series") { observeCovers(document.getElementById("series-view")); }
   if (view === "stats"  && statsDirty)  { renderStats();  statsDirty  = false; }
   if (view === "year"   && yearDirty)   { renderYear();   yearDirty   = false; }
+  else if (view === "year") { observeCovers(document.getElementById("year-view")); }
+}
+
+function statsScrollTo(id, btn) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  // offset for sticky header (60px) + stats nav (~52px)
+  const top = target.getBoundingClientRect().top + window.scrollY - 120;
+  window.scrollTo({ top, behavior: "smooth" });
+  // Update active state
+  document.querySelectorAll(".stats-nav-btn").forEach(b => b.classList.remove("active", "book-active"));
+  if (btn) {
+    btn.classList.add(id.startsWith("books") ? "book-active" : "active");
+  }
 }
 
 function toggleYear(year) {
@@ -1083,7 +1263,7 @@ function renderYear() {
         <div class="card-title">${esc(item.title)}</div>
         <div class="card-author">${esc(item.author || "Unknown author")}</div>
         ${item.series ? `<div class="meta-tags"><span class="meta-tag">${esc(item.series)}</span></div>` : ""}
-        ${item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">£${item.pricePaid.toFixed(2)}</div>` : ""}
+        ${item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.pricePaid, item.priceCurrency || "GBP")}</div>` : ""}
       </div>
       <div class="card-footer">
         <span class="status-pill" style="background:${sc.bg};color:${sc.fg}">${item.status}</span>
@@ -1096,7 +1276,7 @@ function renderYear() {
   }
 
   function yearSectionHtml(year, yearItems) {
-    const spent = yearItems.reduce((s, i) => s + (i.pricePaid || 0), 0);
+    const spent = yearItems.reduce((s, i) => s + (toGBP(i.pricePaid, i.priceCurrency || "GBP") || 0), 0);
     const vols = yearItems.reduce((s, i) => s + (parseInt(i.volumes) || 1), 0);
     // Sort by dateBought within year, then title
     const sorted = [...yearItems].sort((a, b) => {
@@ -1144,7 +1324,7 @@ function renderSeries() {
       seriesMap[name] = {
         name,
         type: item.type,
-        coverItemId: getCover(item.id) ? item.id : null,
+        coverItemId: (getCover(item.id) || coverIds.has(String(item.id))) ? item.id : null,
         owned: 0,
         total: "",
         author: "",
@@ -1154,7 +1334,7 @@ function renderSeries() {
         mangaStatus: "Publishing",
         collectionStatus: "Collecting"
       };
-    } else if (!seriesMap[name].coverItemId && getCover(item.id)) {
+    } else if (!seriesMap[name].coverItemId && (getCover(item.id) || coverIds.has(String(item.id)))) {
       seriesMap[name].coverItemId = item.id;
     }
     seriesMap[name].owned++;
@@ -1176,11 +1356,10 @@ function renderSeries() {
     s.pct = (!isNaN(total) && total > 0) ? Math.min(100, Math.round((s.owned / total) * 100)) : null;
   });
 
-  if (sortVal === "owned") seriesList.sort((a, b) => b.owned - a.owned);
-  else if (sortVal === "rating") seriesList.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
-  else if (sortVal === "pct") seriesList.sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1));
-  else if (sortVal === "pct-asc") seriesList.sort((a, b) => (a.pct ?? 101) - (b.pct ?? 101));
-  else seriesList.sort((a, b) => a.name.localeCompare(b.name));
+  if (sortVal === "owned") seriesList.sort((a, b) => seriesSortDir * (b.owned - a.owned));
+  else if (sortVal === "rating") seriesList.sort((a, b) => seriesSortDir * ((b.rating ?? -1) - (a.rating ?? -1)));
+  else if (sortVal === "pct") seriesList.sort((a, b) => seriesSortDir * ((b.pct ?? -1) - (a.pct ?? -1)));
+  else seriesList.sort((a, b) => seriesSortDir * a.name.localeCompare(b.name));
 
   grid.innerHTML = seriesList.map(series => {
     const hasPct = series.pct !== null;
@@ -1321,34 +1500,54 @@ function debouncedRender() {
   _renderTimer = setTimeout(render, 150);
 }
 
+let sortDir = 1;
+let seriesSortDir = 1;
+
+function toggleSortDir() {
+  sortDir = -sortDir;
+  const btn = document.getElementById("sort-dir-btn");
+  if (btn) { btn.textContent = sortDir === 1 ? "↑" : "↓"; btn.classList.toggle("active", sortDir === -1); }
+  render();
+}
+
+function toggleSeriesSortDir() {
+  seriesSortDir = -seriesSortDir;
+  const btn = document.getElementById("series-sort-dir-btn");
+  if (btn) { btn.textContent = seriesSortDir === 1 ? "↑" : "↓"; btn.classList.toggle("active", seriesSortDir === -1); }
+  renderSeries();
+}
+
 function render() {
   const search = document.getElementById("search").value.toLowerCase();
   const status = document.getElementById("status-filter").value;
   const sort = document.getElementById("sort-select").value;
+  const d = sortDir;
 
   let list = items
     .filter(i => typeFilter === "All" || i.type === typeFilter)
     .filter(i => status === "All" || i.status === status)
     .filter(i => !search || i._titleLower.includes(search) || i._authorLower.includes(search));
 
-  if (sort === "title") list.sort((a,b) => a.title.localeCompare(b.title, undefined, {numeric: true, sensitivity: 'base'}));
-  else if (sort === "title-desc") list.sort((a,b) => b.title.localeCompare(a.title, undefined, {numeric: true, sensitivity: 'base'}));
-  else if (sort === "price-asc") list.sort((a,b) => (a.pricePaid ?? Infinity) - (b.pricePaid ?? Infinity));
-  else if (sort === "price-desc") list.sort((a,b) => (b.pricePaid ?? -Infinity) - (a.pricePaid ?? -Infinity));
+  if (sort === "title")     list.sort((a,b) => d * a.title.localeCompare(b.title, undefined, {numeric:true, sensitivity:'base'}));
+  else if (sort === "author")    list.sort((a,b) => d * (a.author||"").localeCompare(b.author||"", undefined, {sensitivity:'base'}));
+  else if (sort === "price")     list.sort((a,b) => d * ((a.pricePaid ?? Infinity) - (b.pricePaid ?? Infinity)));
+  else if (sort === "msrp")      list.sort((a,b) => d * ((a.msrp ?? Infinity) - (b.msrp ?? Infinity)));
+  else if (sort === "pages")     list.sort((a,b) => d * ((a.pageCount ?? Infinity) - (b.pageCount ?? Infinity)));
+  else if (sort === "publisher") list.sort((a,b) => d * (a.publisher||"").localeCompare(b.publisher||"", undefined, {sensitivity:'base'}));
   else {
     list.sort((a,b) => {
       const da = a._dateBoughtMs, db = b._dateBoughtMs;
-      if (da === null && db === null) return b.addedAt - a.addedAt;
+      if (da === null && db === null) return d * (b.addedAt - a.addedAt);
       if (da === null) return 1;
       if (db === null) return -1;
-      return db - da;
+      return d * (db - da);
     });
   }
 
   document.getElementById("s-total").textContent = items.length;
   document.getElementById("s-manga").textContent = items.filter(i => i.type !== "Book").length;
   document.getElementById("s-books").textContent = items.filter(i => i.type === "Book").length;
-  document.getElementById("s-done").textContent = items.filter(i => i.status === "Reading" || i.status === "Read").length;
+  document.getElementById("s-done").textContent = items.filter(i => i.type === "Book" && i.status === "Unread").length;
 
   // Recently Added — only re-render when items change (called from markDirty)
   // renderRecent() is NOT called here to avoid cover cost on every filter/search change
@@ -1391,9 +1590,9 @@ function render() {
           ${!isBook && item.genre ? `<span class="meta-tag">${esc(item.genre)}</span>` : ""}
           ${item.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(item.publisher)}</span>` : ""}
         </div>
-        ${isBook && item.pageCount ? `<div style="font-size:11px;color:var(--text3)">${item.pageCount} pages</div>` : ""}
+        ${isBook && item.pageCount ? `<div style="font-size:11px;color:var(--text3)">${item.pageCount} pages${item.msrp != null ? ` · ${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP` : ""}</div>` : (isBook && item.msrp != null ? `<div style="font-size:11px;color:var(--text3)">${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP</div>` : "")}
         ${!isBook && item.volumes ? `<div style="font-size:11px;color:var(--text3)">${esc(item.volumes)} vol.</div>` : ""}
-        ${!isBook && item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">£${item.pricePaid.toFixed(2)}${item.dateBought ? ` · ${item.dateBought}` : ""}</div>` : (!isBook && item.dateBought ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${item.dateBought}</div>` : "")}
+        ${!isBook && item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.pricePaid, item.priceCurrency || "GBP")}${item.dateBought ? ` · ${item.dateBought}` : ""}</div>` : (!isBook && item.dateBought ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${item.dateBought}</div>` : "")}
       </div>
       <div class="card-footer">
         <span class="status-pill" style="background:${sc.bg};color:${sc.fg}">${item.status}</span>
@@ -1409,11 +1608,17 @@ function render() {
 
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-// Returns img tag if cover already visible in DOM, otherwise a lazy placeholder div
+// Returns cover HTML for a card: real <img> if cached in memory, lazy placeholder
+// div if stored in IndexedDB but not yet loaded, or null if no cover at all.
 function lazyCoverHtml(itemId, title, cssClass) {
-  const src = getCover(itemId);
-  if (!src) return null; // no cover — caller should render placeholder
-  // Always lazy: placeholder div observed by IntersectionObserver
+  const k = String(itemId);
+  const cached = getCover(itemId);
+  if (cached) {
+    // Already in LRU cache — render immediately, no observer needed
+    return `<img class="${cssClass}" src="${cached}" alt="${esc(title)}">`;
+  }
+  if (!coverIds.has(k)) return null; // no cover stored at all
+  // Cover exists in IndexedDB but not yet in memory — render lazy placeholder
   const initials = title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
   const color = PALETTE[title.length % PALETTE.length];
   return `<div class="${cssClass} cover-lazy-placeholder" data-coverid="${itemId}" data-alt="${esc(title)}" style="background:${color};display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:rgba(255,255,255,0.85)">${initials}</div>`;
@@ -1553,7 +1758,7 @@ function bulkDelete() {
   if (!confirm(`Delete ${selectedIds.size} item${selectedIds.size !== 1 ? "s" : ""}? This cannot be undone.`)) return;
   const toDelete = [...selectedIds];
   items = items.filter(i => !selectedIds.has(i.id));
-  toDelete.forEach(id => { delete coverCache[String(id)]; CoverDB.remove(id); });
+  toDelete.forEach(id => { _evictCover(id); CoverDB.remove(id); });
   selectedIds.clear(); updateBulkCount();
   save(); render(); renderSeries();
   showToast(`🗑 Deleted ${toDelete.length} item${toDelete.length !== 1 ? "s" : ""}`);
@@ -1606,7 +1811,9 @@ function openAdd() {
   document.getElementById("f-series").value = "";
   document.getElementById("f-dateBought").value = "";
   document.getElementById("f-pricePaid").value = "";
+  document.getElementById("f-priceCurrency").value = "GBP";
   document.getElementById("f-msrp").value = "";
+  document.getElementById("f-msrpCurrency").value = "GBP";
   // Book fields
   document.getElementById("f-book-status").value = "Unread";
   document.getElementById("f-book-author").value = "";
@@ -1616,9 +1823,12 @@ function openAdd() {
   document.getElementById("f-book-series").value = "";
   document.getElementById("f-book-publisher").value = "";
   document.getElementById("f-book-pages").value = "";
-  document.getElementById("f-book-language").value = "";
-  document.getElementById("f-book-country").value = "";
-  document.getElementById("f-book-year").value = "";
+  document.getElementById("f-book-msrp").value = "";
+  document.getElementById("f-book-msrpCurrency").value = "GBP";
+  document.getElementById("f-book-orig-lang").value = "";
+  document.getElementById("f-book-author-gender").value = "";
+  document.getElementById("f-book-author-country").value = "";
+  document.getElementById("f-book-orig-pubdate").value = "";
   switchModalType("Manga");
   coverWasRemoved = false;
   removeCover();
@@ -1641,9 +1851,12 @@ function openEdit(id) {
     document.getElementById("f-book-series").value = item.series || "";
     document.getElementById("f-book-publisher").value = item.publisher || "";
     document.getElementById("f-book-pages").value = item.pageCount || "";
-    document.getElementById("f-book-language").value = item.originalLanguage || "";
-    document.getElementById("f-book-country").value = item.authorCountry || "";
-    document.getElementById("f-book-year").value = item.originalYearPublished || "";
+    document.getElementById("f-book-msrp").value = item.msrp != null ? item.msrp : "";
+    document.getElementById("f-book-msrpCurrency").value = item.msrpCurrency || "GBP";
+    document.getElementById("f-book-orig-lang").value = item.originalLanguage || "";
+    document.getElementById("f-book-author-country").value = item.authorCountry || "";
+    document.getElementById("f-book-author-gender").value = item.authorGender || "";
+    document.getElementById("f-book-orig-pubdate").value = item.originalPubDate || "";
     switchModalType("Book");
   } else {
     document.getElementById("f-status").value = item.status || "Plan to Read";
@@ -1652,7 +1865,9 @@ function openEdit(id) {
     document.getElementById("f-series").value = item.series || "";
     document.getElementById("f-dateBought").value = item.dateBought || "";
     document.getElementById("f-pricePaid").value = item.pricePaid != null ? item.pricePaid : "";
+    document.getElementById("f-priceCurrency").value = item.priceCurrency || "GBP";
     document.getElementById("f-msrp").value = item.msrp != null ? item.msrp : "";
+    document.getElementById("f-msrpCurrency").value = item.msrpCurrency || "GBP";
     switchModalType("Manga");
   }
   coverWasRemoved = false;
@@ -1668,6 +1883,21 @@ function openEdit(id) {
 
 function closeModal() { document.getElementById("modal").style.display = "none"; }
 function overlayClick(e) { if (e.target === document.getElementById("modal")) closeModal(); }
+
+function openFXModal() {
+  document.getElementById("fx-rate-input").value = FX.rate;
+  document.getElementById("fx-rate-display").textContent = `£${FX.rate.toFixed(4)}`;
+  document.getElementById("fx-modal").style.display = "flex";
+}
+function closeFXModal() { document.getElementById("fx-modal").style.display = "none"; }
+function saveFXRate() {
+  const v = parseFloat(document.getElementById("fx-rate-input").value);
+  if (isNaN(v) || v <= 0) { showToast("⚠️ Enter a valid rate"); return; }
+  FX.save(v);
+  closeFXModal();
+  render(); markDirty();
+  showToast(`✅ Rate updated: 1 USD = £${v.toFixed(4)}`);
+}
 
 function saveItem() {
   const title = document.getElementById("f-title").value.trim();
@@ -1688,12 +1918,15 @@ function saveItem() {
       series: document.getElementById("f-book-series").value.trim(),
       publisher: document.getElementById("f-book-publisher").value.trim(),
       pageCount: document.getElementById("f-book-pages").value !== "" ? parseInt(document.getElementById("f-book-pages").value) : null,
-      originalLanguage: document.getElementById("f-book-language").value.trim(),
-      authorCountry: document.getElementById("f-book-country").value.trim(),
-      originalYearPublished: document.getElementById("f-book-year").value !== "" ? parseInt(document.getElementById("f-book-year").value) : null,
+      msrp: document.getElementById("f-book-msrp").value !== "" ? parseFloat(document.getElementById("f-book-msrp").value) : null,
+      msrpCurrency: document.getElementById("f-book-msrpCurrency").value || "GBP",
+      originalLanguage: document.getElementById("f-book-orig-lang").value.trim() || null,
+      authorCountry: document.getElementById("f-book-author-country").value.trim() || null,
+      authorGender: document.getElementById("f-book-author-gender").value || null,
+      originalPubDate: document.getElementById("f-book-orig-pubdate").value.trim() || null,
       notes: document.getElementById("f-notes").value.trim(),
       // clear manga-only fields
-      volumes: null, volRange: null, dateBought: null, pricePaid: null, msrp: null,
+      volumes: null, volRange: null, dateBought: null, pricePaid: null,
       demographic: "", genre: "",
     };
   } else {
@@ -1713,7 +1946,9 @@ function saveItem() {
       notes: document.getElementById("f-notes").value.trim(),
       dateBought: document.getElementById("f-dateBought").value || null,
       pricePaid: document.getElementById("f-pricePaid").value !== "" ? parseFloat(document.getElementById("f-pricePaid").value) : null,
+      priceCurrency: document.getElementById("f-priceCurrency").value || "GBP",
       msrp: document.getElementById("f-msrp").value !== "" ? parseFloat(document.getElementById("f-msrp").value) : null,
+      msrpCurrency: document.getElementById("f-msrpCurrency").value || "GBP",
     };
   }
   let savedId;
@@ -1726,10 +1961,10 @@ function saveItem() {
   }
   // Save cover to IndexedDB
   if (currentCover) {
-    coverCache[String(savedId)] = currentCover;
+    _setCover(savedId, currentCover); coverIds.add(String(savedId));
     CoverDB.set(savedId, currentCover);
   } else if (coverWasRemoved) {
-    delete coverCache[String(savedId)];
+    _evictCover(savedId);
     CoverDB.remove(savedId);
   }
   save(); render(); markDirty(); closeModal();
@@ -1738,7 +1973,7 @@ function saveItem() {
 function deleteItem(id) {
   if (!confirm("Remove this title from your collection?")) return;
   items = items.filter(i => i.id !== id);
-  delete coverCache[String(id)];
+  _evictCover(id);
   CoverDB.remove(id);
   save(); render(); markDirty();
 }
@@ -1802,22 +2037,6 @@ function renderStats() {
 
   // Separate manga from books
   const mangaItems = items.filter(i => i.type !== "Book");
-  const bookItems = items.filter(i => i.type === "Book");
-
-  const languageMap = {};
-  const countryMap = {};
-  const publicationYears = [];
-
-  bookItems.forEach(book => {
-    if (book.originalLanguage) languageMap[book.originalLanguage] = (languageMap[book.originalLanguage] || 0) + 1;
-    if (book.authorCountry) countryMap[book.authorCountry] = (countryMap[book.authorCountry] || 0) + 1;
-    if (book.originalYearPublished) publicationYears.push(book.originalYearPublished);
-  });
-
-  const topLanguage = Object.entries(languageMap).sort((a,b) => b[1]-a[1])[0];
-  const topCountry = Object.entries(countryMap).sort((a,b) => b[1]-a[1])[0];
-  const oldestPublication = publicationYears.length ? Math.min(...publicationYears) : null;
-  const newestPublication = publicationYears.length ? Math.max(...publicationYears) : null;
 
   // ---- Aggregates (manga only) ----
   const total = mangaItems.length;
@@ -1828,8 +2047,8 @@ function renderStats() {
   const dropped = mangaItems.filter(i => i.status === "Dropped").length;
 
   // Spending (manga only)
-  const totalSpent = mangaItems.reduce((s, i) => s + (i.pricePaid != null ? i.pricePaid : 0), 0);
-  const totalMsrp = mangaItems.reduce((s, i) => s + (i.msrp != null ? i.msrp : 0), 0);
+  const totalSpent = mangaItems.reduce((s, i) => s + (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : 0), 0);
+  const totalMsrp = mangaItems.reduce((s, i) => s + (i.msrp != null ? toGBP(i.msrp, i.msrpCurrency || "GBP") : 0), 0);
   const totalSaved = totalMsrp - totalSpent;
   const itemsWithPrice = mangaItems.filter(i => i.pricePaid != null);
   const avgPricePerVol = itemsWithPrice.length ? totalSpent / itemsWithPrice.length : null;
@@ -1843,8 +2062,9 @@ function renderStats() {
     if (isNaN(d)) return;
     const yr = d.getFullYear();
     const mo = `${yr}-${String(d.getMonth()+1).padStart(2,"0")}`;
-    monthlySpend[mo] = (monthlySpend[mo] || 0) + i.pricePaid;
-    yearlySpend[yr] = (yearlySpend[yr] || 0) + i.pricePaid;
+    const gbp = toGBP(i.pricePaid, i.priceCurrency || "GBP");
+    monthlySpend[mo] = (monthlySpend[mo] || 0) + gbp;
+    yearlySpend[yr] = (yearlySpend[yr] || 0) + gbp;
   });
 
   // Volumes owned total
@@ -1891,7 +2111,7 @@ function renderStats() {
     const a = i.author || "Unknown";
     if (!authorMap[a]) authorMap[a] = { count: 0, spent: 0, series: new Set() };
     authorMap[a].count++;
-    authorMap[a].spent += i.pricePaid || 0;
+    authorMap[a].spent += toGBP(i.pricePaid, i.priceCurrency || "GBP") || 0;
     if (i.series) authorMap[a].series.add(i.series);
   });
 
@@ -2025,7 +2245,7 @@ function renderStats() {
     if (i.pricePaid == null) return;
     const p = i.publisher || "Unknown";
     if (!pubPriceMap[p]) pubPriceMap[p] = { total: 0, count: 0 };
-    pubPriceMap[p].total += i.pricePaid;
+    pubPriceMap[p].total += toGBP(i.pricePaid, i.priceCurrency || "GBP");
     pubPriceMap[p].count++;
   });
   const pubAvgEntries = Object.entries(pubPriceMap)
@@ -2138,6 +2358,29 @@ function renderStats() {
     // By publisher
     const bookPubMap = {};
     bookItems.forEach(i => { if (i.publisher) { bookPubMap[i.publisher] = (bookPubMap[i.publisher] || 0) + 1; } });
+    // By original language
+    const bookLangMap = {};
+    bookItems.forEach(i => { if (i.originalLanguage) { bookLangMap[i.originalLanguage] = (bookLangMap[i.originalLanguage] || 0) + 1; } });
+    // By author country
+    const bookCountryMap = {};
+    bookItems.forEach(i => { if (i.authorCountry) { bookCountryMap[i.authorCountry] = (bookCountryMap[i.authorCountry] || 0) + 1; } });
+    // By author gender
+    const bookGenderMap = {};
+    bookItems.forEach(i => { if (i.authorGender) { bookGenderMap[i.authorGender] = (bookGenderMap[i.authorGender] || 0) + 1; } });
+    // MSRP
+    const bookMsrpItems = bookItems.filter(i => i.msrp != null);
+    const bookTotalMsrp = bookMsrpItems.reduce((s, i) => s + toGBP(i.msrp, i.msrpCurrency || "GBP"), 0);
+    const bookAvgMsrp = bookMsrpItems.length ? bookTotalMsrp / bookMsrpItems.length : null;
+    // Orig pub decade distribution
+    const pubDecadeMap = {};
+    bookItems.forEach(i => {
+      if (!i.originalPubDate) return;
+      const yr = parseInt(i.originalPubDate.slice(0, 4));
+      if (isNaN(yr)) return;
+      const decade = Math.floor(yr / 10) * 10;
+      const label = `${decade}s`;
+      pubDecadeMap[label] = (pubDecadeMap[label] || 0) + 1;
+    });
     // Read/Unread donut
     const readDist = { "Read": bRead, "Unread": bUnread };
     const readColors = ["#185FA5", "#5F5E5A"];
@@ -2174,7 +2417,7 @@ function renderStats() {
       </div>`).join("")}</div>` : `<p style="color:var(--text3);font-size:13px">No publisher data yet.</p>`;
 
     return `
-    <div style="padding-top:1rem;border-top:2px solid var(--book-bg);margin-top:1rem">
+    <div id="books-overview" style="padding-top:1rem;border-top:2px solid var(--book-bg);margin-top:1rem">
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Overview</div>
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">Total Books</div><div class="kpi-value">${bTotal}</div><div class="kpi-sub">${bWithSeries} in series · ${bStandalone} standalone</div></div>
@@ -2182,6 +2425,8 @@ function renderStats() {
         <div class="kpi-card"><div class="kpi-label">Unread</div><div class="kpi-value">${bUnread}</div><div class="kpi-sub">on the TBR pile</div></div>
         ${bPages > 0 ? `<div class="kpi-card"><div class="kpi-label">Total Pages</div><div class="kpi-value" style="font-size:22px">${bPages.toLocaleString()}</div><div class="kpi-sub">${bReadPages.toLocaleString()} pages read</div></div>` : ""}
         ${bPages > 0 && bRead > 0 ? `<div class="kpi-card"><div class="kpi-label">Avg Pages / Book</div><div class="kpi-value" style="font-size:22px">${Math.round(bPages/bTotal)}</div><div class="kpi-sub">across ${bTotal} books</div></div>` : ""}
+        ${bookMsrpItems.length ? `<div class="kpi-card"><div class="kpi-label">Total MSRP</div><div class="kpi-value" style="font-size:22px">£${bookTotalMsrp.toFixed(2)}</div><div class="kpi-sub">${bookMsrpItems.length} book${bookMsrpItems.length!==1?"s":""} with price</div></div>` : ""}
+        ${bookAvgMsrp != null ? `<div class="kpi-card"><div class="kpi-label">Avg MSRP / Book</div><div class="kpi-value" style="font-size:22px">£${bookAvgMsrp.toFixed(2)}</div><div class="kpi-sub">across ${bookMsrpItems.length} book${bookMsrpItems.length!==1?"s":""}</div></div>` : ""}
       </div>
     </div>
 
@@ -2201,9 +2446,15 @@ function renderStats() {
 
     ${topBookAuthors.length ? `<div>
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Authors</div>
-      <div class="chart-card">
-        <div class="chart-title">Books by Author (top 10)</div>
-        ${bookAuthorBarHTML}
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Books by Author (top 10)</div>
+          ${bookAuthorBarHTML}
+        </div>
+        ${Object.keys(bookGenderMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Author Gender</div>
+          ${bookDonutHTML(bookGenderMap, ["#7B3553","#3D3BAA","#3B6D11","#BA7517"], "donut-book-gender", 110)}
+        </div>` : ""}
       </div>
     </div>` : ""}
 
@@ -2214,13 +2465,61 @@ function renderStats() {
         ${bookPubBarHTML}
       </div>
     </div>` : ""}
+
+    ${(Object.keys(bookLangMap).length || Object.keys(bookCountryMap).length || Object.keys(pubDecadeMap).length) ? `<div>
+      <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Origins &amp; Publication</div>
+      <div class="charts-row${Object.keys(pubDecadeMap).length ? "-3" : ""}">
+        ${Object.keys(bookLangMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Original Language</div>
+          ${(()=>{
+            const entries = Object.entries(bookLangMap).sort((a,b)=>b[1]-a[1]);
+            const max = entries[0]?.[1] || 1;
+            return `<div class="bar-list">${entries.map(([k,v],i)=>`
+              <div class="bar-row">
+                <div class="bar-row-label"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(k)}</span><span>${v}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+              </div>`).join("")}</div>`;
+          })()}
+        </div>` : ""}
+        ${Object.keys(bookCountryMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Author Country of Origin</div>
+          ${(()=>{
+            const entries = Object.entries(bookCountryMap).sort((a,b)=>b[1]-a[1]);
+            const max = entries[0]?.[1] || 1;
+            return `<div class="bar-list">${entries.map(([k,v],i)=>`
+              <div class="bar-row">
+                <div class="bar-row-label"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(k)}</span><span>${v}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+              </div>`).join("")}</div>`;
+          })()}
+        </div>` : ""}
+        ${Object.keys(pubDecadeMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Publication Decade</div>
+          ${(()=>{
+            const entries = Object.entries(pubDecadeMap).sort((a,b)=>a[0].localeCompare(b[0]));
+            const max = Math.max(...entries.map(([,v])=>v), 1);
+            return `<div class="bar-list">${entries.map(([k,v],i)=>`
+              <div class="bar-row">
+                <div class="bar-row-label"><span>${esc(k)}</span><span>${v}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+              </div>`).join("")}</div>`;
+          })()}
+        </div>` : ""}
+      </div>
+    </div>` : ""}
     `;
   })();
 
   el.innerHTML = `<div class="stats-page">
 
+    <!-- Sticky section nav -->
+    <div class="stats-nav" id="stats-nav">
+      <button class="stats-nav-btn active" onclick="statsScrollTo('manga-overview', this)">📚 Manga</button>
+      ${bookItems.length ? `<button class="stats-nav-btn" onclick="statsScrollTo('books-overview', this)">📖 Books</button>` : ""}
+    </div>
+
     <!-- KPI row -->
-    <div>
+    <div id="manga-overview">
       <div class="stats-section-title">📚 Manga — Overview</div>
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">Total Volumes</div><div class="kpi-value">${total}</div><div class="kpi-sub">${numSeries} series tracked</div></div>
@@ -2230,9 +2529,6 @@ function renderStats() {
         <div class="kpi-card"><div class="kpi-label">Total Spent</div><div class="kpi-value" style="font-size:22px">£${totalSpent.toFixed(2)}</div><div class="kpi-sub">MSRP £${totalMsrp.toFixed(2)}</div></div>
         <div class="kpi-card"><div class="kpi-label">Saved vs MSRP</div><div class="kpi-value" style="font-size:22px;color:#2D4A3E">£${totalSaved.toFixed(2)}</div><div class="kpi-sub">${totalMsrp > 0 ? Math.round(totalSaved/totalMsrp*100) : 0}% off MSRP</div></div>
         <div class="kpi-card"><div class="kpi-label">Avg Price / Vol</div><div class="kpi-value" style="font-size:22px">${avgPricePerVol != null ? "£"+avgPricePerVol.toFixed(2) : "—"}</div><div class="kpi-sub">${itemsWithPrice.length} vol${itemsWithPrice.length!==1?"s":""} with price</div></div>
-        <div class="kpi-card"><div class="kpi-label">Top Original Language</div><div class="kpi-value" style="font-size:18px">${topLanguage ? esc(topLanguage[0]) : "—"}</div><div class="kpi-sub">${topLanguage ? topLanguage[1] + " book(s)" : "No data yet"}</div></div>
-        <div class="kpi-card"><div class="kpi-label">Top Author Country</div><div class="kpi-value" style="font-size:18px">${topCountry ? esc(topCountry[0]) : "—"}</div><div class="kpi-sub">${topCountry ? topCountry[1] + " book(s)" : "No data yet"}</div></div>
-        <div class="kpi-card"><div class="kpi-label">Oldest Original Publication</div><div class="kpi-value" style="font-size:22px">${oldestPublication || "—"}</div><div class="kpi-sub">${newestPublication ? "Newest: " + newestPublication : "No publication years"}</div></div>
         ${mostRecentItem ? `<div class="kpi-card"><div class="kpi-label">Last Purchase</div><div class="kpi-value" style="font-size:15px;line-height:1.2;margin-top:4px">${esc(mostRecentItem.title)}</div><div class="kpi-sub">${daysAgoStr(mostRecentItem.dateBought)} · ${mostRecentItem.dateBought}</div></div>` : ""}
         ${oldestItem ? `<div class="kpi-card"><div class="kpi-label">Collection Age</div><div class="kpi-value" style="font-size:20px">${collectionAgeStr(oldestItem.dateBought)}</div><div class="kpi-sub">since ${oldestItem.dateBought}</div></div>` : ""}
         ${avgPerMonth != null ? `<div class="kpi-card"><div class="kpi-label">Avg Pace</div><div class="kpi-value" style="font-size:22px">${avgPerMonth.toFixed(1)}</div><div class="kpi-sub">vol${avgPerMonth!==1?"s":""}/month · ${last3.length ? "last "+last3.length+" mo avg" : totalMonthsActive+" mo avg"}</div></div>` : ""}
@@ -2253,7 +2549,7 @@ function renderStats() {
             const spendMap = {};
             mangaItems.forEach(i => {
               const s = i.series || "Standalone";
-              spendMap[s] = (spendMap[s] || 0) + (i.pricePaid || 0);
+              spendMap[s] = (spendMap[s] || 0) + (toGBP(i.pricePaid, i.priceCurrency || "GBP") || 0);
             });
             const entries = Object.entries(spendMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
             const max = entries[0]?.[1] || 1;
@@ -2634,6 +2930,9 @@ function renderStats() {
       bookItems2.forEach(i => { const f = i.format || "Unknown"; formatMap2[f] = (formatMap2[f] || 0) + 1; });
       drawDonut("donut-book-read", readDist2, ["#185FA5","#5F5E5A"]);
       drawDonut("donut-book-format", formatMap2, ["#8B4A00","#3D3BAA","#2D4A3E","#BA7517","#185FA5"]);
+      const bookGenderMap2 = {};
+      bookItems2.forEach(i => { if (i.authorGender) { bookGenderMap2[i.authorGender] = (bookGenderMap2[i.authorGender] || 0) + 1; } });
+      if (Object.keys(bookGenderMap2).length) drawDonut("donut-book-gender", bookGenderMap2, ["#7B3553","#3D3BAA","#3B6D11","#BA7517"]);
     }
   });
 }
@@ -2758,7 +3057,7 @@ function openAuthorModal(authorName) {
     if (!seriesMap[name]) {
       seriesMap[name] = { name, owned: 0, coverItemId: getCover(item.id) ? item.id : null,
         total: "", demographic: "", genre: "", publisher: "", mangaStatus: "Publishing", collectionStatus: "Collecting" };
-    } else if (!seriesMap[name].coverItemId && getCover(item.id)) {
+    } else if (!seriesMap[name].coverItemId && (getCover(item.id) || coverIds.has(String(item.id)))) {
       seriesMap[name].coverItemId = item.id;
     }
     seriesMap[name].owned++;
@@ -2887,12 +3186,12 @@ function importJSON(e) {
       const incoming = Array.isArray(data) ? data : (data.items || []);
       if (!incoming.length) { showToast("⚠️ No items found in file"); return; }
       const existingIds = new Set(items.map(i => i.id));
-      const existingKeys = new Set(items.map(i => `${i.title}||${i.author || ""}`));
+      const existingKeys = new Set(items.map(i => `${i.title}||${i.author || ""}||${i.format || ""}||${i.translator || ""}`));
       let added = 0;
       const newCovers = {};
       incoming.forEach(inItem => {
         if (!inItem.title) return;
-        const key = `${inItem.title}||${inItem.author || ""}`;
+        const key = `${inItem.title}||${inItem.author || ""}||${inItem.format || ""}||${inItem.translator || ""}`;
         if (existingKeys.has(key)) return;
         if (existingIds.has(inItem.id)) inItem = { ...inItem, id: Date.now() + Math.random() };
         const cover = inItem.cover || null;
@@ -2943,7 +3242,7 @@ function importCSV(e) {
         const obj = {};
         headers.forEach((h, i) => obj[h] = parseVal(cols[i] || ""));
         if (!obj.title) return;
-        const dup = items.find(i => i.title === obj.title && i.author === (obj.author || ""));
+        const dup = items.find(i => i.title === obj.title && i.author === (obj.author || "") && (i.format || "") === (obj.format || "") && (i.translator || "") === (obj.translator || ""));
         if (dup) return;
         items.push({
           id: Date.now() + Math.random(),
@@ -2960,6 +3259,11 @@ function importCSV(e) {
           translator: obj.translator || null,
           narrator: obj.narrator || null,
           pageCount: obj.pageCount !== "" ? parseInt(obj.pageCount) : null,
+          msrp: obj.msrp !== "" ? parseFloat(obj.msrp) : null,
+          originalLanguage: obj.originalLanguage || null,
+          authorCountry: obj.authorCountry || null,
+          authorGender: obj.authorGender || null,
+          originalPubDate: obj.originalPubDate || null,
           addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), importedAt: Date.now(), cover: null
         });
         added++;
@@ -3087,6 +3391,28 @@ function importCSV(e) {
     </div>
     <div class="modal-body">
       <div class="author-modal-grid" id="author-modal-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FX Rate Modal -->
+<div class="overlay" id="fx-modal" style="display:none" onclick="if(event.target===this)closeFXModal()">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header">
+      <div class="modal-title">USD → GBP Rate</div>
+      <button class="btn-close" onclick="closeFXModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Set the exchange rate used to convert USD prices to GBP in stats and totals. Prices are always stored in their original currency.</p>
+      <div class="form-group">
+        <label>1 USD = ? GBP</label>
+        <input type="number" id="fx-rate-input" step="0.0001" min="0.01" max="10" placeholder="e.g. 0.79">
+      </div>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:16px">Current rate: <strong id="fx-rate-display"></strong></p>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeFXModal()">Cancel</button>
+        <button class="btn-save" onclick="saveFXRate()">Save rate</button>
+      </div>
     </div>
   </div>
 </div>
