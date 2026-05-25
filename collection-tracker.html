@@ -1704,6 +1704,72 @@ function renderStats() {
   });
   missingData.sort((a,b) => a.name.localeCompare(b.name));
 
+  // ---- Most / least complete series (need total set) ----
+  const seriesWithPct = seriesList
+    .filter(s => s.total && s.total > 0)
+    .map(s => ({ ...s, pct: Math.min(100, s.owned / s.total * 100) }))
+    .sort((a, b) => b.pct - a.pct);
+  const mostComplete   = seriesWithPct.filter(s => s.pct < 100)[0] || seriesWithPct[0] || null;
+  const leastComplete  = seriesWithPct.length > 1 ? seriesWithPct[seriesWithPct.length - 1] : null;
+
+  // ---- Acquisition pace ----
+  // Group purchases by month, compute 3-month rolling avg of last 3 full months
+  const purchasesByMonth = {};
+  items.forEach(i => {
+    if (!i.dateBought) return;
+    const d = new Date(i.dateBought);
+    if (isNaN(d)) return;
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    purchasesByMonth[key] = (purchasesByMonth[key] || 0) + 1;
+  });
+  const sortedMonths = Object.keys(purchasesByMonth).sort();
+  // Drop the current partial month from the rolling avg
+  const today = new Date();
+  const thisMonth = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`;
+  const fullMonths = sortedMonths.filter(m => m !== thisMonth);
+  const last3 = fullMonths.slice(-3);
+  const avgPerMonth = last3.length
+    ? (last3.reduce((s, m) => s + purchasesByMonth[m], 0) / last3.length)
+    : (sortedMonths.length ? Object.values(purchasesByMonth).reduce((a,b)=>a+b,0) / sortedMonths.length : null);
+  const totalMonthsActive = fullMonths.length || sortedMonths.length;
+
+  // ---- Most recent purchase & collection age ----
+  const datedItems = items.filter(i => i.dateBought).sort((a, b) => b.dateBought.localeCompare(a.dateBought));
+  const mostRecentItem = datedItems[0] || null;
+  const oldestItem     = datedItems[datedItems.length - 1] || null;
+  function daysAgoStr(dateStr) {
+    if (!dateStr) return null;
+    const diff = Math.round((Date.now() - new Date(dateStr)) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    if (diff < 30)  return `${diff} days ago`;
+    if (diff < 365) return `${Math.round(diff/30)} month${Math.round(diff/30)!==1?"s":""} ago`;
+    const yrs = Math.floor(diff/365), mos = Math.round((diff%365)/30);
+    return `${yrs}y${mos>0?" "+mos+"m":""} ago`;
+  }
+  function collectionAgeStr(dateStr) {
+    if (!dateStr) return null;
+    const diff = Math.round((Date.now() - new Date(dateStr)) / 86400000);
+    const yrs = Math.floor(diff/365), mos = Math.round((diff%365)/30);
+    if (yrs >= 1) return `${yrs} year${yrs!==1?"s":""}${mos>0?", "+mos+" mo":""}`;
+    if (mos >= 1) return `${mos} month${mos!==1?"s":""}`;
+    return `${diff} day${diff!==1?"s":""}`;
+  }
+
+  // ---- Price per volume by publisher ----
+  const pubPriceMap = {};
+  items.forEach(i => {
+    if (i.pricePaid == null) return;
+    const p = i.publisher || "Unknown";
+    if (!pubPriceMap[p]) pubPriceMap[p] = { total: 0, count: 0 };
+    pubPriceMap[p].total += i.pricePaid;
+    pubPriceMap[p].count++;
+  });
+  const pubAvgEntries = Object.entries(pubPriceMap)
+    .filter(([, v]) => v.count >= 2)
+    .map(([k, v]) => [k, v.total / v.count, v.count])
+    .sort((a, b) => b[1] - a[1]);
+
   // Status distribution
   const statusDist = {
     "Completed": completed, "Reading": reading,
@@ -1799,6 +1865,9 @@ function renderStats() {
         <div class="kpi-card"><div class="kpi-label">Total Spent</div><div class="kpi-value" style="font-size:22px">£${totalSpent.toFixed(2)}</div><div class="kpi-sub">MSRP £${totalMsrp.toFixed(2)}</div></div>
         <div class="kpi-card"><div class="kpi-label">Saved vs MSRP</div><div class="kpi-value" style="font-size:22px;color:#2D4A3E">£${totalSaved.toFixed(2)}</div><div class="kpi-sub">${totalMsrp > 0 ? Math.round(totalSaved/totalMsrp*100) : 0}% off MSRP</div></div>
         <div class="kpi-card"><div class="kpi-label">Avg Price / Vol</div><div class="kpi-value" style="font-size:22px">${avgPricePerVol != null ? "£"+avgPricePerVol.toFixed(2) : "—"}</div><div class="kpi-sub">${itemsWithPrice.length} vol${itemsWithPrice.length!==1?"s":""} with price</div></div>
+        ${mostRecentItem ? `<div class="kpi-card"><div class="kpi-label">Last Purchase</div><div class="kpi-value" style="font-size:15px;line-height:1.2;margin-top:4px">${esc(mostRecentItem.title)}</div><div class="kpi-sub">${daysAgoStr(mostRecentItem.dateBought)} · ${mostRecentItem.dateBought}</div></div>` : ""}
+        ${oldestItem ? `<div class="kpi-card"><div class="kpi-label">Collection Age</div><div class="kpi-value" style="font-size:20px">${collectionAgeStr(oldestItem.dateBought)}</div><div class="kpi-sub">since ${oldestItem.dateBought}</div></div>` : ""}
+        ${avgPerMonth != null ? `<div class="kpi-card"><div class="kpi-label">Avg Pace</div><div class="kpi-value" style="font-size:22px">${avgPerMonth.toFixed(1)}</div><div class="kpi-sub">vol${avgPerMonth!==1?"s":""}/month · ${last3.length ? "last "+last3.length+" mo avg" : totalMonthsActive+" mo avg"}</div></div>` : ""}
       </div>
     </div>
 
@@ -1902,6 +1971,53 @@ function renderStats() {
           <div class="chart-title">Collection Completion %</div>
           ${completionBarsHTML}
         </div>
+      </div>
+    </div>
+
+    <!-- Series Spotlight & Publisher Pricing -->
+    <div>
+      <div class="stats-section-title">Series Spotlight</div>
+      <div class="charts-row${pubAvgEntries.length ? "" : ""}">
+        <div class="chart-card">
+          <div class="chart-title">Completion Spotlight</div>
+          ${(()=>{
+            if (!seriesWithPct.length) return '<p style="color:var(--text3);font-size:13px">Set "Total Volumes" on a series to see completion callouts.</p>';
+            const rows = [];
+            if (mostComplete) {
+              const needed = Math.ceil(mostComplete.total - mostComplete.owned);
+              const pct = Math.round(mostComplete.pct);
+              rows.push(`<div style="background:var(--accent-light);border:1px solid rgba(45,74,62,0.18);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px">
+                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:5px">🎯 Closest to finishing</div>
+                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px">${esc(mostComplete.name)}</div>
+                <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${mostComplete.owned} / ${mostComplete.total} volumes · ${pct}% complete · <strong>${needed} vol${needed!==1?"s":""} to go</strong></div>
+                <div style="height:7px;background:rgba(45,74,62,0.15);border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent);border-radius:99px"></div></div>
+              </div>`);
+            }
+            if (leastComplete) {
+              const pct2 = Math.round(leastComplete.pct);
+              const needed2 = leastComplete.total - leastComplete.owned;
+              rows.push(`<div style="background:#FEF7ED;border:1px solid rgba(186,117,23,0.2);border-radius:var(--radius);padding:12px 14px">
+                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#BA7517;margin-bottom:5px">📦 Most to collect</div>
+                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px">${esc(leastComplete.name)}</div>
+                <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${leastComplete.owned} / ${leastComplete.total} volumes · ${pct2}% complete · <strong>${needed2} vol${needed2!==1?"s":""} still needed</strong></div>
+                <div style="height:7px;background:rgba(186,117,23,0.15);border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct2}%;background:#BA7517;border-radius:99px"></div></div>
+              </div>`);
+            }
+            return rows.join("");
+          })()}
+        </div>
+        ${pubAvgEntries.length >= 2 ? `<div class="chart-card">
+          <div class="chart-title">Avg Price / Vol by Publisher</div>
+          <div class="bar-list">${pubAvgEntries.map(([k, avg, cnt], i) => `
+            <div class="bar-row">
+              <div class="bar-row-label">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${esc(k)}</span>
+                <span>£${avg.toFixed(2)} <span style="font-weight:400;color:var(--text3)">(${cnt} vol${cnt!==1?"s":""})</span></span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:${Math.round(avg/pubAvgEntries[0][1]*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+            </div>`).join("")}
+          </div>
+        </div>` : ""}
       </div>
     </div>
 
