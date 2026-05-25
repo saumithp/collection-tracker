@@ -330,6 +330,33 @@
     font-family: 'DM Sans', sans-serif; font-size: 13px; background: var(--surface); color: var(--text);
   }
 
+  /* ---- SERIES DETAIL MODAL ---- */
+  .series-detail-header { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; }
+  .series-detail-cover { width: 90px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: var(--surface2); }
+  .series-detail-cover-placeholder { width: 90px; height: 120px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; color: rgba(255,255,255,0.85); }
+  .series-detail-meta { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .series-detail-name { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500; line-height: 1.2; }
+  .series-detail-author { font-size: 13px; color: var(--text2); }
+  .series-kpi-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 18px; }
+  .series-kpi { background: var(--surface2); border-radius: var(--radius); padding: 10px 12px; }
+  .series-kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
+  .series-kpi-value { font-family: 'Fraunces', serif; font-size: 22px; color: var(--text); line-height: 1; }
+  .series-kpi-sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
+  .vol-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .vol-bubble { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: pointer; transition: transform 0.1s; border: 1.5px solid transparent; }
+  .vol-bubble:hover { transform: scale(1.12); }
+  .vol-bubble.owned { background: var(--accent-light); color: var(--accent); border-color: rgba(45,74,62,0.25); }
+  .vol-bubble.missing { background: #FDDEDE; color: #A32D2D; border-color: #F5C0C0; }
+  .vol-bubble.unknown { background: var(--surface2); color: var(--text3); border-color: var(--border); }
+  .section-label { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; margin-top: 16px; }
+  .vol-item-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--surface2); border-radius: var(--radius); margin-bottom: 6px; cursor: pointer; transition: background 0.12s; }
+  .vol-item-row:hover { background: #e8e4dc; }
+  .vol-item-cover { width: 32px; height: 44px; object-fit: cover; border-radius: 4px; flex-shrink: 0; background: var(--surface); }
+  .vol-item-cover-placeholder { width: 32px; height: 44px; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.85); }
+  .vol-item-info { flex: 1; min-width: 0; }
+  .vol-item-title { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vol-item-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
   /* ---- AUTHOR MODAL ---- */
   .author-modal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 4px; }
 
@@ -838,8 +865,9 @@ function renderSeries() {
     const pct = series.pct ?? 0;
     const pctColor = pct >= 100 ? "#2D4A3E" : pct >= 50 ? "#3D3BAA" : "#BA7517";
     const seriesCover = series.coverItemId ? getCover(series.coverItemId) : null;
+    const safeName = series.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return `
-    <div class="card">
+    <div class="card" onclick="openSeriesDetail('${safeName}')" style="cursor:pointer">
       ${seriesCover ? `<img class="card-cover" src="${seriesCover}" alt="${esc(series.name)}">`
       : `<div class="card-cover-placeholder" style="background:#2D4A3E">${esc(series.name.slice(0,2).toUpperCase())}</div>`}
       <div class="card-body">
@@ -864,8 +892,9 @@ function renderSeries() {
         <div class="series-card-stat"><span>Manga status</span><span>${esc(series.mangaStatus)}</span></div>
         <div class="series-card-stat"><span>Collection status</span><span>${esc(series.collectionStatus)}</span></div>
       </div>
-      <div class="card-footer">
-        <button class="btn-icon" onclick="editSeries('${series.name.replace(/'/g,"\\'")}')">Edit Series</button>
+      <div class="card-footer" onclick="event.stopPropagation()">
+        <button class="btn-icon" onclick="openSeriesDetail('${safeName}')">View</button>
+        <button class="btn-icon" onclick="editSeries('${safeName}')">Edit</button>
       </div>
     </div>`;
   }).join("");
@@ -1752,6 +1781,102 @@ function renderStats() {
   });
 }
 
+/* ---- SERIES DETAIL MODAL ---- */
+function openSeriesDetail(name) {
+  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  const sm = meta[name] || {};
+  const seriesItems = items.filter(i => (i.series || "Standalone") === name)
+    .sort((a,b) => a.title.localeCompare(b.title, undefined, {numeric:true, sensitivity:'base'}));
+
+  const totalOwned = seriesItems.length;
+  const totalVols = parseInt(sm.total) || null;
+  const totalSpent = seriesItems.reduce((s,i) => s + (i.pricePaid || 0), 0);
+  const priced = seriesItems.filter(i => i.pricePaid != null);
+  const avgPrice = priced.length ? totalSpent / priced.length : null;
+  const pct = totalVols ? Math.min(100, Math.round(totalOwned / totalVols * 100)) : null;
+  const pctColor = pct >= 100 ? "#2D4A3E" : pct >= 50 ? "#3D3BAA" : "#BA7517";
+
+  const coverItem = seriesItems.find(i => getCover(i.id));
+  const cover = coverItem ? getCover(coverItem.id) : null;
+  const initials = name.slice(0,2).toUpperCase();
+
+  // Build set of owned volume numbers (from title parsing + volumes field)
+  const ownedNums = new Set();
+  seriesItems.forEach(i => {
+    const m = (i.title||"").match(/(?:vol(?:ume)?\.?\s*|#|no\.?\s*)(\d+)/i) || (i.title||"").match(/\b(\d+)\s*$/);
+    if (m) ownedNums.add(parseInt(m[1]));
+    if (i.volumes) { const { owned } = parseVolumeString(i.volumes); owned.forEach(n => ownedNums.add(n)); }
+  });
+
+  // Volume bubble grid
+  let bubbleHTML = "";
+  if (ownedNums.size > 0 || totalVols) {
+    const maxVol = totalVols || (ownedNums.size ? Math.max(...ownedNums) : 0);
+    let bubbles = [];
+    for (let v = 1; v <= maxVol; v++) {
+      bubbles.push(`<div class="vol-bubble ${ownedNums.has(v) ? "owned" : "missing"}" title="Vol. ${v}">${v}</div>`);
+    }
+    [...ownedNums].filter(n => n > (totalVols||0)).sort((a,b)=>a-b).forEach(n => {
+      bubbles.push(`<div class="vol-bubble owned" title="Vol. ${n}">${n}</div>`);
+    });
+    bubbleHTML = `<div class="section-label">Volume Map</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">
+        <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="width:10px;height:10px;border-radius:3px;background:var(--accent-light);border:1px solid rgba(45,74,62,0.25);display:inline-block"></span>Owned</span>
+        <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;background:#FDDEDE;border:1px solid #F5C0C0;display:inline-block"></span>Missing</span>
+      </div>
+      <div class="vol-grid">${bubbles.join("")}</div>`;
+  }
+
+  // Owned volumes list
+  const volListHTML = `<div class="section-label" style="margin-top:18px">Owned Volumes (${totalOwned})</div>
+    ${seriesItems.map(i => {
+      const c = getCover(i.id);
+      const sc = STATUS_COLORS[i.status] || {bg:"#eee",fg:"#555"};
+      const meta2 = [i.pricePaid != null ? `£${i.pricePaid.toFixed(2)}` : "", i.dateBought || ""].filter(Boolean).join(" · ");
+      return `<div class="vol-item-row" onclick="closeSeriesDetail();openEdit(${i.id})">
+        ${c ? `<img class="vol-item-cover" src="${c}" alt="">` : `<div class="vol-item-cover-placeholder" style="background:#2D4A3E">${esc(initials)}</div>`}
+        <div class="vol-item-info">
+          <div class="vol-item-title">${esc(i.title)}</div>
+          ${meta2 ? `<div class="vol-item-meta">${meta2}</div>` : ""}
+        </div>
+        <span class="status-pill" style="background:${sc.bg};color:${sc.fg};font-size:10px">${i.status}</span>
+      </div>`;
+    }).join("")}`;
+
+  document.getElementById("series-detail-cover-wrap").innerHTML = cover
+    ? `<img class="series-detail-cover" src="${cover}" alt="${esc(name)}">`
+    : `<div class="series-detail-cover-placeholder" style="background:#2D4A3E">${esc(initials)}</div>`;
+
+  document.getElementById("series-detail-meta").innerHTML = `
+    <div class="series-detail-name">${esc(name)}</div>
+    ${sm.author ? `<div class="series-detail-author">${esc(sm.author)}</div>` : ""}
+    <div class="meta-tags" style="margin-top:6px">
+      ${sm.demographic ? `<span class="meta-tag">${esc(sm.demographic)}</span>` : ""}
+      ${sm.genre ? `<span class="meta-tag">${esc(sm.genre)}</span>` : ""}
+      ${sm.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(sm.publisher)}</span>` : ""}
+    </div>
+    ${pct !== null ? `<div style="margin-top:8px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px"><span>Collection progress</span><span style="font-weight:600;color:${pctColor}">${pct}%</span></div>
+      <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pctColor};border-radius:99px"></div></div>
+    </div>` : ""}`;
+
+  document.getElementById("series-detail-kpis").innerHTML = `
+    <div class="series-kpi"><div class="series-kpi-label">Owned</div><div class="series-kpi-value">${totalOwned}</div>${totalVols ? `<div class="series-kpi-sub">of ${totalVols}</div>` : ""}</div>
+    ${totalVols ? `<div class="series-kpi"><div class="series-kpi-label">Missing</div><div class="series-kpi-value" style="color:#A32D2D">${Math.max(0, totalVols - totalOwned)}</div></div>` : ""}
+    <div class="series-kpi"><div class="series-kpi-label">Total Spent</div><div class="series-kpi-value" style="font-size:18px">£${totalSpent.toFixed(2)}</div></div>
+    ${avgPrice != null ? `<div class="series-kpi"><div class="series-kpi-label">Avg / Vol</div><div class="series-kpi-value" style="font-size:18px">£${avgPrice.toFixed(2)}</div></div>` : ""}
+    <div class="series-kpi"><div class="series-kpi-label">Manga Status</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.mangaStatus||"—")}</div></div>
+    <div class="series-kpi"><div class="series-kpi-label">Collection</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.collectionStatus||"—")}</div></div>`;
+
+  document.getElementById("series-detail-body").innerHTML = bubbleHTML + volListHTML;
+  document.getElementById("series-detail-edit-btn").onclick = () => { closeSeriesDetail(); editSeries(name); };
+  document.getElementById("series-detail-modal").style.display = "flex";
+}
+
+function closeSeriesDetail() {
+  document.getElementById("series-detail-modal").style.display = "none";
+}
+
 /* ---- AUTHOR MODAL ---- */
 function openAuthorModal(authorName) {
   const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
@@ -2043,6 +2168,28 @@ function importCSV(e) {
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeSeriesModal()">Cancel</button>
         <button class="btn-save" onclick="saveSeriesMeta()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Series Detail Modal -->
+<div class="overlay" id="series-detail-modal" style="display:none" onclick="if(event.target===this)closeSeriesDetail()">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div class="modal-title">Series Detail</div>
+      <button class="btn-close" onclick="closeSeriesDetail()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="series-detail-header">
+        <div id="series-detail-cover-wrap"></div>
+        <div class="series-detail-meta" id="series-detail-meta"></div>
+      </div>
+      <div class="series-kpi-row" id="series-detail-kpis"></div>
+      <div id="series-detail-body"></div>
+      <div class="modal-footer" style="margin-top:16px">
+        <button class="btn-cancel" onclick="closeSeriesDetail()">Close</button>
+        <button class="btn-save" id="series-detail-edit-btn">Edit Series</button>
       </div>
     </div>
   </div>
