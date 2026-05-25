@@ -804,6 +804,35 @@ let typeFilter = "All";
 let currentCover = null;      // base64 string or null
 let coverWasRemoved = false;  // true when user clicked Remove on an existing cover
 let currentView = 'library';
+
+// Dirty flags — set true when data changes so tabs re-render only when needed
+let seriesDirty = true;
+let statsDirty  = true;
+let yearDirty   = true;
+
+// Cached series meta — updated on every save, avoids repeated localStorage reads
+let _seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+function getSeriesMetaCache() { return _seriesMeta; }
+function refreshSeriesMeta() { _seriesMeta = JSON.parse(localStorage.getItem("series-meta") || "{}"); }
+
+// IntersectionObserver for lazy cover loading
+const _coverObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    const id = el.dataset.coverid;
+    if (!id) return;
+    const src = getCover(id);
+    if (src) {
+      const img = document.createElement("img");
+      img.className = el.className; // card-cover or recent-cover etc
+      img.src = src;
+      img.alt = el.dataset.alt || "";
+      el.replaceWith(img);
+    }
+    _coverObserver.unobserve(el);
+  });
+}, { rootMargin: "200px" });
 let bulkMode = false;
 let selectedIds = new Set();
 let recentHidden = false;
@@ -815,17 +844,25 @@ function save() {
   buildIndex();
 }
 
+// Call after any data mutation — marks background tabs dirty, re-renders active ones
+function markDirty() {
+  seriesDirty = true; statsDirty = true; yearDirty = true;
+  renderRecent();
+  if (currentView === "series") { renderSeries(); seriesDirty = false; }
+  if (currentView === "stats")  { renderStats();  statsDirty  = false; }
+  if (currentView === "year")   { renderYear();   yearDirty   = false; }
+}
+
 
 // Helper: get series meta for a given series name
 function getSeriesMeta(seriesName) {
   if (!seriesName) return {};
-  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
-  return meta[seriesName] || {};
+  return _seriesMeta[seriesName] || {};
 }
 
 // Backfill all items: set author/demographic/genre/publisher from their series meta
 function backfillItemsFromSeries() {
-  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  const meta = _seriesMeta;
   let dirty = false;
   items = items.map(item => {
     if (!item.series) return item;
@@ -853,9 +890,9 @@ function switchView(view) {
   document.getElementById("series-tab").classList.toggle("active", view === "series");
   document.getElementById("stats-tab").classList.toggle("active", view === "stats");
   document.getElementById("year-tab").classList.toggle("active", view === "year");
-  if (view === "series") renderSeries();
-  if (view === "stats") renderStats();
-  if (view === "year") renderYear();
+  if (view === "series" && seriesDirty) { renderSeries(); seriesDirty = false; }
+  if (view === "stats"  && statsDirty)  { renderStats();  statsDirty  = false; }
+  if (view === "year"   && yearDirty)   { renderYear();   yearDirty   = false; }
 }
 
 function toggleYear(year) {
@@ -895,10 +932,10 @@ function renderYear() {
     const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
     const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
     const color = PALETTE[item.title.length % PALETTE.length];
-    const cover = getCover(item.id);
+    const lazyCover = lazyCoverHtml(item.id, item.title, "card-cover");
     return `<div class="card">
       <div class="card-cover-wrap">
-        ${cover ? `<img class="card-cover" src="${cover}" alt="${esc(item.title)}">` : `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`}
+        ${lazyCover || `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`}
       </div>
       <div class="card-body">
         <div class="card-title">${esc(item.title)}</div>
@@ -952,6 +989,7 @@ function renderYear() {
   }
 
   el.innerHTML = html;
+  observeCovers(el);
 }
 
 function renderSeries() {
@@ -980,7 +1018,7 @@ function renderSeries() {
     seriesMap[name].owned++;
   });
 
-  const savedSeries = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  const savedSeries = _seriesMeta;
 
   Object.values(seriesMap).forEach(series => {
     if (savedSeries[series.name]) {
@@ -1005,12 +1043,11 @@ function renderSeries() {
     const hasPct = series.pct !== null;
     const pct = series.pct ?? 0;
     const pctColor = pct >= 100 ? "#2D4A3E" : pct >= 50 ? "#3D3BAA" : "#BA7517";
-    const seriesCover = series.coverItemId ? getCover(series.coverItemId) : null;
+    const lazyCover = series.coverItemId ? lazyCoverHtml(series.coverItemId, series.name, "card-cover") : null;
     const safeName = series.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return `
     <div class="card" onclick="openSeriesDetail('${safeName}')" style="cursor:pointer">
-      ${seriesCover ? `<img class="card-cover" src="${seriesCover}" alt="${esc(series.name)}">`
-      : `<div class="card-cover-placeholder" style="background:#2D4A3E">${esc(series.name.slice(0,2).toUpperCase())}</div>`}
+      ${lazyCover || `<div class="card-cover-placeholder" style="background:#2D4A3E">${esc(series.name.slice(0,2).toUpperCase())}</div>`}
       <div class="card-body">
         <div class="card-title">${esc(series.name)}</div>
         ${series.author ? `<div class="card-author" style="margin-top:2px">${esc(series.author)}</div>` : ""}
@@ -1039,11 +1076,11 @@ function renderSeries() {
       </div>
     </div>`;
   }).join("");
+  observeCovers(grid);
 }
 
 function editSeries(name) {
-  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
-  const current = meta[name] || {};
+  const current = _seriesMeta[name] || {};
 
   const owned = items.filter(i => (i.series || "Standalone") === name).length;
 
@@ -1072,10 +1109,8 @@ function seriesOverlayClick(e) {
 function saveSeriesMeta() {
   const name = document.getElementById("series-name-hidden").value;
 
-  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
-
-  meta[name] = {
-    ...(meta[name] || {}),
+  _seriesMeta[name] = {
+    ...(_seriesMeta[name] || {}),
     author: document.getElementById("series-author").value.trim(),
     publisher: document.getElementById("series-publisher").value.trim(),
     demographic: document.getElementById("series-demographic").value.trim(),
@@ -1085,10 +1120,10 @@ function saveSeriesMeta() {
     collectionStatus: document.getElementById("series-collection-status").value
   };
 
-  localStorage.setItem("series-meta", JSON.stringify(meta));
+  localStorage.setItem("series-meta", JSON.stringify(_seriesMeta));
   backfillItemsFromSeries();
   render();
-  renderSeries();
+  markDirty();
   closeSeriesModal();
 }
 
@@ -1139,8 +1174,8 @@ function render() {
   document.getElementById("s-books").textContent = items.filter(i=>i.status==="Reading").length;
   document.getElementById("s-done").textContent = items.filter(i=>i.status==="Completed").length;
 
-  // Recently Added
-  renderRecent();
+  // Recently Added — only re-render when items change (called from markDirty)
+  // renderRecent() is NOT called here to avoid cover cost on every filter/search change
 
   const grid = document.getElementById("grid");
   if (list.length === 0) {
@@ -1158,11 +1193,9 @@ function render() {
     const sc = STATUS_COLORS[item.status] || { bg:"#eee", fg:"#555" };
     const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
     const color = PALETTE[item.title.length % PALETTE.length];
-    const cover = getCover(item.id);
+    const lazyHtml = lazyCoverHtml(item.id, item.title, "card-cover");
+    const coverHtml = lazyHtml || `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`;
     const isSelected = selectedIds.has(item.id);
-    const coverHtml = cover
-      ? `<img class="card-cover" src="${cover}" alt="${esc(item.title)}">`
-      : `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`;
     const cardClick = bulkMode ? `toggleSelectCard(${item.id}, this)` : "";
     return `<div class="card${isSelected ? " selected" : ""}" ${bulkMode ? `onclick="toggleSelectCard(${item.id}, this)" style="cursor:pointer"` : ""}>
       <div class="card-cover-wrap" style="position:relative">
@@ -1190,9 +1223,27 @@ function render() {
       </div>
     </div>`;
   }).join("");
+  observeCovers(grid);
 }
 
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+// Returns img tag if cover already visible in DOM, otherwise a lazy placeholder div
+function lazyCoverHtml(itemId, title, cssClass) {
+  const src = getCover(itemId);
+  if (!src) return null; // no cover — caller should render placeholder
+  // Always lazy: placeholder div observed by IntersectionObserver
+  const initials = title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
+  const color = PALETTE[title.length % PALETTE.length];
+  return `<div class="${cssClass} cover-lazy-placeholder" data-coverid="${itemId}" data-alt="${esc(title)}" style="background:${color};display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:rgba(255,255,255,0.85)">${initials}</div>`;
+}
+
+// Call after any innerHTML update that may contain lazy placeholders
+function observeCovers(root) {
+  (root || document).querySelectorAll(".cover-lazy-placeholder").forEach(el => {
+    _coverObserver.observe(el);
+  });
+}
 
 function setType(btn) {
   document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
@@ -1213,7 +1264,7 @@ function renderRecent() {
     .slice(0, 8);
   const grid = document.getElementById("recent-grid");
   grid.innerHTML = recent.map(item => {
-    const cover = getCover(item.id);
+    const lazyCover = lazyCoverHtml(item.id, item.title, "recent-cover");
     const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
     const color = PALETTE[item.title.length % PALETTE.length];
     const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
@@ -1221,13 +1272,14 @@ function renderRecent() {
     const daysAgo = Math.round((todayMidnight - boughtMidnight) / 86400000);
     const dateStr = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo}d ago`;
     return `<div class="recent-card" onclick="openEdit(${item.id})">
-      ${cover ? `<img class="recent-cover" src="${cover}" alt="${esc(item.title)}">` : `<div class="recent-cover-placeholder" style="background:${color}">${initials}</div>`}
+      ${lazyCover || `<div class="recent-cover-placeholder" style="background:${color}">${initials}</div>`}
       <div class="recent-info">
         <div class="recent-name">${esc(item.title)}</div>
         <div class="recent-date">${dateStr}</div>
       </div>
     </div>`;
   }).join("");
+  observeCovers(grid);
 }
 
 function toggleRecentSection() {
@@ -1436,7 +1488,7 @@ function saveItem() {
     delete coverCache[String(savedId)];
     CoverDB.remove(savedId);
   }
-  save(); render(); renderSeries(); renderSeries(); closeModal();
+  save(); render(); markDirty(); closeModal();
 }
 
 function deleteItem(id) {
@@ -1444,7 +1496,7 @@ function deleteItem(id) {
   items = items.filter(i => i.id !== id);
   delete coverCache[String(id)];
   CoverDB.remove(id);
-  save(); render();
+  save(); render(); markDirty();
 }
 
 // Async startup: load all covers into memory cache, then render
@@ -1502,7 +1554,7 @@ function compressToRanges(nums) {
 function renderStats() {
   const el = document.getElementById("stats-content");
 
-  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  const meta = _seriesMeta;
 
   // ---- Aggregates ----
   const total = items.length;
@@ -1949,7 +2001,7 @@ function renderStats() {
 
 /* ---- SERIES DETAIL MODAL ---- */
 function openSeriesDetail(name) {
-  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  const meta = _seriesMeta;
   const sm = meta[name] || {};
   const seriesItems = items.filter(i => (i.series || "Standalone") === name)
     .sort((a,b) => a.title.localeCompare(b.title, undefined, {numeric:true, sensitivity:'base'}));
@@ -2057,7 +2109,7 @@ function closeSeriesDetail() {
 
 /* ---- AUTHOR MODAL ---- */
 function openAuthorModal(authorName) {
-  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  const meta = _seriesMeta;
 
   // Build series data for this author
   const seriesMap = {};
