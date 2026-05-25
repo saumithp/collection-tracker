@@ -403,10 +403,6 @@
         <label>Title *</label>
         <input type="text" id="f-title" placeholder="e.g. Berserk">
       </div>
-      <div class="form-group">
-        <label>Author / Creator</label>
-        <input type="text" id="f-author" placeholder="e.g. Kentaro Miura">
-      </div>
       <div class="form-row">
         <div class="form-group">
           <label>Type</label>
@@ -443,19 +439,9 @@
           <input type="text" id="f-volumes" placeholder="e.g. 12">
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Series</label>
-          <input type="text" id="f-series" placeholder="e.g. One Piece">
-        </div>
-        <div class="form-group">
-          <label>Demographic</label>
-          <input type="text" id="f-demographic" placeholder="e.g. Shounen">
-        </div>
-      </div>
       <div class="form-group">
-        <label>Genre</label>
-        <input type="text" id="f-genre" placeholder="e.g. Action">
+        <label>Series</label>
+        <input type="text" id="f-series" placeholder="e.g. One Piece">
       </div>
       <div class="form-group">
         <label>Notes</label>
@@ -481,8 +467,6 @@ const PALETTE = ["#2D4A3E","#3D3BAA","#8B4A00","#7B3553","#185FA5","#3B6D11","#B
 
 const PRELOADED = [{"id": 1700000000000, "addedAt": 1700000000000, "title": "One Piece Vol. 1", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Romance Dawn", "cover": "https://dw9to29mmj727.cloudfront.net/products/1569319014.jpg"}, {"id": 1700000001000, "addedAt": 1700000001000, "title": "One Piece Vol. 2", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Buggy the Clown", "cover": "https://dw9to29mmj727.cloudfront.net/products/159116057X.jpg"}, {"id": 1700000002000, "addedAt": 1700000002000, "title": "One Piece Vol. 3", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Don't Get Fooled Again", "cover": "https://dw9to29mmj727.cloudfront.net/products/1591161843.jpg"}, {"id": 1700000003000, "addedAt": 1700000003000, "title": "One Piece Vol. 4", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Black Cat Pirates", "cover": "https://dw9to29mmj727.cloudfront.net/products/1591163374.jpg"}, {"id": 1700000004000, "addedAt": 1700000004000, "title": "One Piece Vol. 5", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "For Whom the Bell Tolls", "cover": "https://dw9to29mmj727.cloudfront.net/products/1591166152.jpg"}, {"id": 1700000005000, "addedAt": 1700000005000, "title": "One Piece Vol. 6", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Oath", "cover": "https://dw9to29mmj727.cloudfront.net/products/159116723X.jpg"}, {"id": 1700000006000, "addedAt": 1700000006000, "title": "One Piece Vol. 7", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Crap-Geezer", "cover": "https://dw9to29mmj727.cloudfront.net/products/159116852X.jpg"}, {"id": 1700000007000, "addedAt": 1700000007000, "title": "One Piece Vol. 8", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "I Won't Die", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421500752.jpg"}, {"id": 1700000008000, "addedAt": 1700000008000, "title": "One Piece Vol. 9", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Tears", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421501910.jpg"}, {"id": 1700000009000, "addedAt": 1700000009000, "title": "One Piece Vol. 10", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "OK, Let's STAND UP!", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421504065.jpg"}, {"id": 1700000010000, "addedAt": 1700000010000, "title": "One Piece Vol. 11", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Meanest Man in the East", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421506637.jpg"}, {"id": 1700000011000, "addedAt": 1700000011000, "title": "One Piece Vol. 12", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Legend Begins", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421506645.jpg"}, {"id": 1700000012000, "addedAt": 1700000012000, "title": "One Piece Vol. 20", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Showdown at Alubarna", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421515148.jpg"}, {"id": 1700000013000, "addedAt": 1700000013000, "title": "One Piece Vol. 21", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Utopia", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421524295.jpg"}, {"id": 1700000014000, "addedAt": 1700000014000, "title": "One Piece Vol. 22", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Hope!!", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421524309.jpg"}, {"id": 1700000015000, "addedAt": 1700000015000, "title": "One Piece Vol. 24", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "People's Dreams", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421528452.jpg"}, {"id": 1700000016000, "addedAt": 1700000016000, "title": "One Piece Vol. 25", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The 100 Million Berry Man", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421528460.jpg"}, {"id": 1700000017000, "addedAt": 1700000017000, "title": "One Piece Vol. 26", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Adventure on Kami's Island", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534428.jpg"}, {"id": 1700000018000, "addedAt": 1700000018000, "title": "One Piece Vol. 27", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Overture", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534436.jpg"}, {"id": 1700000019000, "addedAt": 1700000019000, "title": "One Piece Vol. 28", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Wyper the Berserker", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534444.jpg"}, {"id": 1700000020000, "addedAt": 1700000020000, "title": "One Piece Vol. 29", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Oratorio", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534452.jpg"}, {"id": 1700000021000, "addedAt": 1700000021000, "title": "One Piece Vol. 30", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Capriccio", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534460.jpg"}, {"id": 1700000022000, "addedAt": 1700000022000, "title": "One Piece Vol. 31", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "We'll Be Here", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534479.jpg"}, {"id": 1700000023000, "addedAt": 1700000023000, "title": "One Piece Vol. 32", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Love Song", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534487.jpg"}, {"id": 1700000024000, "addedAt": 1700000024000, "title": "One Piece Vol. 33", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Davy Back Fight", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534495.jpg"}, {"id": 1700000025000, "addedAt": 1700000025000, "title": "One Piece Vol. 34", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The City of Water, Water Seven", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534509.jpg"}, {"id": 1700000026000, "addedAt": 1700000026000, "title": "One Piece Vol. 35", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Captain", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534517.jpg"}, {"id": 1700000027000, "addedAt": 1700000027000, "title": "One Piece Vol. 36", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Ninth Justice", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534525.jpg"}, {"id": 1700000028000, "addedAt": 1700000028000, "title": "One Piece Vol. 37", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Tom", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534533.jpg"}, {"id": 1700000029000, "addedAt": 1700000029000, "title": "One Piece Vol. 38", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Rocketman!!", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534541.jpg"}, {"id": 1700000030000, "addedAt": 1700000030000, "title": "One Piece Vol. 39", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Scramble", "cover": "https://dw9to29mmj727.cloudfront.net/products/142153455X.jpg"}, {"id": 1700000031000, "addedAt": 1700000031000, "title": "One Piece Vol. 40", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Gear", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534568.jpg"}, {"id": 1700000032000, "addedAt": 1700000032000, "title": "One Piece Vol. 41", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Declaration of War", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534576.jpg"}, {"id": 1700000033000, "addedAt": 1700000033000, "title": "One Piece Vol. 42", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Pirates vs. CP9", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534584.jpg"}, {"id": 1700000034000, "addedAt": 1700000034000, "title": "One Piece Vol. 43", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Legend of a Hero", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534592.jpg"}, {"id": 1700000035000, "addedAt": 1700000035000, "title": "One Piece Vol. 44", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Let's Go Back", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534606.jpg"}, {"id": 1700000036000, "addedAt": 1700000036000, "title": "One Piece Vol. 45", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "You Have My Sympathies", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534614.jpg"}, {"id": 1700000037000, "addedAt": 1700000037000, "title": "One Piece Vol. 46", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Adventure on Ghost Island", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421534622.jpg"}, {"id": 1700000038000, "addedAt": 1700000038000, "title": "One Piece Vol. 71", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Coliseum of Scoundrels", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421569450.jpg"}, {"id": 1700000039000, "addedAt": 1700000039000, "title": "One Piece Vol. 72", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Dressrosa's Forgotten", "cover": "https://dw9to29mmj727.cloudfront.net/products/142157344X.jpg"}, {"id": 1700000040000, "addedAt": 1700000040000, "title": "One Piece Vol. 73", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Operation Dressrosa S.O.P.", "cover": "https://dw9to29mmj727.cloudfront.net/products/142157683X.jpg"}, {"id": 1700000041000, "addedAt": 1700000041000, "title": "One Piece Vol. 74", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Ever at Your Side", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421578670.jpg"}, {"id": 1700000042000, "addedAt": 1700000042000, "title": "One Piece Vol. 75", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Repaying the Debt", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421580292.jpg"}, {"id": 1700000043000, "addedAt": 1700000043000, "title": "One Piece Vol. 76", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Just Keep Going", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421582600.jpg"}, {"id": 1700000044000, "addedAt": 1700000044000, "title": "One Piece Vol. 77", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Smile", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421585146.jpg"}, {"id": 1700000045000, "addedAt": 1700000045000, "title": "One Piece Vol. 78", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Champion of Evil", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421585847.jpg"}, {"id": 1700000046000, "addedAt": 1700000046000, "title": "One Piece Vol. 79", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Lucy!!", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421588153.jpg"}, {"id": 1700000047000, "addedAt": 1700000047000, "title": "One Piece Vol. 80", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Opening Speech", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421590247.jpg"}, {"id": 1700000048000, "addedAt": 1700000048000, "title": "One Piece Vol. 81", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Let's Go See the Cat Viper", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421591596.jpg"}, {"id": 1700000049000, "addedAt": 1700000049000, "title": "One Piece Vol. 82", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The World Is Restless", "cover": "https://dw9to29mmj727.cloudfront.net/products/142159269X.jpg"}, {"id": 1700000050000, "addedAt": 1700000050000, "title": "One Piece Vol. 83", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Emperor of the Sea, Charlotte Linlin", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421594331.jpg"}, {"id": 1700000051000, "addedAt": 1700000051000, "title": "One Piece Vol. 84", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Luffy vs. Sanji", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421597004.jpg"}, {"id": 1700000052000, "addedAt": 1700000052000, "title": "One Piece Vol. 85", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Liar", "cover": "https://dw9to29mmj727.cloudfront.net/products/1421598205.jpg"}, {"id": 1700000053000, "addedAt": 1700000053000, "title": "One Piece Vol. 86", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Emperor Assassination Plan", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974700429.jpg"}, {"id": 1700000054000, "addedAt": 1700000054000, "title": "One Piece Vol. 87", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Bittersweet", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974701417.jpg"}, {"id": 1700000055000, "addedAt": 1700000055000, "title": "One Piece Vol. 88", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Lion", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974703789.jpg"}, {"id": 1700000056000, "addedAt": 1700000056000, "title": "One Piece Vol. 89", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Bad End Musical", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974705218.jpg"}, {"id": 1700000057000, "addedAt": 1700000057000, "title": "One Piece Vol. 90", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Sacred Marijoa", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974707008.jpg"}, {"id": 1700000058000, "addedAt": 1700000058000, "title": "One Piece Vol. 91", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Adventure in the Land of Samurai", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974707016.jpg"}, {"id": 1700000059000, "addedAt": 1700000059000, "title": "One Piece Vol. 100", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Color of the Supreme King", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974732177.jpg"}, {"id": 1700000060000, "addedAt": 1700000060000, "title": "One Piece Vol. 102", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Pivotal Clash", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974736555.jpg"}, {"id": 1700000061000, "addedAt": 1700000061000, "title": "One Piece Vol. 103", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Warrior of Liberation", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974738701.jpg"}, {"id": 1700000062000, "addedAt": 1700000062000, "title": "One Piece Vol. 104", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Shogun of Wano, Kozuki Momonosuke", "cover": "https://dw9to29mmj727.cloudfront.net/products/197474129X.jpg"}, {"id": 1700000063000, "addedAt": 1700000063000, "title": "One Piece Vol. 105", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Luffy's Dream", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974743276.jpg"}, {"id": 1700000064000, "addedAt": 1700000064000, "title": "One Piece Vol. 106", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "A Genius's Dream", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974745864.jpg"}, {"id": 1700000065000, "addedAt": 1700000065000, "title": "One Piece Vol. 107", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Hero of Legend", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974749797.jpg"}, {"id": 1700000066000, "addedAt": 1700000066000, "title": "One Piece Vol. 108", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Better Off Dead In This World", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974752224.jpg"}, {"id": 1700000067000, "addedAt": 1700000067000, "title": "One Piece Vol. 109", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "On Your Side", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974755908.jpg"}, {"id": 1700000068000, "addedAt": 1700000068000, "title": "One Piece Vol. 110", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "The Upheaval of the Era", "cover": "https://dw9to29mmj727.cloudfront.net/products/1974758966.jpg"}, {"id": 1700000069000, "addedAt": 1700000069000, "title": "One Piece Vol. 111", "author": "Eiichiro Oda", "type": "Manga", "status": "Completed", "rating": 5, "volumes": "1", "notes": "Adventure in Elbaph", "cover": null}];
 PRELOADED.forEach(i => {
-  i.demographic = "Shounen";
-  i.genre = "Action";
   i.series = "One Piece";
 });
 
@@ -494,6 +478,49 @@ let currentRating = 0;
 let currentView = 'library';
 
 function save() { localStorage.setItem("collection-v1", JSON.stringify(items)); }
+
+// Seed One Piece series meta if not already set
+(function seedSeriesMeta() {
+  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  if (!meta["One Piece"]) {
+    meta["One Piece"] = {
+      total: "111", mangaStatus: "Publishing", collectionStatus: "Collecting",
+      author: "Eiichiro Oda", demographic: "Shounen", genre: "Action", publisher: "VIZ Media"
+    };
+    localStorage.setItem("series-meta", JSON.stringify(meta));
+  } else if (!meta["One Piece"].publisher) {
+    meta["One Piece"].publisher = "VIZ Media";
+    if (!meta["One Piece"].author) meta["One Piece"].author = "Eiichiro Oda";
+    if (!meta["One Piece"].demographic) meta["One Piece"].demographic = "Shounen";
+    if (!meta["One Piece"].genre) meta["One Piece"].genre = "Action";
+    localStorage.setItem("series-meta", JSON.stringify(meta));
+  }
+})();
+
+// Helper: get series meta for a given series name
+function getSeriesMeta(seriesName) {
+  if (!seriesName) return {};
+  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  return meta[seriesName] || {};
+}
+
+// Backfill all items: set author/demographic/genre/publisher from their series meta
+function backfillItemsFromSeries() {
+  const meta = JSON.parse(localStorage.getItem("series-meta") || "{}");
+  let dirty = false;
+  items = items.map(item => {
+    if (!item.series) return item;
+    const sm = meta[item.series] || {};
+    const updates = {};
+    if (sm.author && item.author !== sm.author) { updates.author = sm.author; dirty = true; }
+    if (sm.demographic && item.demographic !== sm.demographic) { updates.demographic = sm.demographic; dirty = true; }
+    if (sm.genre && item.genre !== sm.genre) { updates.genre = sm.genre; dirty = true; }
+    if (sm.publisher && item.publisher !== sm.publisher) { updates.publisher = sm.publisher; dirty = true; }
+    return Object.keys(updates).length ? { ...item, ...updates } : item;
+  });
+  if (dirty) save();
+}
+backfillItemsFromSeries();
 
 // Convert a remote cover URL to a base64 data URL and persist it
 async function fetchCoverAsBase64(url) {
@@ -546,11 +573,13 @@ function renderSeries() {
       seriesMap[name] = {
         name,
         type: item.type,
-        demographic: item.demographic || "",
-        genre: item.genre || "",
         cover: item.cover,
         owned: 0,
         total: "",
+        author: "",
+        demographic: "",
+        genre: "",
+        publisher: "",
         mangaStatus: "Publishing",
         collectionStatus: "Collecting"
       };
@@ -589,9 +618,11 @@ function renderSeries() {
       : `<div class="card-cover-placeholder" style="background:#2D4A3E">${esc(series.name.slice(0,2).toUpperCase())}</div>`}
       <div class="card-body">
         <div class="card-title">${esc(series.name)}</div>
-        <div class="meta-tags">
+        ${series.author ? `<div class="card-author" style="margin-top:2px">${esc(series.author)}</div>` : ""}
+        <div class="meta-tags" style="margin-top:5px">
           ${series.demographic ? `<span class="meta-tag">${esc(series.demographic)}</span>` : ""}
           ${series.genre ? `<span class="meta-tag">${esc(series.genre)}</span>` : ""}
+          ${series.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(series.publisher)}</span>` : ""}
         </div>
         <div class="series-card-stat"><span>Volumes owned</span><span>${series.owned}${series.total ? " / " + series.total : ""}</span></div>
         ${hasPct ? `
@@ -622,6 +653,10 @@ function editSeries(name) {
 
   document.getElementById("series-name-hidden").value = name;
   document.getElementById("series-name").value = name;
+  document.getElementById("series-author").value = current.author || "";
+  document.getElementById("series-publisher").value = current.publisher || "";
+  document.getElementById("series-demographic").value = current.demographic || "";
+  document.getElementById("series-genre").value = current.genre || "";
   document.getElementById("series-total").value = current.total || "";
   document.getElementById("series-owned").value = owned;
   document.getElementById("series-manga-status").value = current.mangaStatus || "Publishing";
@@ -645,13 +680,18 @@ function saveSeriesMeta() {
 
   meta[name] = {
     ...(meta[name] || {}),
+    author: document.getElementById("series-author").value.trim(),
+    publisher: document.getElementById("series-publisher").value.trim(),
+    demographic: document.getElementById("series-demographic").value.trim(),
+    genre: document.getElementById("series-genre").value.trim(),
     total: document.getElementById("series-total").value.trim(),
     mangaStatus: document.getElementById("series-manga-status").value,
     collectionStatus: document.getElementById("series-collection-status").value
   };
 
   localStorage.setItem("series-meta", JSON.stringify(meta));
-
+  backfillItemsFromSeries();
+  render();
   renderSeries();
   closeSeriesModal();
 }
@@ -703,6 +743,7 @@ function render() {
           ${item.series ? `<span class="meta-tag">${esc(item.series)}</span>` : ""}
           ${item.demographic ? `<span class="meta-tag">${esc(item.demographic)}</span>` : ""}
           ${item.genre ? `<span class="meta-tag">${esc(item.genre)}</span>` : ""}
+          ${item.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(item.publisher)}</span>` : ""}
         </div>
         ${item.volumes ? `<div style="font-size:11px;color:var(--text3)">${esc(item.volumes)} ${item.type==="Manga"?"vol.":"pg."}</div>` : ""}
       </div>
@@ -765,14 +806,11 @@ function openAdd() {
   document.getElementById("modal-title").textContent = "Add to collection";
   document.querySelector(".btn-save").textContent = "Add to collection";
   document.getElementById("f-title").value = "";
-  document.getElementById("f-author").value = "";
   document.getElementById("f-type").value = "Manga";
   document.getElementById("f-status").value = "Plan to Read";
   document.getElementById("f-volumes").value = "";
   document.getElementById("f-notes").value = "";
   document.getElementById("f-series").value = "";
-  document.getElementById("f-demographic").value = "";
-  document.getElementById("f-genre").value = "";
   removeCover(); setStar(0); updateVolLabel();
   document.getElementById("modal").style.display = "flex";
 }
@@ -783,14 +821,11 @@ function openEdit(id) {
   document.getElementById("modal-title").textContent = "Edit title";
   document.querySelector(".btn-save").textContent = "Save changes";
   document.getElementById("f-title").value = item.title;
-  document.getElementById("f-author").value = item.author || "";
   document.getElementById("f-type").value = item.type;
   document.getElementById("f-status").value = item.status;
   document.getElementById("f-volumes").value = item.volumes || "";
   document.getElementById("f-notes").value = item.notes || "";
   document.getElementById("f-series").value = item.series || "";
-  document.getElementById("f-demographic").value = item.demographic || "";
-  document.getElementById("f-genre").value = item.genre || "";
   currentCover = item.cover || null;
   if (currentCover) {
     const img = document.getElementById("cover-preview");
@@ -815,14 +850,18 @@ function saveItem() {
   const title = document.getElementById("f-title").value.trim();
   if (!title) { document.getElementById("f-title").focus(); return; }
   const editId = parseInt(document.getElementById("edit-id").value);
+  const seriesName = document.getElementById("f-series").value.trim();
+  const sm = getSeriesMeta(seriesName);
   const obj = {
-    title, author: document.getElementById("f-author").value.trim(),
+    title,
+    author: sm.author || "",
     type: document.getElementById("f-type").value,
     status: document.getElementById("f-status").value,
     volumes: document.getElementById("f-volumes").value.trim(),
-    series: document.getElementById("f-series").value.trim(),
-    demographic: document.getElementById("f-demographic").value.trim(),
-    genre: document.getElementById("f-genre").value.trim(),
+    series: seriesName,
+    demographic: sm.demographic || "",
+    genre: sm.genre || "",
+    publisher: sm.publisher || "",
     notes: document.getElementById("f-notes").value.trim(),
     cover: currentCover,
     rating: parseInt(document.getElementById("f-rating").value) || 0,
@@ -978,6 +1017,28 @@ function importCSV(e) {
       <div class="form-group">
         <label>Series</label>
         <input type="text" id="series-name" disabled>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Author / Creator</label>
+          <input type="text" id="series-author" placeholder="e.g. Kentaro Miura">
+        </div>
+        <div class="form-group">
+          <label>Publisher</label>
+          <input type="text" id="series-publisher" placeholder="e.g. VIZ Media">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Demographic</label>
+          <input type="text" id="series-demographic" placeholder="e.g. Shounen">
+        </div>
+        <div class="form-group">
+          <label>Genre</label>
+          <input type="text" id="series-genre" placeholder="e.g. Action">
+        </div>
       </div>
 
       <div class="form-row">
