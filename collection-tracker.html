@@ -1014,14 +1014,15 @@ function renderRecent() {
   if (!rs) return;
   if (recentHidden || items.length === 0) { rs.style.display = "none"; return; }
   rs.style.display = "";
-  const recent = [...items].sort((a,b) => (b.addedAt||0)-(a.addedAt||0)).slice(0, 8);
+  const recent = [...items].sort((a,b) => (b.importedAt||b.addedAt||0)-(a.importedAt||a.addedAt||0)).slice(0, 8);
   const grid = document.getElementById("recent-grid");
   grid.innerHTML = recent.map(item => {
     const cover = getCover(item.id);
     const initials = item.title.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase() || "?";
     const color = PALETTE[item.title.length % PALETTE.length];
+    const stamp = item.importedAt || item.addedAt;
     const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
-    const addedMidnight = item.addedAt ? new Date(item.addedAt) : null;
+    const addedMidnight = stamp ? new Date(stamp) : null;
     if (addedMidnight) addedMidnight.setHours(0,0,0,0);
     const daysAgo = addedMidnight ? Math.round((todayMidnight - addedMidnight) / 86400000) : null;
     const dateStr = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : daysAgo !== null ? `${daysAgo}d ago` : "";
@@ -1811,7 +1812,7 @@ function importJSON(e) {
         const cover = inItem.cover || null;
         delete inItem.cover;
         if (cover) newCovers[String(inItem.id)] = cover;
-        items.push(inItem); existingIds.add(inItem.id); existingKeys.add(key); added++;
+        items.push({ ...inItem, importedAt: Date.now() }); existingIds.add(inItem.id); existingKeys.add(key); added++;
       });
       if (data.seriesMeta) {
         const existing = JSON.parse(localStorage.getItem("series-meta") || "{}");
@@ -1865,7 +1866,7 @@ function importCSV(e) {
           dateBought: obj.dateBought || null,
           pricePaid: obj.pricePaid ? parseFloat(obj.pricePaid) : null,
           msrp: obj.msrp ? parseFloat(obj.msrp) : null,
-          addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), cover: null
+          addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), importedAt: Date.now(), cover: null
         });
         added++;
       });
