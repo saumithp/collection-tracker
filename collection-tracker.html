@@ -23,11 +23,198 @@
     --manga-fg: #3D3BAA;
     --book-bg: #FFF3E8;
     --book-fg: #8B4A00;
+    --refbook-bg: #E8F4FD;
+    --refbook-fg: #1565A8;
     --radius: 10px;
     --radius-lg: 14px;
     --shadow: 0 2px 12px rgba(0,0,0,0.07);
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.14);
   }
+
+  /* ---- THEMES ---- */
+  [data-theme="midnight"] {
+    --bg: #0E0E12; --surface: #1A1A22; --surface2: #22222E;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #E8E6F0; --text2: #9B98AC; --text3: #5C5A6A;
+    --accent: #7C5CFC; --accent-light: #1E1840;
+    --manga-bg: #1A1840; --manga-fg: #9D8FFF;
+    --book-bg: #1F1410; --book-fg: #D4935A;
+    --refbook-bg: #0D1E30; --refbook-fg: #5BA4E0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.35); --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+    --text-outline: rgba(0,0,0,0.55);
+  }
+  [data-theme="rose"] {
+    --bg: #FDF5F5; --surface: #FFFFFF; --surface2: #F7EDED;
+    --border: rgba(180,60,80,0.12); --border2: rgba(180,60,80,0.2);
+    --text: #1A0D0F; --text2: #7A4F55; --text3: #B08890;
+    --accent: #C0394E; --accent-light: #FDEAED;
+    --manga-bg: #EEE0FF; --manga-fg: #6B3BAA;
+    --book-bg: #FFF3E8; --book-fg: #8B4A00;
+    --refbook-bg: #E8F4FD; --refbook-fg: #1565A8;
+  }
+  [data-theme="slate"] {
+    --bg: #F0F2F5; --surface: #FFFFFF; --surface2: #E5E8EE;
+    --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.16);
+    --text: #111827; --text2: #4B5563; --text3: #9CA3AF;
+    --accent: #1D4ED8; --accent-light: #EEF2FF;
+    --manga-bg: #EDE9FE; --manga-fg: #5B21B6;
+    --book-bg: #FEF3C7; --book-fg: #92400E;
+    --refbook-bg: #DBEAFE; --refbook-fg: #1D4ED8;
+  }
+  [data-theme="forest"] {
+    --bg: #F2F5F0; --surface: #FFFFFF; --surface2: #E6EDE3;
+    --border: rgba(30,80,40,0.1); --border2: rgba(30,80,40,0.18);
+    --text: #0F1E0C; --text2: #4A6840; --text3: #8AA882;
+    --accent: #2E7D32; --accent-light: #E8F5E9;
+    --manga-bg: #E8F5E9; --manga-fg: #1B5E20;
+    --book-bg: #FFF8E1; --book-fg: #795548;
+    --refbook-bg: #E3F2FD; --refbook-fg: #0D47A1;
+  }
+  [data-theme="amber"] {
+    --bg: #FDFBF5; --surface: #FFFFFF; --surface2: #F5EDDA;
+    --border: rgba(120,80,0,0.12); --border2: rgba(120,80,0,0.2);
+    --text: #1C1200; --text2: #7A6020; --text3: #B8A060;
+    --accent: #B45309; --accent-light: #FEF3C7;
+    --manga-bg: #FFF3E8; --manga-fg: #C2410C;
+    --book-bg: #F0F9FF; --book-fg: #0369A1;
+    --refbook-bg: #EFF6FF; --refbook-fg: #1D4ED8;
+  }
+  [data-theme="sunset"] {
+    --bg: #FFF4ED; --surface: #FFFFFF; --surface2: #FFE7D6;
+    --border: rgba(180,90,40,0.12); --border2: rgba(180,90,40,0.2);
+    --text: #2B1408; --text2: #8A5A42; --text3: #C08A72;
+    --accent: #E76F51; --accent-light: #FFF0EA;
+    --manga-bg: #FFE1D6; --manga-fg: #B6472E;
+    --book-bg: #FFF5CC; --book-fg: #A66A00;
+    --refbook-bg: #E3F2FD; --refbook-fg: #1565C0;
+  }
+  [data-theme="matcha"] {
+    --bg: #F3F7F1; --surface: #FFFFFF; --surface2: #E6EFE1;
+    --border: rgba(50,80,40,0.1); --border2: rgba(50,80,40,0.18);
+    --text: #152010; --text2: #5C7252; --text3: #98AA92;
+    --accent: #6A994E; --accent-light: #EDF5E8;
+    --manga-bg: #DDEED4; --manga-fg: #48702F;
+    --book-bg: #FFF3D6; --book-fg: #9B6A00;
+    --refbook-bg: #E0F2FE; --refbook-fg: #0369A1;
+  }
+
+
+  [data-theme="obsidian"] {
+    --bg: #050505; --surface: #111111; --surface2: #1A1A1A;
+    --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.12);
+    --text: #F2F2F2; --text2: #A3A3A3; --text3: #666666;
+    --accent: #FF4D6D; --accent-light: #2A1016;
+    --manga-bg: #2B1020; --manga-fg: #FF7A95;
+    --book-bg: #2A1C10; --book-fg: #FFB86B;
+    --refbook-bg: #101C2A; --refbook-fg: #6BB6FF;
+  }
+
+  [data-theme="ocean"] {
+    --bg: #07131F; --surface: #102030; --surface2: #162B40;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.16);
+    --text: #EAF6FF; --text2: #9CB8CC; --text3: #5D7387;
+    --accent: #00B4D8; --accent-light: #0E2B38;
+    --manga-bg: #12273F; --manga-fg: #7EDBFF;
+    --book-bg: #2B2110; --book-fg: #FFD166;
+    --refbook-bg: #10263B; --refbook-fg: #90E0EF;
+  }
+
+  [data-theme="dracula"] {
+    --bg: #1E1F29; --surface: #282A36; --surface2: #343746;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #F8F8F2; --text2: #BDC1D6; --text3: #7B809B;
+    --accent: #BD93F9; --accent-light: #332B47;
+    --manga-bg: #3A2C57; --manga-fg: #D6BCFF;
+    --book-bg: #4A3322; --book-fg: #FFB86C;
+    --refbook-bg: #223347; --refbook-fg: #8BE9FD;
+  }
+
+  [data-theme="nord"] {
+    --bg: #2E3440; --surface: #3B4252; --surface2: #434C5E;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.16);
+    --text: #ECEFF4; --text2: #D8DEE9; --text3: #81A1C1;
+    --accent: #88C0D0; --accent-light: #33414D;
+    --manga-bg: #3B4C63; --manga-fg: #A3D5E2;
+    --book-bg: #5A4A3A; --book-fg: #EBCB8B;
+    --refbook-bg: #334B5C; --refbook-fg: #81A1C1;
+  }
+
+
+  /* ---- THEME PICKER ---- */
+  .theme-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface); cursor: pointer; font-size: 15px;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .theme-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+  .theme-picker-wrap { position: relative; }
+  .theme-picker-panel {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    padding: 14px 16px; z-index: 300; min-width: 200px;
+    animation: slideUp 0.15s;
+  }
+  .theme-picker-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; font-weight: 600; }
+  .theme-swatches { display: flex; flex-direction: column; gap: 6px; }
+  .theme-swatch {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid transparent; transition: all 0.12s;
+    font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text);
+  }
+  .theme-swatch:hover { background: var(--surface2); border-color: var(--border2); }
+  .theme-swatch.active { border-color: var(--accent); background: var(--accent-light); }
+  .theme-swatch-dots { display: flex; gap: 3px; }
+  .theme-swatch-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); }
+
+  
+
+
+  /* ---- DARK THEME TEXT CONTRAST ---- */
+  [data-theme="midnight"] .card-title,
+  [data-theme="obsidian"] .card-title,
+  [data-theme="ocean"] .card-title,
+  [data-theme="dracula"] .card-title,
+  [data-theme="nord"] .card-title,
+  [data-theme="midnight"] .logo,
+  [data-theme="obsidian"] .logo,
+  [data-theme="ocean"] .logo,
+  [data-theme="dracula"] .logo,
+  [data-theme="nord"] .logo,
+  [data-theme="midnight"] .overview-hero-count,
+  [data-theme="obsidian"] .overview-hero-count,
+  [data-theme="ocean"] .overview-hero-count,
+  [data-theme="dracula"] .overview-hero-count,
+  [data-theme="nord"] .overview-hero-count {
+    text-shadow:
+      0 1px 0 rgba(0,0,0,0.35),
+      0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  [data-theme="midnight"] .card-author,
+  [data-theme="obsidian"] .card-author,
+  [data-theme="ocean"] .card-author,
+  [data-theme="dracula"] .card-author,
+  [data-theme="nord"] .card-author,
+  [data-theme="midnight"] .stat-label,
+  [data-theme="obsidian"] .stat-label,
+  [data-theme="ocean"] .stat-label,
+  [data-theme="dracula"] .stat-label,
+  [data-theme="nord"] .stat-label {
+    color: #c9c9d4;
+  }
+
+  [data-theme="midnight"] .card,
+  [data-theme="obsidian"] .card,
+  [data-theme="ocean"] .card,
+  [data-theme="dracula"] .card,
+  [data-theme="nord"] .card {
+    border-color: rgba(255,255,255,0.14);
+  }
+
 
   body {
     font-family: 'DM Sans', sans-serif;
@@ -58,10 +245,10 @@
 
   /* ---- TOOLBAR ---- */
   .toolbar { display: flex; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
-  .search-wrap { position: relative; flex: 1 1 200px; }
+  .search-wrap { position: relative; flex: 1 1 320px; min-width: 280px; }
   .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); pointer-events: none; }
   input[type=text], input[type=search] {
-    width: 100%; padding: 9px 12px 9px 36px;
+    width: 100%; max-width: 100%; padding: 9px 12px 9px 36px;
     border: 1px solid var(--border); border-radius: var(--radius);
     font-family: 'DM Sans', sans-serif; font-size: 13px;
     background: var(--surface); color: var(--text);
@@ -319,7 +506,7 @@
 
   /* ---- STATS NAV ---- */
   .stats-nav {
-    position: sticky; top: 60px; z-index: 50;
+    position: sticky; top: 115px; z-index: 50;
     display: flex; gap: 8px; padding: 10px 0;
     background: var(--bg); border-bottom: 1px solid var(--border);
     margin-bottom: 1.5rem;
@@ -453,7 +640,7 @@
 
   /* ---- BULK EDIT ---- */
   .bulk-bar {
-    position: sticky; top: 60px; z-index: 90;
+    position: sticky; top: 115px; z-index: 90;
     background: var(--accent); color: white;
     padding: 10px 16px; border-radius: var(--radius);
     display: flex; align-items: center; gap: 12px;
@@ -489,7 +676,7 @@
 
   /* ---- BY YEAR VIEW ---- */
   .year-selector-bar {
-    position: sticky; top: 60px; z-index: 50;
+    position: sticky; top: 115px; z-index: 50;
     display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 0;
     background: var(--bg); border-bottom: 1px solid var(--border);
     margin-bottom: 1.5rem;
@@ -554,7 +741,19 @@
     main { padding: 1.25rem 1rem 3rem; }
   }
 
-  /* ---- OVERVIEW PAGE ---- */
+  /* ---- STICKY VIEW TABS ---- */
+  .view-tabs-bar {
+    position: sticky; top: 60px; z-index: 90;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+  }
+  .view-tabs-inner {
+    max-width: 980px; margin: 0 auto;
+    display: flex; gap: 8px; padding: 10px 0; flex-wrap: wrap;
+  }
+
+
   .overview-page { display: flex; flex-direction: column; gap: 2rem; }
 
   .overview-hero {
@@ -743,6 +942,14 @@
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       Add title
     </button>
+    <!-- Theme picker -->
+    <div class="theme-picker-wrap" id="theme-picker-wrap">
+      <button class="theme-btn" onclick="toggleThemePicker(event)" title="Change theme">🎨</button>
+      <div class="theme-picker-panel" id="theme-picker-panel" style="display:none">
+        <div class="theme-picker-label">Colour Theme</div>
+        <div class="theme-swatches" id="theme-swatches"></div>
+      </div>
+    </div>
     <button class="btn-ie" onclick="openFXModal()" title="Set exchange rates (USD/INR → GBP)" style="padding:9px 10px">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 0 1 5.12-1.5M15 15a3 3 0 0 1-5.12 1.5M12 6v2m0 8v2"/></svg>
     </button>
@@ -750,14 +957,17 @@
 </header>
 <div class="toast" id="toast"></div>
 
-<main>
-  <div class="view-tabs" style="display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;">
+<div class="view-tabs-bar">
+  <div class="view-tabs-inner">
     <button class="filter-btn" id="overview-tab" onclick="switchView('overview')">Overview</button>
     <button class="filter-btn" id="library-tab" onclick="switchView('library')">Library</button>
     <button class="filter-btn" id="year-tab" onclick="switchView('year')">By Year</button>
     <button class="filter-btn" id="series-tab" onclick="switchView('series')">Series</button>
     <button class="filter-btn" id="stats-tab" onclick="switchView('stats')">Stats</button>
   </div>
+</div>
+
+<main>
 
   <div id="library-view">
   <!-- Stats -->
@@ -772,12 +982,13 @@
   <div class="toolbar">
     <div class="search-wrap">
       <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
-      <input type="search" id="search" placeholder="Search titles, authors…" oninput="debouncedRender()">
+      <div style="display:flex;gap:8px;align-items:center"><input type="search" id="search" placeholder="Search" oninput="debouncedRender()"><button class="btn-ie" type="button" onclick="openSearchHelp()" style="padding:8px 10px">?</button></div>
     </div>
     <div class="filter-btns">
       <button class="filter-btn active" data-type="All" onclick="setType(this)">All</button>
       <button class="filter-btn" data-type="Manga" onclick="setType(this)">Manga</button>
       <button class="filter-btn" data-type="Book" onclick="setType(this)">Books</button>
+      <button class="filter-btn" data-type="Reference Book" onclick="setType(this)">Reference</button>
     </div>
     <select id="status-filter" onchange="render()">
       <option value="All">All statuses</option>
@@ -786,6 +997,7 @@
       <option>On Hold</option>
       <option>Plan to Read</option>
       <option>Dropped</option>
+      <option>Reference</option>
     </select>
     <div class="sort-wrap">
       <select id="sort-select" onchange="render()">
@@ -796,6 +1008,7 @@
         <option value="pages">Pages</option>
         <option value="publisher">Publisher A–Z</option>
         <option value="msrp">MSRP</option>
+        <option value="originalPubDate">Original Pub Date</option>
       </select>
       <button class="btn-sort-dir" id="sort-dir-btn" onclick="toggleSortDir()" title="Reverse sort direction">↑</button>
     </div>
@@ -865,8 +1078,37 @@
         </select>
         <button class="btn-sort-dir" id="series-sort-dir-btn" onclick="toggleSeriesSortDir()" title="Reverse sort direction">↑</button>
       </div>
+      <div class="filter-btns">
+        <button class="filter-btn active" id="series-jump-manga" onclick="seriesJump('manga')">📚 Manga</button>
+        <button class="filter-btn" id="series-jump-books" onclick="seriesJump('books')">📖 Books</button>
+      </div>
     </div>
-    <div class="grid" id="series-grid"></div>
+    <!-- Manga Series -->
+    <div id="manga-series-section">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
+        <span style="font-family:'Fraunces',serif;font-size:17px;font-weight:500;color:var(--manga-fg)">📚 Manga Series</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span id="manga-series-count" style="font-size:12px;color:var(--text3)"></span>
+      </div>
+      <div class="grid" id="manga-series-grid"></div>
+      <div id="manga-series-empty" style="display:none;text-align:center;padding:40px 20px;border:2px dashed var(--border);border-radius:var(--radius-lg);margin-bottom:1.5rem">
+        <div style="font-size:36px;margin-bottom:8px">📚</div>
+        <p style="color:var(--text2);font-size:13px">No manga series yet. Add manga with a series name.</p>
+      </div>
+    </div>
+    <!-- Book Series -->
+    <div id="book-series-section" style="margin-top:2rem">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
+        <span style="font-family:'Fraunces',serif;font-size:17px;font-weight:500;color:var(--book-fg)">📖 Book &amp; Reference Series</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span id="book-series-count" style="font-size:12px;color:var(--text3)"></span>
+      </div>
+      <div class="grid" id="book-series-grid"></div>
+      <div id="book-series-empty" style="display:none;text-align:center;padding:40px 20px;border:2px dashed var(--border);border-radius:var(--radius-lg)">
+        <div style="font-size:36px;margin-bottom:8px">📖</div>
+        <p style="color:var(--text2);font-size:13px">No book series yet. Add books with a series name.</p>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -885,6 +1127,7 @@
         <div style="display:flex;gap:8px">
           <button type="button" class="type-tab active" id="type-tab-manga" onclick="switchModalType('Manga')">📚 Manga</button>
           <button type="button" class="type-tab" id="type-tab-book" onclick="switchModalType('Book')">📖 Book</button>
+          <button type="button" class="type-tab" id="type-tab-refbook" onclick="switchModalType('Reference Book')">📘 Reference</button>
         </div>
       </div>
       <input type="hidden" id="f-type" value="Manga">
@@ -963,13 +1206,16 @@
               <input type="number" id="f-msrp" placeholder="e.g. 8.99" step="0.01" min="0" style="flex:1">
             </div>
           </div>
-          <div class="form-group"></div>
+          <div class="form-group">
+            <label>ISBN</label>
+            <input type="text" id="f-isbn" placeholder="e.g. 9781974700011">
+          </div>
         </div>
       </div>
 
       <!-- BOOK FIELDS -->
       <div id="book-fields" style="display:none">
-        <div class="form-group">
+        <div class="form-group" id="book-status-group">
           <label>Read Status</label>
           <select id="f-book-status">
             <option selected>Plan to Read</option>
@@ -1056,7 +1302,26 @@
             <label>Original Publication Date</label>
             <input type="text" id="f-book-orig-pubdate" placeholder="e.g. 1994 or 1994-03-15">
           </div>
-          <div class="form-group"></div>
+          <div class="form-group">
+            <label>Edition Publish Date</label>
+            <input type="text" id="f-book-edition-pubdate" placeholder="e.g. 2012 or 2012-06-01">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Obtained</label>
+            <select id="f-book-obtained">
+              <option value="">Not specified</option>
+              <option value="New">New</option>
+              <option value="2nd Hand">2nd Hand</option>
+              <option value="Gift">Gift</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>ISBN</label>
+            <input type="text" id="f-book-isbn" placeholder="e.g. 9780593599235">
+          </div>
         </div>
       </div>
 
@@ -1229,6 +1494,7 @@ const STATUS_COLORS = {
   "On Hold":       { bg:"#FEF0CD", fg:"#BA7517" },
   "Plan to Read":  { bg:"#E8E8E8", fg:"#5F5E5A" },
   "Dropped":       { bg:"#FDDEDE", fg:"#A32D2D" },
+  "Reference":     { bg:"#E8F4FD", fg:"#1565A8" },
 };
 const PALETTE = ["#2D4A3E","#3D3BAA","#8B4A00","#7B3553","#185FA5","#3B6D11","#BA7517","#A32D2D"];
 
@@ -1563,7 +1829,8 @@ function renderYear() {
 }
 
 function renderSeries() {
-  const grid = document.getElementById("series-grid");
+  const mangaGrid = document.getElementById("manga-series-grid");
+  const bookGrid = document.getElementById("book-series-grid");
 
   const seriesMap = {};
   items.forEach(item => {
@@ -1582,8 +1849,12 @@ function renderSeries() {
         mangaStatus: "Publishing",
         collectionStatus: "Collecting"
       };
-    } else if (!seriesMap[name].coverItemId && (getCover(item.id) || coverIds.has(String(item.id)))) {
-      seriesMap[name].coverItemId = item.id;
+    } else {
+      // If types differ, prefer Manga (so mixed-type series go to manga)
+      if (item.type === "Manga") seriesMap[name].type = item.type;
+      if (!seriesMap[name].coverItemId && (getCover(item.id) || coverIds.has(String(item.id)))) {
+        seriesMap[name].coverItemId = item.id;
+      }
     }
     seriesMap[name].owned++;
   });
@@ -1610,25 +1881,29 @@ function renderSeries() {
   else if (sortVal === "pct") seriesList.sort((a, b) => seriesSortDir * ((b.pct ?? -1) - (a.pct ?? -1)));
   else seriesList.sort((a, b) => seriesSortDir * a.name.localeCompare(b.name));
 
-  grid.innerHTML = seriesList.map(series => {
+  const mangaList = seriesList.filter(s => s.type === "Manga");
+  const bookList  = seriesList.filter(s => s.type === "Book" || s.type === "Reference Book");
+
+  function buildCard(series, isBook) {
     const hasPct = series.pct !== null;
     const pct = series.pct ?? 0;
     const pctColor = pct >= 100 ? "#2D4A3E" : pct >= 50 ? "#3D3BAA" : "#BA7517";
     const lazyCover = series.coverItemId ? lazyCoverHtml(series.coverItemId, series.name, "card-cover") : null;
     const safeName = series.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const placeholderBg = isBook ? "var(--book-fg)" : "#2D4A3E";
     return `
     <div class="card" onclick="openSeriesDetail('${safeName}')" style="cursor:pointer">
-      ${lazyCover || `<div class="card-cover-placeholder" style="background:#2D4A3E">${esc(series.name.slice(0,2).toUpperCase())}</div>`}
+      ${lazyCover || `<div class="card-cover-placeholder" style="background:${placeholderBg}">${esc(series.name.slice(0,2).toUpperCase())}</div>`}
       <div class="card-body">
         <div class="card-title">${esc(series.name)}</div>
         ${series.author ? `<div class="card-author" style="margin-top:2px">${esc(series.author)}</div>` : ""}
-        <div class="meta-tags" style="margin-top:5px">
+        ${!isBook ? `<div class="meta-tags" style="margin-top:5px">
           ${series.demographic ? `<span class="meta-tag">${esc(series.demographic)}</span>` : ""}
           ${series.genre ? `<span class="meta-tag">${esc(series.genre)}</span>` : ""}
           ${series.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(series.publisher)}</span>` : ""}
-        </div>
-        <div class="series-card-stat"><span>Volumes owned</span><span>${series.owned}${series.total ? " / " + series.total : ""}</span></div>
-        ${series.rating != null ? `<div style="margin-top:5px">${ratingBadgeHtml(series.rating)}</div>` : ""}
+        </div>` : `${series.publisher ? `<div class="meta-tags" style="margin-top:5px"><span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(series.publisher)}</span></div>` : ""}`}
+        <div class="series-card-stat"><span>${isBook ? "Books owned" : "Volumes owned"}</span><span>${series.owned}${series.total ? " / " + series.total : ""}</span></div>
+        ${!isBook && series.rating != null ? `<div style="margin-top:5px">${ratingBadgeHtml(series.rating)}</div>` : ""}
         ${hasPct ? `
         <div style="margin-top:6px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -1639,7 +1914,7 @@ function renderSeries() {
             <div style="height:100%;width:${pct}%;background:${pctColor};border-radius:99px;transition:width 0.4s"></div>
           </div>
         </div>` : ""}
-        <div class="series-card-stat"><span>Manga status</span><span>${esc(series.mangaStatus)}</span></div>
+        ${!isBook ? `<div class="series-card-stat"><span>Manga status</span><span>${esc(series.mangaStatus)}</span></div>` : ""}
         <div class="series-card-stat"><span>Collection status</span><span>${esc(series.collectionStatus)}</span></div>
       </div>
       <div class="card-footer" onclick="event.stopPropagation()">
@@ -1647,8 +1922,27 @@ function renderSeries() {
         <button class="btn-icon" onclick="editSeries('${safeName}')">Edit</button>
       </div>
     </div>`;
-  }).join("");
-  observeCovers(grid);
+  }
+
+  mangaGrid.innerHTML = mangaList.map(s => buildCard(s, false)).join("");
+  bookGrid.innerHTML  = bookList.map(s => buildCard(s, true)).join("");
+
+  // Show/hide empty states and section counts
+  const mangaEmpty = document.getElementById("manga-series-empty");
+  const bookEmpty  = document.getElementById("book-series-empty");
+  const mangaCountEl = document.getElementById("manga-series-count");
+  const bookCountEl  = document.getElementById("book-series-count");
+  if (mangaEmpty) mangaEmpty.style.display = mangaList.length ? "none" : "";
+  if (bookEmpty)  bookEmpty.style.display  = bookList.length  ? "none" : "";
+  if (mangaCountEl) mangaCountEl.textContent = mangaList.length ? `${mangaList.length} series` : "";
+  if (bookCountEl)  bookCountEl.textContent  = bookList.length  ? `${bookList.length} series` : "";
+
+  // Hide book section entirely if no books with series
+  const bookSection = document.getElementById("book-series-section");
+  if (bookSection) bookSection.style.display = (items.some(i => (i.type === "Book" || i.type === "Reference Book") && i.series)) ? "" : "none";
+
+  observeCovers(mangaGrid);
+  observeCovers(bookGrid);
 }
 
 function ratingBadgeHtml(r) {
@@ -1686,6 +1980,9 @@ function editSeries(name) {
   const current = _seriesMeta[name] || {};
 
   const owned = items.filter(i => (i.series || "Standalone") === name).length;
+  // Determine type: if any item in the series is non-Book, it's a manga series
+  const seriesItems = items.filter(i => (i.series || "Standalone") === name);
+  const isBookSeries = seriesItems.length > 0 && seriesItems.every(i => i.type === "Book" || i.type === "Reference Book");
 
   document.getElementById("series-name-hidden").value = name;
   document.getElementById("series-name").value = name;
@@ -1698,6 +1995,14 @@ function editSeries(name) {
   document.getElementById("series-manga-status").value = current.mangaStatus || "Publishing";
   document.getElementById("series-collection-status").value = current.collectionStatus || "Collecting";
   _ratingWidget = buildRatingWidget("series-rating-widget", current.rating ?? null);
+
+  // Show/hide manga-only fields
+  const demoRow = document.getElementById("series-demographic").closest(".form-row");
+  const mangaStatusRow = document.getElementById("series-manga-status").closest(".form-row");
+  const ratingGroup = document.getElementById("series-rating-widget").closest(".form-group");
+  if (demoRow) demoRow.style.display = isBookSeries ? "none" : "";
+  if (mangaStatusRow) mangaStatusRow.style.display = isBookSeries ? "none" : "";
+  if (ratingGroup) ratingGroup.style.display = isBookSeries ? "none" : "";
 
   document.getElementById("series-modal").style.display = "flex";
 }
@@ -1736,9 +2041,21 @@ function saveSeriesMeta() {
 // Pre-compute lowercase fields and parsed dates used on every render
 function buildIndex() {
   items.forEach(i => {
-    i._titleLower  = (i.title  || "").toLowerCase();
-    i._authorLower = (i.author || "").toLowerCase();
-    i._dateBoughtMs = i.dateBought ? new Date(i.dateBought).getTime() : null;
+    i._titleLower      = (i.title      || "").toLowerCase();
+    i._authorLower     = (i.author     || "").toLowerCase();
+    i._translatorLower = (i.translator || "").toLowerCase();
+    i._seriesLower     = (i.series     || "").toLowerCase();
+    i._publisherLower  = (i.publisher  || "").toLowerCase();
+    i._dateBoughtMs    = i.dateBought ? new Date(i.dateBought).getTime() : null;
+    // Pre-parse originalPubDate to a sortable integer year.
+    // Handles: -500, -500-01-01 (BCE), 117, 1994, 1994-03-15, etc.
+    if (i.originalPubDate) {
+      const s = String(i.originalPubDate).trim();
+      const m = s.match(/^(-?\d+)/);
+      i._origPubYear = m ? parseInt(m[1], 10) : null;
+    } else {
+      i._origPubYear = null;
+    }
   });
 }
 buildIndex();
@@ -1874,8 +2191,10 @@ function _buildCard(item) {
   const coverHtml = lazyHtml || `<div class="card-cover-placeholder" style="background:${color}">${initials}</div>`;
   const isSelected = selectedIds.has(item.id);
   const isBook = item.type === "Book";
-  const typeColor = isBook ? "var(--book-fg)" : "var(--manga-fg)";
-  const typeBg = isBook ? "var(--book-bg)" : "var(--manga-bg)";
+  const isRefBook = item.type === "Reference Book";
+  const typeColor = isRefBook ? "var(--refbook-fg)" : isBook ? "var(--book-fg)" : "var(--manga-fg)";
+  const typeBg = isRefBook ? "var(--refbook-bg)" : isBook ? "var(--book-bg)" : "var(--manga-bg)";
+  const typeLabel = isRefBook ? "Reference" : isBook ? "Book" : "Manga";
 
   const div = document.createElement("div");
   div.className = "card" + (isSelected ? " selected" : "");
@@ -1889,19 +2208,18 @@ function _buildCard(item) {
       <div class="card-select-checkbox" onclick="event.stopPropagation();toggleSelectCard(${item.id}, this.closest('.card'))">${isSelected ? "✓" : ""}</div>
     </div>
     <div class="card-body">
-      <span class="card-type" style="background:${typeBg};color:${typeColor}">${isBook ? "Book" : "Manga"}</span>
+      <span class="card-type" style="background:${typeBg};color:${typeColor}">${typeLabel}</span>
       <div class="card-title" style="margin-top:4px">${esc(item.title)}</div>
       <div class="card-author">${esc(item.author||"Unknown author")}</div>
       <div class="meta-tags">
-        ${item.series ? `<span class="meta-tag">${esc(item.series)}</span>` : ""}
-        ${isBook && item.format ? `<span class="meta-tag" style="background:#FFF3E8;color:#8B4A00;border-color:rgba(139,74,0,0.2)">${esc(item.format)}</span>` : ""}
-        ${!isBook && item.demographic ? `<span class="meta-tag">${esc(item.demographic)}</span>` : ""}
-        ${!isBook && item.genre ? `<span class="meta-tag">${esc(item.genre)}</span>` : ""}
+        ${(isBook || isRefBook) && item.format ? `<span class="meta-tag" style="background:#FFF3E8;color:#8B4A00;border-color:rgba(139,74,0,0.2)">${esc(item.format)}</span>` : ""}
+        ${!isBook && !isRefBook && item.demographic ? `<span class="meta-tag">${esc(item.demographic)}</span>` : ""}
+        ${!isBook && !isRefBook && item.genre ? `<span class="meta-tag">${esc(item.genre)}</span>` : ""}
         ${item.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(item.publisher)}</span>` : ""}
       </div>
-      ${isBook && item.pageCount ? `<div style="font-size:11px;color:var(--text3)">${item.pageCount} pages${item.msrp != null ? ` · ${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP` : ""}</div>` : (isBook && item.msrp != null ? `<div style="font-size:11px;color:var(--text3)">${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP</div>` : "")}
-      ${!isBook && item.volumes ? `<div style="font-size:11px;color:var(--text3)">${esc(item.volumes)} vol.</div>` : ""}
-      ${!isBook && item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.pricePaid, item.priceCurrency || "GBP")}${item.dateBought ? ` · ${item.dateBought}` : ""}</div>` : (!isBook && item.dateBought ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${item.dateBought}</div>` : "")}
+      ${(isBook || isRefBook) && item.pageCount ? `<div style="font-size:11px;color:var(--text3)">${item.pageCount} pages${item.msrp != null ? ` · ${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP` : ""}</div>` : ((isBook || isRefBook) && item.msrp != null ? `<div style="font-size:11px;color:var(--text3)">${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP</div>` : "")}
+      ${!isBook && !isRefBook && item.volumes ? `<div style="font-size:11px;color:var(--text3)">${esc(item.volumes)} vol.</div>` : ""}
+      ${!isBook && !isRefBook && item.pricePaid != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.pricePaid, item.priceCurrency || "GBP")}${item.dateBought ? ` · ${item.dateBought}` : ""}${item.msrp != null ? ` · ${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP` : ""}</div>` : (!isBook && !isRefBook && item.dateBought ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${item.dateBought}${item.msrp != null ? ` · ${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP` : ""}</div>` : (!isBook && !isRefBook && item.msrp != null ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${fmtPrice(item.msrp, item.msrpCurrency || "GBP")} MSRP</div>` : ""))}
     </div>
     <div class="card-footer">
       <span class="status-pill" style="background:${sc.bg};color:${sc.fg}">${item.status}</span>
@@ -1928,8 +2246,107 @@ function toggleSeriesSortDir() {
   renderSeries();
 }
 
+function seriesJump(target) {
+  const mangaBtn = document.getElementById("series-jump-manga");
+  const booksBtn = document.getElementById("series-jump-books");
+  if (mangaBtn) mangaBtn.classList.toggle("active", target === "manga");
+  if (booksBtn) booksBtn.classList.toggle("active", target === "books");
+  const sectionId = target === "books" ? "book-series-section" : "manga-series-section";
+  const el = document.getElementById(sectionId);
+  if (el) {
+    const top = el.getBoundingClientRect().top + window.scrollY - 120;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+}
+
+
+function parseAdvancedSearch(query) {
+  const tokens = query.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+  const filters = [];
+  const plain = [];
+
+  tokens.forEach(token => {
+    const m = token.match(/^([a-zA-Z_]+)\s*(<=|>=|!=|=|<|>|:)\s*(.+)$/);
+    if (!m) {
+      plain.push(token.replace(/^[\"\']|[\"\']$/g, ""));
+      return;
+    }
+
+    filters.push({
+      field: m[1].toLowerCase(),
+      op: m[2],
+      value: m[3].replace(/^[\"\']|[\"\']$/g, "")
+    });
+  });
+
+  return { plain, filters };
+}
+
+function getSearchFieldValue(item, field) {
+  switch(field) {
+    case "title": return item.title || "";
+    case "author": return item.author || "";
+    case "translator": return item.translator || "";
+    case "series": return item.series || "";
+    case "publisher": return item.publisher || "";
+    case "status": return item.status || "";
+    case "type": return item.type || "";
+    case "demographic": return item.demographic || "";
+    case "genre": return item.genre || "";
+    case "pages":
+    case "pagecount": return item.pageCount ?? null;
+    case "rating": return item.rating ?? null;
+    case "price": return item.pricePaid ?? null;
+    case "msrp": return item.msrp ?? null;
+    case "publication_date":
+    case "originalpubdate":
+      return item._origPubYear ?? null;
+    case "purchasedate":
+    case "datebought":
+      return item.dateBought || "";
+    default:
+      return null;
+  }
+}
+
+function matchesAdvancedFilter(item, filter) {
+  const raw = getSearchFieldValue(item, filter.field);
+  if (raw == null) return false;
+
+  const val = filter.value;
+  const op = filter.op;
+
+  const rawNum = typeof raw === "number" ? raw : parseFloat(raw);
+  const valNum = parseFloat(val);
+  const numeric = !Number.isNaN(rawNum) && !Number.isNaN(valNum);
+
+  if (numeric && ["<", ">", "<=", ">=", "=", "!="].includes(op)) {
+    if (op === "<") return rawNum < valNum;
+    if (op === ">") return rawNum > valNum;
+    if (op === "<=") return rawNum <= valNum;
+    if (op === ">=") return rawNum >= valNum;
+    if (op === "=") return rawNum === valNum;
+    if (op === "!=") return rawNum !== valNum;
+  }
+
+  const lhs = String(raw).toLowerCase();
+  const rhs = String(val).toLowerCase();
+
+  if (op === ":" || op === "=") return lhs.includes(rhs);
+  if (op === "!=") return !lhs.includes(rhs);
+  if (op === "<") return lhs < rhs;
+  if (op === ">") return lhs > rhs;
+  if (op === "<=") return lhs <= rhs;
+  if (op === ">=") return lhs >= rhs;
+
+  return false;
+}
+
+
 function render() {
-  const search = document.getElementById("search").value.toLowerCase();
+  const rawSearch = document.getElementById("search").value.trim();
+  const parsedSearch = parseAdvancedSearch(rawSearch);
+  const search = parsedSearch.plain.join(" ").toLowerCase();
   const status = document.getElementById("status-filter").value;
   const sort = document.getElementById("sort-select").value;
   const d = sortDir;
@@ -1937,14 +2354,53 @@ function render() {
   let list = items
     .filter(i => typeFilter === "All" || i.type === typeFilter)
     .filter(i => status === "All" || i.status === status)
-    .filter(i => !search || i._titleLower.includes(search) || i._authorLower.includes(search));
+    .filter(i => {
+      const basicMatch =
+        !search ||
+        i._titleLower.includes(search) ||
+        i._authorLower.includes(search) ||
+        i._translatorLower.includes(search) ||
+        i._seriesLower.includes(search) ||
+        i._publisherLower.includes(search);
+
+      const advancedMatch = parsedSearch.filters.every(f => matchesAdvancedFilter(i, f));
+
+      return basicMatch && advancedMatch;
+    });
 
   if (sort === "title")     list.sort((a,b) => d * a.title.localeCompare(b.title, undefined, {numeric:true, sensitivity:'base'}));
   else if (sort === "author")    list.sort((a,b) => d * (a.author||"").localeCompare(b.author||"", undefined, {sensitivity:'base'}));
-  else if (sort === "price")     list.sort((a,b) => d * ((a.pricePaid ?? Infinity) - (b.pricePaid ?? Infinity)));
-  else if (sort === "msrp")      list.sort((a,b) => d * ((a.msrp ?? Infinity) - (b.msrp ?? Infinity)));
-  else if (sort === "pages")     list.sort((a,b) => d * ((a.pageCount ?? Infinity) - (b.pageCount ?? Infinity)));
+  else if (sort === "price") list.sort((a,b) => {
+    const pa = a.pricePaid != null ? toGBP(a.pricePaid, a.priceCurrency || "GBP") : null;
+    const pb = b.pricePaid != null ? toGBP(b.pricePaid, b.priceCurrency || "GBP") : null;
+    if (pa === null && pb === null) return 0;
+    if (pa === null) return 1;
+    if (pb === null) return -1;
+    return d * (pa - pb);
+  });
+  else if (sort === "msrp") list.sort((a,b) => {
+    const ma = a.msrp != null ? toGBP(a.msrp, a.msrpCurrency || "GBP") : null;
+    const mb = b.msrp != null ? toGBP(b.msrp, b.msrpCurrency || "GBP") : null;
+    if (ma === null && mb === null) return 0;
+    if (ma === null) return 1;
+    if (mb === null) return -1;
+    return d * (ma - mb);
+  });
+  else if (sort === "pages") list.sort((a,b) => {
+    const pa = a.pageCount ?? null, pb = b.pageCount ?? null;
+    if (pa === null && pb === null) return 0;
+    if (pa === null) return 1;
+    if (pb === null) return -1;
+    return d * (pa - pb);
+  });
   else if (sort === "publisher") list.sort((a,b) => d * (a.publisher||"").localeCompare(b.publisher||"", undefined, {sensitivity:'base'}));
+  else if (sort === "originalPubDate") list.sort((a,b) => {
+    const ya = a._origPubYear, yb = b._origPubYear;
+    if (ya === null && yb === null) return 0;
+    if (ya === null) return 1;
+    if (yb === null) return -1;
+    return d * (ya - yb);
+  });
   else {
     list.sort((a,b) => {
       const da = a._dateBoughtMs, db = b._dateBoughtMs;
@@ -1955,9 +2411,9 @@ function render() {
     });
   }
 
-  const _books = items.filter(i => i.type === "Book");
+  const _books = items.filter(i => i.type === "Book" || i.type === "Reference Book");
   document.getElementById("s-total").textContent = items.length;
-  document.getElementById("s-manga").textContent = items.length - _books.length;
+  document.getElementById("s-manga").textContent = items.filter(i => i.type === "Manga").length;
   document.getElementById("s-books").textContent = _books.length;
   document.getElementById("s-done").textContent = _books.filter(i => i.status === "Plan to Read").length;
 
@@ -2195,10 +2651,14 @@ function removeCover() {
 function switchModalType(type) {
   document.getElementById("f-type").value = type;
   document.getElementById("manga-fields").style.display = type === "Manga" ? "" : "none";
-  document.getElementById("book-fields").style.display = type === "Book" ? "" : "none";
+  document.getElementById("book-fields").style.display = (type === "Book" || type === "Reference Book") ? "" : "none";
   document.getElementById("type-tab-manga").classList.toggle("active", type === "Manga");
   document.getElementById("type-tab-book").classList.toggle("active", type === "Book");
-  document.getElementById("cover-placeholder").textContent = type === "Book" ? "📖" : "📚";
+  document.getElementById("type-tab-refbook").classList.toggle("active", type === "Reference Book");
+  document.getElementById("cover-placeholder").textContent = type === "Manga" ? "📚" : type === "Reference Book" ? "📘" : "📖";
+  // Hide read-status for reference books (they don't have a read/unread state)
+  const bookStatusGroup = document.getElementById("book-status-group");
+  if (bookStatusGroup) bookStatusGroup.style.display = type === "Reference Book" ? "none" : "";
 }
 
 function openAdd() {
@@ -2216,6 +2676,7 @@ function openAdd() {
   document.getElementById("f-priceCurrency").value = "GBP";
   document.getElementById("f-msrp").value = "";
   document.getElementById("f-msrpCurrency").value = "GBP";
+  document.getElementById("f-isbn").value = "";
   // Book fields
   document.getElementById("f-book-status").value = "Plan to Read";
   document.getElementById("f-book-author").value = "";
@@ -2231,6 +2692,9 @@ function openAdd() {
   document.getElementById("f-book-author-gender").value = "";
   document.getElementById("f-book-author-country").value = "";
   document.getElementById("f-book-orig-pubdate").value = "";
+  document.getElementById("f-book-edition-pubdate").value = "";
+  document.getElementById("f-book-obtained").value = "";
+  document.getElementById("f-book-isbn").value = "";
   switchModalType("Manga");
   coverWasRemoved = false;
   removeCover();
@@ -2244,7 +2708,7 @@ function openEdit(id) {
   document.querySelector(".btn-save").textContent = "Save changes";
   document.getElementById("f-title").value = item.title;
   document.getElementById("f-notes").value = item.notes || "";
-  if (item.type === "Book") {
+  if (item.type === "Book" || item.type === "Reference Book") {
     document.getElementById("f-book-status").value = item.status || "Plan to Read";
     document.getElementById("f-book-author").value = item.author || "";
     document.getElementById("f-book-format").value = item.format || "Paperback";
@@ -2259,7 +2723,10 @@ function openEdit(id) {
     document.getElementById("f-book-author-country").value = item.authorCountry || "";
     document.getElementById("f-book-author-gender").value = item.authorGender || "";
     document.getElementById("f-book-orig-pubdate").value = item.originalPubDate || "";
-    switchModalType("Book");
+    document.getElementById("f-book-edition-pubdate").value = item.editionPubDate || "";
+    document.getElementById("f-book-obtained").value = item.obtained || "";
+    document.getElementById("f-book-isbn").value = item.isbn || "";
+    switchModalType(item.type);
   } else {
     document.getElementById("f-status").value = item.status || "Plan to Read";
     document.getElementById("f-volumes").value = item.volumes || "";
@@ -2270,6 +2737,7 @@ function openEdit(id) {
     document.getElementById("f-priceCurrency").value = item.priceCurrency || "GBP";
     document.getElementById("f-msrp").value = item.msrp != null ? item.msrp : "";
     document.getElementById("f-msrpCurrency").value = item.msrpCurrency || "GBP";
+    document.getElementById("f-isbn").value = item.isbn || "";
     switchModalType("Manga");
   }
   coverWasRemoved = false;
@@ -2313,11 +2781,11 @@ function saveItem() {
   const itemType = document.getElementById("f-type").value;
 
   let obj;
-  if (itemType === "Book") {
+  if (itemType === "Book" || itemType === "Reference Book") {
     obj = {
       title,
-      type: "Book",
-      status: document.getElementById("f-book-status").value,
+      type: itemType,
+      status: itemType === "Reference Book" ? "Reference" : document.getElementById("f-book-status").value,
       author: document.getElementById("f-book-author").value.trim(),
       format: document.getElementById("f-book-format").value,
       translator: document.getElementById("f-book-translator").value.trim() || null,
@@ -2331,6 +2799,9 @@ function saveItem() {
       authorCountry: document.getElementById("f-book-author-country").value.trim() || null,
       authorGender: document.getElementById("f-book-author-gender").value || null,
       originalPubDate: document.getElementById("f-book-orig-pubdate").value.trim() || null,
+      editionPubDate: document.getElementById("f-book-edition-pubdate").value.trim() || null,
+      obtained: document.getElementById("f-book-obtained").value || null,
+      isbn: document.getElementById("f-book-isbn").value.trim() || null,
       notes: document.getElementById("f-notes").value.trim(),
       // clear manga-only fields
       volumes: null, volRange: null, dateBought: null, pricePaid: null,
@@ -2356,6 +2827,7 @@ function saveItem() {
       priceCurrency: document.getElementById("f-priceCurrency").value || "GBP",
       msrp: document.getElementById("f-msrp").value !== "" ? parseFloat(document.getElementById("f-msrp").value) : null,
       msrpCurrency: document.getElementById("f-msrpCurrency").value || "GBP",
+      isbn: document.getElementById("f-isbn").value.trim() || null,
     };
   }
   let savedId;
@@ -2445,8 +2917,8 @@ function renderOverview() {
   const COLORS = ["#2D4A3E","#3D3BAA","#8B4A00","#7B3553","#185FA5","#3B6D11","#BA7517","#A32D2D","#5B7B6F","#6B4CAA"];
 
   // ---- Aggregate data ----
-  const mangaItems = items.filter(i => i.type !== "Book");
-  const bookItems  = items.filter(i => i.type === "Book");
+  const mangaItems = items.filter(i => i.type === "Manga");
+  const bookItems  = items.filter(i => i.type === "Book" || i.type === "Reference Book");
   const total = items.length;
   const totalManga = mangaItems.length;
   const totalBooks = bookItems.length;
@@ -2495,7 +2967,7 @@ function renderOverview() {
     const key = item.dateBought.slice(0, 7);
     const bucket = monthBuckets.find(b => b.key === key);
     if (!bucket) return;
-    if (item.type === "Book") bucket.books++;
+    if (item.type === "Book" || item.type === "Reference Book") bucket.books++;
     else bucket.manga++;
   });
   const maxMonthTotal = Math.max(...monthBuckets.map(b => b.manga + b.books), 1);
@@ -2558,15 +3030,23 @@ function renderOverview() {
   const fullyCollected = [];
   seriesSet.forEach(name => {
     const sm = meta[name] || {};
-    const owned = mangaItems.filter(i => i.series === name).length;
+    const seriesItems = mangaItems.filter(i => i.series === name);
+    const owned = seriesItems.length;
     const total = parseInt(sm.total);
     const collectionDone = sm.collectionStatus === "Completed";
     const countDone = !isNaN(total) && total > 0 && owned >= total;
     if (collectionDone || countDone) {
-      const spent = mangaItems.filter(i => i.series === name)
-        .reduce((s, i) => s + (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : 0), 0);
+      const spent = seriesItems.reduce((s, i) => s + (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : 0), 0);
       const mangaStatus = sm.mangaStatus || "Unknown";
-      fullyCollected.push({ name, owned, total: isNaN(total) ? null : total, spent, mangaStatus, rating: sm.rating ?? null });
+      // Find the item with a cover, preferring volume 1
+      let coverItemId = null;
+      const withCover = seriesItems.filter(i => getCover(i.id) || coverIds.has(String(i.id)));
+      if (withCover.length) {
+        // Try to pick vol 1 first, otherwise just the first one with a cover
+        const vol1 = withCover.find(i => String(i.volumes).trim() === "1" || String(i.volRange).trim() === "1");
+        coverItemId = (vol1 || withCover[0]).id;
+      }
+      fullyCollected.push({ name, owned, total: isNaN(total) ? null : total, spent, mangaStatus, rating: sm.rating ?? null, coverItemId });
     }
   });
   fullyCollected.sort((a, b) => a.name.localeCompare(b.name));
@@ -2775,28 +3255,39 @@ function renderOverview() {
       </div>
     </div>` : ""}
 
-    <!-- Spending banner -->
-    ${allSpent > 0 ? `
-    <div class="spend-banner">
-      <div class="spend-banner-item">
-        <div class="spend-banner-label">Total Spent</div>
-        <div class="spend-banner-value">£${allSpent.toFixed(2)}</div>
-        ${allMsrp > 0 ? `<div class="spend-banner-sub">£${allMsrp.toFixed(2)} at MSRP</div>` : ""}
-      </div>
-      ${allMsrp > 0 ? `<div class="spend-banner-item">
-        <div class="spend-banner-label">Saved vs MSRP</div>
-        <div class="spend-banner-value">£${(allMsrp - allSpent).toFixed(2)}</div>
-        <div class="spend-banner-sub">${Math.round((allMsrp-allSpent)/allMsrp*100)}% off</div>
+    <!-- Spending — split by type -->
+    ${mangaSpent > 0 || bookSpent > 0 ? `
+    <div class="overview-split">
+      ${mangaSpent > 0 ? `
+      <div class="spend-banner" style="border-top:3px solid var(--manga-fg)">
+        <div class="spend-banner-item">
+          <div class="spend-banner-label">📚 Manga Spent</div>
+          <div class="spend-banner-value">£${mangaSpent.toFixed(2)}</div>
+          ${mangaItems.filter(i=>i.pricePaid!=null).length > 0 ? `<div class="spend-banner-sub">${mangaItems.filter(i=>i.pricePaid!=null).length} vol${mangaItems.filter(i=>i.pricePaid!=null).length!==1?"s":""} priced</div>` : ""}
+        </div>
+        ${mangaItems.filter(i=>i.msrp!=null).length > 0 ? (() => { const msrp = mangaItems.reduce((s,i)=>s+(i.msrp!=null?toGBP(i.msrp,i.msrpCurrency||"GBP"):0),0); return `<div class="spend-banner-item">
+          <div class="spend-banner-label">Saved vs MSRP</div>
+          <div class="spend-banner-value">£${(msrp-mangaSpent).toFixed(2)}</div>
+          <div class="spend-banner-sub">${Math.round((msrp-mangaSpent)/msrp*100)}% off</div>
+        </div>`; })() : ""}
+        ${mangaItems.filter(i=>i.pricePaid!=null).length > 0 ? `<div class="spend-banner-item">
+          <div class="spend-banner-label">Avg per Vol</div>
+          <div class="spend-banner-value">£${(mangaSpent/mangaItems.filter(i=>i.pricePaid!=null).length).toFixed(2)}</div>
+          ${mangaPace != null ? `<div class="spend-banner-sub">${mangaPace.toFixed(1)} vol/mo pace</div>` : ""}
+        </div>` : ""}
       </div>` : ""}
-      ${avgPrice != null ? `<div class="spend-banner-item">
-        <div class="spend-banner-label">Avg per Item</div>
-        <div class="spend-banner-value">£${avgPrice.toFixed(2)}</div>
-        <div class="spend-banner-sub">${items.filter(i=>i.pricePaid!=null).length} items priced</div>
-      </div>` : ""}
-      ${mangaSpent > 0 && totalBooks > 0 ? `<div class="spend-banner-item">
-        <div class="spend-banner-label">Manga vs Books</div>
-        <div class="spend-banner-value">£${mangaSpent.toFixed(0)} / £${bookSpent.toFixed(0)}</div>
-        <div class="spend-banner-sub">manga / books</div>
+      ${bookSpent > 0 ? `
+      <div class="spend-banner" style="border-top:3px solid var(--book-fg)">
+        <div class="spend-banner-item">
+          <div class="spend-banner-label">📖 Books Spent</div>
+          <div class="spend-banner-value">£${bookSpent.toFixed(2)}</div>
+          ${booksWithCost > 0 ? `<div class="spend-banner-sub">${booksWithCost} book${booksWithCost!==1?"s":""} priced</div>` : ""}
+        </div>
+        ${booksWithCost > 0 ? `<div class="spend-banner-item">
+          <div class="spend-banner-label">Avg per Book</div>
+          <div class="spend-banner-value">£${(bookSpent/booksWithCost).toFixed(2)}</div>
+          ${pagesRead > 0 ? `<div class="spend-banner-sub">${pagesRead.toLocaleString()} pg read</div>` : ""}
+        </div>` : ""}
       </div>` : ""}
     </div>` : ""}
 
@@ -2873,8 +3364,20 @@ function renderOverview() {
         ${fullyCollected.map(s => {
           const ratingCol = s.rating === 10 ? "#7C3AED" : s.rating >= 9 ? "#8B4A00" : s.rating >= 7 ? "#185FA5" : "#2D4A3E";
           const mangaStatusColor = s.mangaStatus === "Completed" ? "#0F6E56" : s.mangaStatus === "Publishing" ? "#3D3BAA" : s.mangaStatus === "Hiatus" ? "#BA7517" : "#5F5E5A";
-          return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid #2D4A3E;border-radius:var(--radius);padding:13px 14px;display:flex;align-items:center;gap:12px;transition:box-shadow 0.15s,border-color 0.15s" onmouseover="this.style.boxShadow='var(--shadow)';this.style.borderColor='var(--border2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='rgba(0,0,0,0.1)';this.style.borderLeftColor='#2D4A3E'">
-            <div style="width:36px;height:36px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✅</div>
+          const lazyCover = s.coverItemId ? lazyCoverHtml(s.coverItemId, s.name, "card-cover") : null;
+          const initials = s.name.slice(0,2).toUpperCase();
+          let coverHtml;
+          if (lazyCover) {
+            // Wrap in a fixed-size container; strip the aspect-ratio class styling from the inner element
+            const inner = lazyCover
+              .replace(/class="card-cover"/, 'style="width:48px;height:64px;object-fit:cover;display:block;border-radius:7px"')
+              .replace(/class="card-cover cover-lazy-placeholder"/, 'class="cover-lazy-placeholder" style="width:48px;height:64px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:\'Fraunces\',serif;font-size:16px;font-weight:600;color:rgba(255,255,255,0.85)"');
+            coverHtml = `<div style="width:48px;height:64px;border-radius:7px;overflow:hidden;flex-shrink:0">${inner}</div>`;
+          } else {
+            coverHtml = `<div style="width:48px;height:64px;border-radius:7px;background:#2D4A3E;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:rgba(255,255,255,0.85);flex-shrink:0">${initials}</div>`;
+          }
+          return `<div class="fc-card" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid #2D4A3E;border-radius:var(--radius);padding:10px 14px 10px 10px;display:flex;align-items:center;gap:12px;transition:box-shadow 0.15s,border-color 0.15s" onmouseover="this.style.boxShadow='var(--shadow)';this.style.borderColor='var(--border2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='rgba(0,0,0,0.1)';this.style.borderLeftColor='#2D4A3E'">
+            ${coverHtml}
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}</div>
               <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;align-items:center">
@@ -2909,7 +3412,7 @@ function renderOverview() {
               <div class="recent-enhanced-title">${esc(item.title)}</div>
               ${item.author ? `<div class="recent-enhanced-author">${esc(item.author)}</div>` : ""}
               <div style="margin-top:auto;padding-top:4px">
-                <span style="font-size:10px;font-weight:500;padding:2px 6px;border-radius:10px;background:${item.type==="Book"?"var(--book-bg)":"var(--manga-bg)"};color:${item.type==="Book"?"var(--book-fg)":"var(--manga-fg)"}">${item.type}</span>
+                <span style="font-size:10px;font-weight:500;padding:2px 6px;border-radius:10px;background:${item.type==="Book"?"var(--book-bg)":item.type==="Reference Book"?"var(--refbook-bg)":"var(--manga-bg)"};color:${item.type==="Book"?"var(--book-fg)":item.type==="Reference Book"?"var(--refbook-fg)":"var(--manga-fg)"}">${item.type === "Reference Book" ? "Reference" : item.type}</span>
               </div>
             </div>
             <div class="recent-enhanced-footer">
@@ -2936,9 +3439,10 @@ function renderOverview() {
 
   </div>`;
 
-  // Observe covers in recent grid
+  // Observe covers in recent grid and fully collected section
   const recentGrid = document.getElementById("overview-recent-grid");
   if (recentGrid) observeCovers(recentGrid);
+  el.querySelectorAll(".fc-card").forEach(card => observeCovers(card));
 }
 
 function renderStats() {
@@ -2947,7 +3451,7 @@ function renderStats() {
   const meta = _seriesMeta;
 
   // Separate manga from books
-  const mangaItems = items.filter(i => i.type !== "Book");
+  const mangaItems = items.filter(i => i.type === "Manga");
 
   // ---- Aggregates (manga only) ----
   const total = mangaItems.length;
@@ -3247,7 +3751,7 @@ function renderStats() {
   }).join("")}</div>` : `<p style="color:var(--text3);font-size:13px">Set "Total Volumes" on a series to see completion.</p>`;
 
   // ---- BOOK STATS ----
-  const bookItems = items.filter(i => i.type === "Book");
+  const bookItems = items.filter(i => i.type === "Book" || i.type === "Reference Book");
   const bookStatsHTML = bookItems.length === 0 ? "" : (() => {
     const bTotal = bookItems.length;
     const bRead = bookItems.filter(i => i.status === "Completed").length;
@@ -3292,6 +3796,19 @@ function renderStats() {
       const label = `${decade}s`;
       pubDecadeMap[label] = (pubDecadeMap[label] || 0) + 1;
     });
+    // Edition pub decade distribution
+    const editionDecadeMap = {};
+    bookItems.forEach(i => {
+      if (!i.editionPubDate) return;
+      const yr = parseInt(i.editionPubDate.slice(0, 4));
+      if (isNaN(yr)) return;
+      const decade = Math.floor(yr / 10) * 10;
+      const label = `${decade}s`;
+      editionDecadeMap[label] = (editionDecadeMap[label] || 0) + 1;
+    });
+    // Obtained breakdown
+    const obtainedMap = {};
+    bookItems.forEach(i => { if (i.obtained) { obtainedMap[i.obtained] = (obtainedMap[i.obtained] || 0) + 1; } });
     // Read/Unread donut
     const readDist = { "Completed": bRead, "Plan to Read": bUnread };
     const readColors = ["#185FA5", "#5F5E5A"];
@@ -3377,9 +3894,14 @@ function renderStats() {
       </div>
     </div>` : ""}
 
-    ${(Object.keys(bookLangMap).length || Object.keys(bookCountryMap).length || Object.keys(pubDecadeMap).length) ? `<div>
+    ${(Object.keys(bookLangMap).length || Object.keys(bookCountryMap).length || Object.keys(pubDecadeMap).length || Object.keys(editionDecadeMap).length) ? `<div>
       <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — Origins &amp; Publication</div>
-      <div class="charts-row${Object.keys(pubDecadeMap).length ? "-3" : ""}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+        ${Object.keys(bookCountryMap).length ? `<div class="chart-card" style="grid-column:1/-1">
+          <div class="chart-title">By Author Country of Origin</div>
+          <canvas id="world-heatmap-canvas" style="width:100%;height:auto;border-radius:6px;display:block;margin-top:6px"></canvas>
+          <div id="world-heatmap-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+        </div>` : ""}
         ${Object.keys(bookLangMap).length ? `<div class="chart-card">
           <div class="chart-title">By Original Language</div>
           ${(()=>{
@@ -3392,20 +3914,8 @@ function renderStats() {
               </div>`).join("")}</div>`;
           })()}
         </div>` : ""}
-        ${Object.keys(bookCountryMap).length ? `<div class="chart-card">
-          <div class="chart-title">By Author Country of Origin</div>
-          ${(()=>{
-            const entries = Object.entries(bookCountryMap).sort((a,b)=>b[1]-a[1]);
-            const max = entries[0]?.[1] || 1;
-            return `<div class="bar-list">${entries.map(([k,v],i)=>`
-              <div class="bar-row">
-                <div class="bar-row-label"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${esc(k)}</span><span>${v}</span></div>
-                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
-              </div>`).join("")}</div>`;
-          })()}
-        </div>` : ""}
         ${Object.keys(pubDecadeMap).length ? `<div class="chart-card">
-          <div class="chart-title">By Publication Decade</div>
+          <div class="chart-title">By Original Publication Decade</div>
           ${(()=>{
             const entries = Object.entries(pubDecadeMap).sort((a,b)=>a[0].localeCompare(b[0]));
             const max = Math.max(...entries.map(([,v])=>v), 1);
@@ -3416,6 +3926,25 @@ function renderStats() {
               </div>`).join("")}</div>`;
           })()}
         </div>` : ""}
+        ${Object.keys(editionDecadeMap).length ? `<div class="chart-card">
+          <div class="chart-title">By Edition Publication Decade</div>
+          ${(()=>{
+            const entries = Object.entries(editionDecadeMap).sort((a,b)=>a[0].localeCompare(b[0]));
+            const max = Math.max(...entries.map(([,v])=>v), 1);
+            return `<div class="bar-list">${entries.map(([k,v],i)=>`
+              <div class="bar-row">
+                <div class="bar-row-label"><span>${esc(k)}</span><span>${v}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+              </div>`).join("")}</div>`;
+          })()}
+        </div>` : ""}
+      </div>
+    </div>` : ""}
+    ${Object.keys(obtainedMap).length ? `<div>
+      <div class="stats-section-title" style="color:var(--book-fg)">📖 Books — How Obtained</div>
+      <div class="chart-card" style="max-width:420px">
+        <div class="chart-title">By Obtained</div>
+        ${bookDonutHTML(obtainedMap, ["#2D4A3E","#3D3BAA","#8B4A00","#BA7517"], "donut-book-obtained", 110)}
       </div>
     </div>` : ""}
     `;
@@ -3832,7 +4361,7 @@ function renderStats() {
     drawDonut("donut-status", statusDist, Object.values(STATUS_C));
     if (Object.keys(publisherMap).length) drawDonut("donut-pub", publisherMap, COLORS);
     // Book donuts
-    const bookItems2 = items.filter(i => i.type === "Book");
+    const bookItems2 = items.filter(i => i.type === "Book" || i.type === "Reference Book");
     if (bookItems2.length) {
       const bRead2 = bookItems2.filter(i => i.status === "Completed").length;
       const bUnread2 = bookItems2.filter(i => i.status === "Plan to Read").length;
@@ -3844,9 +4373,295 @@ function renderStats() {
       const bookGenderMap2 = {};
       bookItems2.forEach(i => { if (i.authorGender) { bookGenderMap2[i.authorGender] = (bookGenderMap2[i.authorGender] || 0) + 1; } });
       if (Object.keys(bookGenderMap2).length) drawDonut("donut-book-gender", bookGenderMap2, ["#7B3553","#3D3BAA","#3B6D11","#BA7517"]);
+      const obtainedMap2 = {};
+      bookItems2.forEach(i => { if (i.obtained) { obtainedMap2[i.obtained] = (obtainedMap2[i.obtained] || 0) + 1; } });
+      if (Object.keys(obtainedMap2).length) drawDonut("donut-book-obtained", obtainedMap2, ["#2D4A3E","#3D3BAA","#8B4A00","#BA7517"]);
+      const countryMap2 = {};
+      bookItems2.forEach(i => { if (i.authorCountry) { countryMap2[i.authorCountry] = (countryMap2[i.authorCountry] || 0) + 1; } });
+      if (Object.keys(countryMap2).length) drawWorldHeatmap("world-heatmap-canvas", "world-heatmap-legend", countryMap2);
     }
   });
 }
+
+/* ---- WORLD HEATMAP ---- */
+// Cache so we only load the topology once
+let _worldTopoCache = null;
+let _d3Loaded = false;
+let _topoLoaded = false;
+
+// Common name variants → canonical as used in Natural Earth
+const COUNTRY_NAME_ALIASES = {
+  "usa": "United States of America",
+  "united states": "United States of America",
+  "us": "United States of America",
+  "uk": "United Kingdom",
+  "england": "United Kingdom",
+  "britain": "United Kingdom",
+  "great britain": "United Kingdom",
+  "scotland": "United Kingdom",
+  "wales": "United Kingdom",
+  "northern ireland": "United Kingdom",
+  "russia": "Russia",
+  "south korea": "South Korea",
+  "north korea": "North Korea",
+  "republic of korea": "South Korea",
+  "dprk": "North Korea",
+  "iran": "Iran",
+  "syria": "Syria",
+  "czechia": "Czech Republic",
+  "czech republic": "Czech Republic",
+  "ivory coast": "Ivory Coast",
+  "côte d'ivoire": "Ivory Coast",
+  "congo": "Republic of the Congo",
+  "dr congo": "Democratic Republic of the Congo",
+  "drc": "Democratic Republic of the Congo",
+  "taiwan": "Taiwan",
+  "vietnam": "Vietnam",
+  "viet nam": "Vietnam",
+  "laos": "Laos",
+  "myanmar": "Myanmar",
+  "burma": "Myanmar",
+  "bolivia": "Bolivia",
+  "venezuela": "Venezuela",
+  "tanzania": "Tanzania",
+  "macedonia": "North Macedonia",
+  "north macedonia": "North Macedonia",
+  "moldova": "Moldova",
+  "trinidad": "Trinidad and Tobago",
+  "trinidad and tobago": "Trinidad and Tobago",
+  "new zealand": "New Zealand",
+  "south africa": "South Africa",
+  "saudi arabia": "Saudi Arabia",
+  "united arab emirates": "United Arab Emirates",
+  "uae": "United Arab Emirates",
+};
+
+function _resolveCountryName(raw) {
+  const lower = raw.trim().toLowerCase();
+  if (COUNTRY_NAME_ALIASES[lower]) return COUNTRY_NAME_ALIASES[lower];
+  // Try to match Natural Earth name directly (case-insensitive)
+  return raw.trim();
+}
+
+function _loadScript(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement("script");
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+
+async function drawWorldHeatmap(canvasId, legendId, rawCountryMap) {
+  const canvas = document.getElementById(canvasId);
+  const legendEl = document.getElementById(legendId);
+  if (!canvas) return;
+
+  const parent = canvas.parentElement;
+
+  // Flat tooltip
+  let tooltip = parent.querySelector(".heatmap-tooltip");
+  if (!tooltip) {
+    tooltip = document.createElement("div");
+    tooltip.className = "heatmap-tooltip";
+    tooltip.style.cssText = `
+      position:absolute;
+      pointer-events:none;
+      background:var(--surface);
+      color:var(--text);
+      border:1px solid var(--border2);
+      border-radius:10px;
+      padding:6px 10px;
+      font-size:12px;
+      font-family:'DM Sans',sans-serif;
+      box-shadow:var(--shadow);
+      opacity:0;
+      transform:translate(-50%, -120%);
+      transition:opacity .12s ease;
+      z-index:20;
+      white-space:nowrap;
+      backdrop-filter:blur(6px);
+    `;
+    parent.style.position = "relative";
+    parent.appendChild(tooltip);
+  }
+
+  const W = canvas.parentElement.clientWidth || 700;
+  const H = Math.max(260, Math.round(W * 0.48));
+
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  try {
+    await _loadScript("https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js");
+    await _loadScript("https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js");
+
+    if (!_worldTopoCache) {
+      const resp = await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
+      _worldTopoCache = await resp.json();
+    }
+
+    const topo = _worldTopoCache;
+
+    const ISO_NUM_TO_NAME = {"4":"Afghanistan","8":"Albania","12":"Algeria","24":"Angola","32":"Argentina","36":"Australia","40":"Austria","50":"Bangladesh","56":"Belgium","64":"Bhutan","68":"Bolivia","76":"Brazil","100":"Bulgaria","104":"Myanmar","116":"Cambodia","120":"Cameroon","124":"Canada","144":"Sri Lanka","152":"Chile","156":"China","170":"Colombia","180":"Democratic Republic of the Congo","178":"Republic of the Congo","188":"Costa Rica","191":"Croatia","192":"Cuba","196":"Cyprus","203":"Czech Republic","208":"Denmark","214":"Dominican Republic","218":"Ecuador","818":"Egypt","222":"El Salvador","231":"Ethiopia","246":"Finland","250":"France","266":"Gabon","276":"Germany","288":"Ghana","300":"Greece","320":"Guatemala","332":"Haiti","340":"Honduras","348":"Hungary","356":"India","360":"Indonesia","364":"Iran","368":"Iraq","352":"Iceland","372":"Ireland","376":"Israel","380":"Italy","388":"Jamaica","392":"Japan","400":"Jordan","398":"Kazakhstan","404":"Kenya","408":"North Korea","410":"South Korea","414":"Kuwait","418":"Laos","422":"Lebanon","430":"Liberia","434":"Libya","442":"Luxembourg","454":"Malawi","458":"Malaysia","484":"Mexico","504":"Morocco","508":"Mozambique","516":"Namibia","524":"Nepal","528":"Netherlands","554":"New Zealand","558":"Nicaragua","566":"Nigeria","578":"Norway","586":"Pakistan","591":"Panama","598":"Papua New Guinea","600":"Paraguay","604":"Peru","608":"Philippines","616":"Poland","620":"Portugal","630":"Puerto Rico","634":"Qatar","642":"Romania","643":"Russia","646":"Rwanda","682":"Saudi Arabia","686":"Senegal","694":"Sierra Leone","703":"Slovakia","706":"Somalia","710":"South Africa","724":"Spain","729":"Sudan","752":"Sweden","756":"Switzerland","760":"Syria","158":"Taiwan","764":"Thailand","768":"Togo","780":"Trinidad and Tobago","788":"Tunisia","792":"Turkey","800":"Uganda","804":"Ukraine","784":"United Arab Emirates","826":"United Kingdom","840":"United States of America","858":"Uruguay","860":"Uzbekistan","862":"Venezuela","704":"Vietnam","887":"Yemen","894":"Zambia","716":"Zimbabwe","051":"Armenia","031":"Azerbaijan","933":"Belarus","070":"Bosnia and Herzegovina","233":"Estonia","268":"Georgia","417":"Kyrgyzstan","428":"Latvia","440":"Lithuania","496":"Mongolia","499":"Montenegro","807":"North Macedonia","688":"Serbia","762":"Tajikistan","795":"Turkmenistan","275":"Palestine"};
+
+    
+const nameToIso = {};
+Object.entries(ISO_NUM_TO_NAME).forEach(([id, name]) => {
+  nameToIso[name.toLowerCase()] = id;
+});
+
+// Common aliases / alternate naming
+Object.assign(nameToIso, {
+  "tanzania": "834",
+  "united republic of tanzania": "834",
+  "iceland": "352",
+  "uk": "826",
+  "usa": "840",
+  "united states": "840",
+  "south korea": "410",
+  "north korea": "408",
+  "czechia": "203",
+  "russia": "643"
+});
+
+
+    const idCounts = {};
+    let maxCount = 0;
+
+    Object.entries(rawCountryMap).forEach(([rawName, count]) => {
+      const resolved = _resolveCountryName(rawName);
+      const lower = resolved.toLowerCase();
+
+      let id = nameToIso[lower];
+
+      if (!id) {
+        const k = Object.keys(nameToIso).find(k => k.includes(lower) || lower.includes(k));
+        if (k) id = nameToIso[k];
+      }
+
+      if (id) {
+        idCounts[id] = (idCounts[id] || 0) + count;
+        maxCount = Math.max(maxCount, idCounts[id]);
+      }
+    });
+
+    const accent = getComputedStyle(document.documentElement)
+      .getPropertyValue("--accent")
+      .trim() || "#2D4A3E";
+
+    function hexToRgb(hex) {
+      const h = hex.replace("#","");
+      return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+    }
+
+    const [ar, ag, ab] = hexToRgb(accent);
+
+    function countryColor(count) {
+      const t = maxCount > 1 ? count / maxCount : 1;
+      const mix = 0.18 + (t * 0.82);
+      const r = Math.round(255 - ((255 - ar) * mix));
+      const g = Math.round(255 - ((255 - ag) * mix));
+      const b = Math.round(255 - ((255 - ab) * mix));
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    const countries = topojson.feature(topo, topo.objects.countries);
+
+    const projection = d3.geoNaturalEarth1();
+    projection.fitExtent([[8, 8], [W - 8, H - 8]], countries);
+
+    const path = d3.geoPath(projection, ctx);
+
+    ctx.clearRect(0, 0, W, H);
+
+    const hoverRegions = [];
+
+    countries.features.forEach(feature => {
+      const id = String(feature.id).padStart(3, "0");
+      const count = idCounts[id] || idCounts[String(feature.id)];
+
+      // Hide countries with no books
+      if (!count) return;
+
+      ctx.beginPath();
+      path(feature);
+
+      ctx.fillStyle = countryColor(count);
+      ctx.fill();
+
+      // Very subtle borders
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      hoverRegions.push({
+        feature,
+        count,
+        name: ISO_NUM_TO_NAME[id] || feature.properties?.name || feature.properties?.NAME || "Unknown"
+      });
+    });
+
+    // Hover interaction
+    canvas.onmousemove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      let found = null;
+
+      for (const region of hoverRegions) {
+        ctx.beginPath();
+        path(region.feature);
+
+        if (ctx.isPointInPath(x, y)) {
+          found = region;
+          break;
+        }
+      }
+
+      if (found) {
+        tooltip.innerHTML = `<strong>${found.name}</strong><br>${found.count} book${found.count !== 1 ? "s" : ""}`;
+        tooltip.style.opacity = "1";
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+        canvas.style.cursor = "pointer";
+      } else {
+        tooltip.style.opacity = "0";
+        canvas.style.cursor = "default";
+      }
+    };
+
+    canvas.onmouseleave = () => {
+      tooltip.style.opacity = "0";
+      canvas.style.cursor = "default";
+    };
+
+    if (legendEl) {
+      const sorted = Object.entries(rawCountryMap)
+        .sort((a,b) => b[1] - a[1]);
+
+      legendEl.innerHTML = sorted.map(([name, count]) => `
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)">
+          <div style="width:10px;height:10px;border-radius:999px;background:${countryColor(count)}"></div>
+          <span>${name}</span>
+          <span style="font-weight:600;color:var(--text)">${count}</span>
+        </div>
+      `).join("");
+    }
+
+  } catch(e) {
+    console.warn("World heatmap failed:", e);
+  }
+}
+
 
 /* ---- SERIES DETAIL MODAL ---- */
 function openSeriesDetail(name) {
@@ -3857,11 +4672,21 @@ function openSeriesDetail(name) {
 
   const totalOwned = seriesItems.length;
   const totalVols = parseInt(sm.total) || null;
-  const totalSpent = seriesItems.reduce((s,i) => s + (i.pricePaid || 0), 0);
-  const priced = seriesItems.filter(i => i.pricePaid != null);
+  const isBookSeries2 = seriesItems.length > 0 && seriesItems.every(i => i.type === "Book" || i.type === "Reference Book");
+  // Books: use MSRP as the cost basis; fall back to pricePaid if no MSRP
+  const _seriesItemCost = i => isBookSeries2
+    ? (i.msrp != null ? toGBP(i.msrp, i.msrpCurrency || "GBP") : (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : 0))
+    : (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : 0);
+  const totalSpent = seriesItems.reduce((s,i) => s + _seriesItemCost(i), 0);
+  const priced = isBookSeries2
+    ? seriesItems.filter(i => i.msrp != null || i.pricePaid != null)
+    : seriesItems.filter(i => i.pricePaid != null);
   const avgPrice = priced.length ? totalSpent / priced.length : null;
+  const spentLabel = isBookSeries2 ? "Total MSRP" : "Total Spent";
   const pct = totalVols ? Math.min(100, Math.round(totalOwned / totalVols * 100)) : null;
   const pctColor = pct >= 100 ? "#2D4A3E" : pct >= 50 ? "#3D3BAA" : "#BA7517";
+
+  const isBookSeries = isBookSeries2;
 
   const coverItem = seriesItems.find(i => getCover(i.id));
   const cover = coverItem ? getCover(coverItem.id) : null;
@@ -3911,7 +4736,9 @@ function openSeriesDetail(name) {
     ${seriesItems.map(i => {
       const c = getCover(i.id);
       const sc = STATUS_COLORS[i.status] || {bg:"#eee",fg:"#555"};
-      const meta2 = [i.pricePaid != null ? `£${i.pricePaid.toFixed(2)}` : "", i.dateBought || ""].filter(Boolean).join(" · ");
+      const costVal = isBookSeries ? (i.msrp != null ? toGBP(i.msrp, i.msrpCurrency || "GBP") : (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : null)) : (i.pricePaid != null ? toGBP(i.pricePaid, i.priceCurrency || "GBP") : null);
+      const costStr = costVal != null ? (isBookSeries && i.msrp != null ? `£${costVal.toFixed(2)} MSRP` : `£${costVal.toFixed(2)}`) : "";
+      const meta2 = [costStr, i.dateBought || ""].filter(Boolean).join(" · ");
       return `<div class="vol-item-row" onclick="closeSeriesDetail();openEdit(${i.id})">
         ${c ? `<img class="vol-item-cover" src="${c}" alt="">` : `<div class="vol-item-cover-placeholder" style="background:#2D4A3E">${esc(initials)}</div>`}
         <div class="vol-item-info">
@@ -3930,8 +4757,8 @@ function openSeriesDetail(name) {
     <div class="series-detail-name">${esc(name)}</div>
     ${sm.author ? `<div class="series-detail-author">${esc(sm.author)}</div>` : ""}
     <div class="meta-tags" style="margin-top:6px">
-      ${sm.demographic ? `<span class="meta-tag">${esc(sm.demographic)}</span>` : ""}
-      ${sm.genre ? `<span class="meta-tag">${esc(sm.genre)}</span>` : ""}
+      ${!isBookSeries && sm.demographic ? `<span class="meta-tag">${esc(sm.demographic)}</span>` : ""}
+      ${!isBookSeries && sm.genre ? `<span class="meta-tag">${esc(sm.genre)}</span>` : ""}
       ${sm.publisher ? `<span class="meta-tag" style="background:var(--accent-light);color:var(--accent);border-color:rgba(45,74,62,0.2)">${esc(sm.publisher)}</span>` : ""}
     </div>
     ${pct !== null ? `<div style="margin-top:8px">
@@ -3942,12 +4769,11 @@ function openSeriesDetail(name) {
   document.getElementById("series-detail-kpis").innerHTML = `
     <div class="series-kpi"><div class="series-kpi-label">Owned</div><div class="series-kpi-value">${totalOwned}</div>${totalVols ? `<div class="series-kpi-sub">of ${totalVols}</div>` : ""}</div>
     ${totalVols ? `<div class="series-kpi"><div class="series-kpi-label">Missing</div><div class="series-kpi-value" style="color:#A32D2D">${Math.max(0, totalVols - totalOwned)}</div></div>` : ""}
-    <div class="series-kpi"><div class="series-kpi-label">Total Spent</div><div class="series-kpi-value" style="font-size:18px">£${totalSpent.toFixed(2)}</div></div>
-    ${avgPrice != null ? `<div class="series-kpi"><div class="series-kpi-label">Avg / Vol</div><div class="series-kpi-value" style="font-size:18px">£${avgPrice.toFixed(2)}</div></div>` : ""}
-    <div class="series-kpi"><div class="series-kpi-label">Manga Status</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.mangaStatus||"—")}</div></div>
+    <div class="series-kpi"><div class="series-kpi-label">${spentLabel}</div><div class="series-kpi-value" style="font-size:18px">£${totalSpent.toFixed(2)}</div></div>
+    ${avgPrice != null ? `<div class="series-kpi"><div class="series-kpi-label">Avg / ${isBookSeries ? "Book" : "Vol"}</div><div class="series-kpi-value" style="font-size:18px">£${avgPrice.toFixed(2)}</div></div>` : ""}
+    ${!isBookSeries ? `<div class="series-kpi"><div class="series-kpi-label">Manga Status</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.mangaStatus||"—")}</div></div>` : ""}
     <div class="series-kpi"><div class="series-kpi-label">Collection</div><div class="series-kpi-value" style="font-size:13px;margin-top:4px">${esc(sm.collectionStatus||"—")}</div></div>
-    ${sm.rating != null ? `<div class="series-kpi"><div class="series-kpi-label">Rating</div><div style="margin-top:4px">${ratingBadgeHtml(sm.rating)}</div></div>` : ""}`;
-
+    ${!isBookSeries && sm.rating != null ? `<div class="series-kpi"><div class="series-kpi-label">Rating</div><div style="margin-top:4px">${ratingBadgeHtml(sm.rating)}</div></div>` : ""}`;
   document.getElementById("series-detail-body").innerHTML = bubbleHTML + volListHTML;
   document.getElementById("series-detail-edit-btn").onclick = () => { closeSeriesDetail(); editSeries(name); };
   document.getElementById("series-detail-modal").style.display = "flex";
@@ -4077,7 +4903,7 @@ async function exportJSON(typeOnly) {
 
 function exportCSV(typeOnly) {
   document.getElementById("ie-dropdown").style.display = "none";
-  const cols = ["id","title","type","author","status","volumes","series","demographic","genre","publisher","dateBought","pricePaid","msrp","format","translator","narrator","pageCount","notes","addedAt"];
+  const cols = ["id","title","type","author","status","volumes","series","demographic","genre","publisher","dateBought","pricePaid","priceCurrency","msrp","msrpCurrency","format","translator","narrator","pageCount","notes","addedAt","originalPubDate","editionPubDate","obtained","originalLanguage","authorCountry","authorGender","isbn"];
   const escape = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const filtered = typeOnly ? items.filter(i => i.type === typeOnly) : items;
   const rows = [cols.join(",")];
@@ -4135,6 +4961,129 @@ function importJSON(e) {
   e.target.value = "";
 }
 
+/* ========== THEME SYSTEM ========== */
+const THEMES = [{ id: "",         name: "Parchment",  dots: ["#F7F5F0","#2D4A3E","#3D3BAA"] },
+  { id: "midnight", name: "Midnight",   dots: ["#0E0E12","#7C5CFC","#9D8FFF"] },
+  { id: "rose",     name: "Rose",       dots: ["#FDF5F5","#C0394E","#6B3BAA"] },
+  { id: "slate",    name: "Ocean",      dots: ["#F0F2F5","#1D4ED8","#5B21B6"] },
+  { id: "forest",   name: "Forest",     dots: ["#F2F5F0","#2E7D32","#8AA882"] },
+  { id: "amber",    name: "Amber",      dots: ["#FDFBF5","#B45309","#0369A1"] },
+  { id: "sunset",   name: "Sunset",     dots: ["#FFF4ED","#FFE7D6","#E76F51"] },
+  { id: "matcha",   name: "Matcha",     dots: ["#F3F7F1","#E6EFE1","#6A994E"] },
+
+  { id: "ocean",    name: "Ocean Dark", dots: ["#07131F","#102030","#00B4D8"] },
+  { id: "dracula",  name: "Dracula",    dots: ["#1E1F29","#282A36","#BD93F9"] },
+  { id: "nord",     name: "Nord",       dots: ["#2E3440","#3B4252","#88C0D0"] },
+  { id: "obsidian", name: "Obsidian",   dots: ["#050505","#111111","#FF4D6D"] },
+
+];
+
+let activeTheme = localStorage.getItem("collection-theme") || "";
+
+function applyTheme(id) {
+  if (id) document.documentElement.setAttribute("data-theme", id);
+  else document.documentElement.removeAttribute("data-theme");
+  activeTheme = id;
+  localStorage.setItem("collection-theme", id);
+  renderThemeSwatches();
+}
+
+function renderThemeSwatches() {
+  const wrap = document.getElementById("theme-swatches");
+  if (!wrap) return;
+  wrap.innerHTML = THEMES.map(t => `
+    <div class="theme-swatch${t.id === activeTheme ? " active" : ""}" onclick="applyTheme('${t.id}');toggleThemePicker(null)">
+      <div class="theme-swatch-dots">
+        ${t.dots.map(c => `<div class="theme-swatch-dot" style="background:${c}"></div>`).join("")}
+      </div>
+      <span>${t.name}</span>
+    </div>
+  `).join("");
+}
+
+function toggleThemePicker(e) {
+  if (e) e.stopPropagation();
+  const panel = document.getElementById("theme-picker-panel");
+  const isOpen = panel.style.display !== "none";
+  panel.style.display = isOpen ? "none" : "block";
+  if (!isOpen) renderThemeSwatches();
+}
+
+document.addEventListener("click", (e) => {
+  const wrap = document.getElementById("theme-picker-wrap");
+  if (wrap && !wrap.contains(e.target)) {
+    const panel = document.getElementById("theme-picker-panel");
+    if (panel) panel.style.display = "none";
+  }
+});
+
+// Apply saved theme on load
+applyTheme(activeTheme);
+
+/* ========== SHARE / EXPORT IMAGE ========== */
+let shareFilter = "recent";
+
+
+
+
+
+
+
+
+
+
+
+
+
+function drawPlaceholder(ctx, item, x, y, w, h, mangaBg, mangaFg, bookBg, bookFg) {
+  ctx.fillStyle = item.type === "Manga" ? mangaBg : bookBg;
+  roundRect(ctx, x, y, w, h, [6,6,0,0]);
+  ctx.fill();
+  ctx.fillStyle = item.type === "Manga" ? mangaFg : bookFg;
+  ctx.globalAlpha = 0.6;
+  ctx.font = `bold ${Math.floor(w * 0.3)}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.fillText(item.type === "Manga" ? "📚" : "📖", x + w/2, y + h/2 + 8);
+  ctx.textAlign = "left";
+  ctx.globalAlpha = 1;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (typeof r === "number") r = [r,r,r,r];
+  const [tl,tr,br,bl] = r;
+  ctx.beginPath();
+  ctx.moveTo(x + tl, y);
+  ctx.lineTo(x + w - tr, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + tr);
+  ctx.lineTo(x + w, y + h - br);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+  ctx.lineTo(x + bl, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - bl);
+  ctx.lineTo(x, y + tl);
+  ctx.quadraticCurveTo(x, y, x + tl, y);
+  ctx.closePath();
+}
+
+function adjustColor(hex, amount) {
+  // Darken/lighten a hex colour
+  try {
+    let c = hex.replace("#","");
+    if (c.length === 3) c = c.split("").map(x=>x+x).join("");
+    let [r,g,b] = [0,2,4].map(i => Math.max(0,Math.min(255,parseInt(c.slice(i,i+2),16)+amount)));
+    return `#${[r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("")}`;
+  } catch { return hex; }
+}
+
+function downloadShareImage() {
+  const canvas = document.getElementById("share-canvas");
+  const a = document.createElement("a");
+  const label = shareFilter === "manga" ? "manga" : shareFilter === "books" ? "books" : "collection";
+  a.download = `my-${label}-${new Date().toISOString().slice(0,10)}.png`;
+  a.href = canvas.toDataURL("image/png");
+  a.click();
+  showToast("✅ Image downloaded!");
+}
+
 function importCSV(e) {
   document.getElementById("ie-dropdown").style.display = "none";
   const file = e.target.files[0]; if (!file) return;
@@ -4169,7 +5118,9 @@ function importCSV(e) {
           notes: obj.notes || "",
           dateBought: obj.dateBought || null,
           pricePaid: obj.pricePaid !== "" ? parseFloat(obj.pricePaid) : null,
+          priceCurrency: obj.priceCurrency || "GBP",
           msrp: obj.msrp !== "" ? parseFloat(obj.msrp) : null,
+          msrpCurrency: obj.msrpCurrency || "GBP",
           format: obj.format || null,
           translator: obj.translator || null,
           narrator: obj.narrator || null,
@@ -4178,6 +5129,9 @@ function importCSV(e) {
           authorCountry: obj.authorCountry || null,
           authorGender: obj.authorGender || null,
           originalPubDate: obj.originalPubDate || null,
+          editionPubDate: obj.editionPubDate || null,
+          obtained: obj.obtained || null,
+          isbn: obj.isbn || null,
           addedAt: obj.addedAt ? Number(obj.addedAt) : Date.now(), importedAt: Date.now(), cover: null
         });
         added++;
@@ -4309,6 +5263,10 @@ function importCSV(e) {
   </div>
 </div>
 
+<!-- Share / Export Image Modal -->
+
+</div>
+
 <!-- FX Rate Modal -->
 <div class="overlay" id="fx-modal" style="display:none" onclick="if(event.target===this)closeFXModal()">
   <div class="modal" style="max-width:360px">
@@ -4335,6 +5293,111 @@ function importCSV(e) {
     </div>
   </div>
 </div>
+
+
+<!-- ADVANCED SEARCH HELP MODAL -->
+<div class="overlay" id="search-help-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Advanced Search Help</div>
+      <button class="btn-close" onclick="closeSearchHelp()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:18px;font-size:14px;color:var(--text2)">
+
+        <div>
+          <div class="section-label">Basic Search</div>
+          <p>Type any text to search titles, authors, translators, series, and publishers.</p>
+          <div class="meta-tags">
+            <span class="meta-tag">berserk</span>
+            <span class="meta-tag">sanderson</span>
+            <span class="meta-tag">history</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Field Searches</div>
+          <p>Use field=value style filters.</p>
+          <div class="meta-tags">
+            <span class="meta-tag">series="One Piece"</span>
+            <span class="meta-tag">author="Kentaro Miura"</span>
+            <span class="meta-tag">publisher=Viz</span>
+            <span class="meta-tag">type=Manga</span>
+            <span class="meta-tag">status=Reading</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Comparison Searches</div>
+          <p>Use comparison operators for numeric fields.</p>
+          <div class="meta-tags">
+            <span class="meta-tag">rating>=8</span>
+            <span class="meta-tag">pages>500</span>
+            <span class="meta-tag">price<20</span>
+            <span class="meta-tag">msrp<=15</span>
+            <span class="meta-tag">publication_date<1600</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Supported Fields</div>
+          <div class="meta-tags">
+            <span class="meta-tag">title</span>
+            <span class="meta-tag">author</span>
+            <span class="meta-tag">translator</span>
+            <span class="meta-tag">series</span>
+            <span class="meta-tag">publisher</span>
+            <span class="meta-tag">status</span>
+            <span class="meta-tag">type</span>
+            <span class="meta-tag">genre</span>
+            <span class="meta-tag">demographic</span>
+            <span class="meta-tag">pages</span>
+            <span class="meta-tag">rating</span>
+            <span class="meta-tag">price</span>
+            <span class="meta-tag">msrp</span>
+            <span class="meta-tag">publication_date</span>
+            <span class="meta-tag">datebought</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Operators</div>
+          <div class="meta-tags">
+            <span class="meta-tag">= contains / equals</span>
+            <span class="meta-tag">!= not equal</span>
+            <span class="meta-tag">></span>
+            <span class="meta-tag"><</span>
+            <span class="meta-tag">>=</span>
+            <span class="meta-tag"><=</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Combining Searches</div>
+          <p>You can combine multiple filters together.</p>
+          <div class="meta-tags">
+            <span class="meta-tag">type=Manga rating>=9</span>
+            <span class="meta-tag">series="One Piece" pages>180</span>
+            <span class="meta-tag">publisher=Viz status=Reading</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function openSearchHelp() {
+  document.getElementById('search-help-overlay').style.display = 'flex';
+}
+
+function closeSearchHelp() {
+  document.getElementById('search-help-overlay').style.display = 'none';
+}
+</script>
 
 </body>
 </html>
